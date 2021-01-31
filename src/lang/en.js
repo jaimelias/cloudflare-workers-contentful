@@ -1,0 +1,16 @@
+export const labelIncluded = 'Included';
+export const labelNotIncluded = 'Not Included';
+export const labelAmenities = 'Amenities';
+export const labelCallUs = 'Call';
+export const notFoundTitle = 'Page Not Found: Error 404';
+export const labelStartDate = 'From';
+export const labelEndDate = 'To';
+export const labelButtonSubmit = 'Send Request';
+export const labelPax1 = 'Persons';
+export const labelTelephone = 'Telephone';
+export const labelEmail = 'Email';
+export const labelFirstName = 'First name';
+export const labelLastName = 'Last name';
+export const formSuccess = 'Request sent successfully!';
+export const labelHello = 'Hello';
+export const labelOriginalData = 'This was your request:';
