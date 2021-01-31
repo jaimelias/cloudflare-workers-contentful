@@ -143,7 +143,6 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 				output.status = 200;	
 				output.statusText = response.statusText;
 				output.data = outputData;
-				console.log(outputData);
 			}
 			else
 			{

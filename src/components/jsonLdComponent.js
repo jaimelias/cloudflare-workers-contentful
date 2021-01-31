@@ -2,6 +2,8 @@ export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAd
 	
 	let output = '';
 	
+	const imageUrl = Utilities.MediaSrc(image);
+	
 	if(!slug)
 	{
 		output = `
@@ -24,7 +26,7 @@ export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAd
 					"longitude": ${coordinates.lon}
 				},
 				"telephone": "${telephoneNumber}",
-				"photo": "${image.src}",
+				"photo": "${imageUrl}",
 				"starRating": {
 					"@type": "Rating",
 					"ratingValue": "5"

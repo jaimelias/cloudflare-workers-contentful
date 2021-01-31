@@ -6,6 +6,7 @@ export const handleSitemap = async ({langConfig, website, hostName}) => {
 	let output = {
 		status: 404
 	};
+	const {MediaSrc, escUrl} = Utilities;
 	
 	langList.forEach(key => {
 		langPaths[key] = (key === website.defaultLanguage) ? '' : key;
@@ -23,8 +24,8 @@ export const handleSitemap = async ({langConfig, website, hostName}) => {
 			
 			if(website.image.hasOwnProperty('fileName'))
 			{
-				urlObj.images.push(new URL(`images/${website.image.fileName}`,
-					`https://${hostName}`).href);
+				const imageUrl = MediaSrc(website.image);
+				urlObj.images.push(escUrl(new URL(imageUrl, `https://${hostName}`).href));
 			}
 			
 			langList.forEach(key => {
@@ -66,7 +67,7 @@ export const handleSitemap = async ({langConfig, website, hostName}) => {
 		if(imageGallery)
 		{	
 			imageGallery.forEach(image => {
-				urlObj.images.push(new URL(`images/${image.fileName}`, `https://${hostName}`).href);
+				urlObj.images.push(escUrl(new URL(MediaSrc(image), `https://${hostName}`).href));
 			});			
 		}
 		
@@ -89,21 +90,21 @@ export const handleSitemap = async ({langConfig, website, hostName}) => {
 export const RenderSitemap = ({urls}) => {
 		
 	const urlSet = urls.map(row => {
-		let item = [`<loc>${row.loc}</loc>`];
+		let item = [`\n\t\t<loc>${row.loc}</loc>`];
 		const images = row.images.forEach(image => {
-			item.push(`<image:image><image:loc>${image}</image:loc></image:image>`);
+			item.push(`\n\t\t<image:image><image:loc>${image}</image:loc></image:image>`);
 		});
 		
 		const alternates = row.alternates.forEach(alternate => {
-			item.push(`<xhtml:link rel="alternate" hreflang="${alternate.hreflang}" href="${alternate.href}" />`);
+			item.push(`\n\t\t<xhtml:link rel="alternate" hreflang="${alternate.hreflang}" href="${alternate.href}" />`);
 		});
 		
 		item = item.join('');
 		
-		return `<url>${item}</url>`;
+		return `\n\t<url>${item}\n\t</url>`;
 	}).join('');
 		
 	return SiteMapLayout({content: urlSet});
 };
 
-export const SiteMapLayout = ({content}) => (`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${content}</urlset>`);
+export const SiteMapLayout = ({content}) => (`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${content}\n</urlset>`);
