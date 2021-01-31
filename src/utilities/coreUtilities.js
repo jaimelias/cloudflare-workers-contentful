@@ -379,3 +379,20 @@ export const pathNameToArr = pathName => {
 	
 	return output;
 };
+
+export const contentTypeIsHtml = ({headers}) => {
+	let output = false;
+	
+	if(headers)
+	{
+		if(headers.hasOwnProperty('content-type'))
+		{
+			if(headers['content-type'].includes('text/html'))
+			{
+				output = true;
+			}
+		}				
+	}
+	return output;
+};
+

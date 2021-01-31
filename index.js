@@ -232,8 +232,7 @@ const Render = ({store}) => {
 		return Response.redirect(body, status);
 	}
 	else
-	{
-		const isHtml = () => headers['content-type'] && headers['content-type'].includes('text/html');
+	{		
 		const response = new Response(body, {
 			status
 		});
@@ -248,6 +247,6 @@ const Render = ({store}) => {
 			response.headers.set(key, secureHeaders[key])
 		}
 
-		return (isHtml()) ? htmlRewriter().transform(response) : response;		
+		return (Utilities.contentTypeIsHtml({headers})) ? htmlRewriter().transform(response) : response;		
 	}	
 }

@@ -13,7 +13,7 @@ export const response = (state = {
                 ...state,
 				body: action.body,
 				status: 200,
-				headers: action.headers,
+				headers: action.headers || headers,
 				isDefault: false
             };
         case actionTypes.RESPONSE_REDIRECT:
