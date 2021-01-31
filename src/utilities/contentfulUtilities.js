@@ -43,7 +43,17 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 					}
 					if(fields.hasOwnProperty('websites'))
 					{
-						defaultLanguage = Object.keys(fields.websites)[0];
+						for(let w in fields.websites)
+						{
+							fields.websites[w].forEach(r => {
+								const findDefLang = entries.find(i => i.sys.id === r.sys.id);
+								
+								if(findDefLang)
+								{
+									defaultLanguage = Object.values(findDefLang.fields.defaultLanguage)[0];
+								}	
+							});
+						}
 					}
 					
 					for(let key in fields)
@@ -105,6 +115,11 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 						entryOutput.defaultLanguage = defaultLanguage;
 					}
 					
+					if(entryOutput.hasOwnProperty('slug'))
+					{
+						entryOutput.slugs = entry.fields.slug;
+					}
+					
 					entryOutput.assets = assets;
 					entryOutput.id = entry.sys.id;
 					outputData.push(entryOutput);
@@ -116,6 +131,7 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 				output.status = 200;	
 				output.statusText = response.statusText;
 				output.data = outputData;
+				console.log(outputData);
 			}
 			else
 			{
