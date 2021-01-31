@@ -12,78 +12,80 @@ const {slugRegex, imageFileRegex, secureHeaders, isUrl, isDevMode, pathNameToArr
 addEventListener('fetch', event => {
     event.respondWith(handleSecurity({
 		request: event.request
-	}))
+	}));
 });
 
 const handleSecurity = async ({request}) => {
 	
 	const store = {...ReduxStore(), actionTypes};
-	const url = new URL(encodeURI(decodeURI(request.url)));
-	let isBadRequest = false;
 	
-	for(let param of url.searchParams)
+	try
 	{
-		const validKeyRegex = /^[\w\d\_\-]{0,25}$/g;
-		const validValueRegex =  /^[\w\d\_\-\#\$\%\&\/\(\)\=\?\¿\@\,\;\.\:\s\t\n\r]{0,1000}$/g;
+		let isBadRequest = false;
+		const rawUrl = encodeURI(decodeURI(request.url));
+		const url = new URL(rawUrl);
 		
-		if(!validKeyRegex.test(param[0]))
+		for(let param of url.searchParams)
 		{
-			isBadRequest = true;
+			const validKeyRegex = /^[\w\d\_\-]{0,25}$/g;
+			const validValueRegex =  /^[\w\d\_\-\#\$\%\&\/\(\)\=\?\¿\@\,\;\.\:\s\t\n\r]{0,1000}$/g;
+			
+			if(!validKeyRegex.test(param[0]))
+			{
+				isBadRequest = true;
+			}
+			
+			if(!validValueRegex.test(param[1]))
+			{
+				isBadRequest = true;
+			}
 		}
 		
-		if(!validValueRegex.test(param[1]))
+		if(isBadRequest)
 		{
-			isBadRequest = true;
+			store.dispatch({type: actionTypes.RESPONSE_BAD_REQUEST});
 		}
 	}
-	
-	if(isBadRequest)
+	catch(err)
 	{
 		store.dispatch({type: actionTypes.RESPONSE_BAD_REQUEST});
 	}
-		
-	const requestClone = new Request(url, {
-		body: request.body,
-		headers: request.headers,
-		method: request.method,
-		redirect: request.redirect
-	});
 	
 	return handleRouting({
-		request: requestClone,
+		request: request,
 		store
-	});
+	});		
+	
 };
 
 const handleRouting = async ({request, store}) => {
 	
-	let data = {};
-	let status = 500;
 	const {dispatch, getState, actionTypes} = store;
-	const {url: requestUrl, method, headers, body} = request;
-	const url = new URL(requestUrl);
-	const {pathname: pathName, searchParams} = url;	
-	const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
-	const isDev = isDevMode({headers, hostName, isUrl});
-	const pathNameArr = pathNameToArr(pathName);
-	
-	let requestObj = {
-		...request,
-		hostName,
-		pathName,
-		searchParams,
-		pathNameArr,
-		isDev
-	};
 
 	if(!getState().response.isDefault)
 	{
-		return Render({
-			response: getState().response
-		});
+		return Render({store});
 	}
 	else
 	{
+		let data = {};
+		let status = 500;
+		const {url: requestUrl, method, headers, body} = request;
+		const url = new URL(requestUrl);
+		const {pathname: pathName, searchParams} = url;	
+		const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
+		const isDev = isDevMode({headers, hostName, isUrl});
+		const pathNameArr = pathNameToArr(pathName);
+		
+		let requestObj = {
+			...request,
+			hostName,
+			pathName,
+			searchParams,
+			pathNameArr,
+			isDev
+		};
+
 		if(method === 'GET')
 		{
 			if(pathNameArr.first === 'images')
@@ -184,43 +186,46 @@ const handleRouting = async ({request, store}) => {
 			status = 405;
 		}		
 
-		switch(status)
-		{
-			case 200:
-				dispatch({type: actionTypes.RESPONSE_SUCCESS, ...data});
-				break;
-			case 301:
-				dispatch({type: actionTypes.RESPONSE_REDIRECT, ...data});
-				break;
-			case 302:
-				dispatch({type: actionTypes.RESPONSE_REDIRECT, ...data});
-				break;			
-			case 400:
-				dispatch({type: actionTypes.RESPONSE_BAD_REQUEST, ...data});
-				break;
-			case 403:
-				dispatch({type: actionTypes.RESPONSE_FORBIDDEN, ...data});
-				break;
-			case 404:
-				dispatch({type: actionTypes.RESPONSE_NOT_FOUND, ...data});
-				break;
-			case 405:
-				dispatch({type: actionTypes.RESPONSE_METHOD_NOT_ALLOWED, ...data});
-				break;
-			case 500:
-				dispatch({type: actionTypes.RESPONSE_SERVER, ...data});
-				break;
-		};
+		dispatchers({dispatch, status, data});
 		
-		return Render({
-			store: store
-		});	
+		return Render({store});	
 	}	
+}
+
+const dispatchers = ({dispatch, status, data}) => {
+	
+	switch(status)
+	{
+		case 200:
+			dispatch({type: actionTypes.RESPONSE_SUCCESS, ...data});
+			break;
+		case 301:
+			dispatch({type: actionTypes.RESPONSE_REDIRECT, ...data});
+			break;
+		case 302:
+			dispatch({type: actionTypes.RESPONSE_REDIRECT, ...data});
+			break;			
+		case 400:
+			dispatch({type: actionTypes.RESPONSE_BAD_REQUEST, ...data});
+			break;
+		case 403:
+			dispatch({type: actionTypes.RESPONSE_FORBIDDEN, ...data});
+			break;
+		case 404:
+			dispatch({type: actionTypes.RESPONSE_NOT_FOUND, ...data});
+			break;
+		case 405:
+			dispatch({type: actionTypes.RESPONSE_METHOD_NOT_ALLOWED, ...data});
+			break;
+		case 500:
+			dispatch({type: actionTypes.RESPONSE_SERVER, ...data});
+			break;
+	};	
 }
 
 const Render = ({store}) => {
 	
-	const {body, format, status, headers} = store.getState().response;
+	const {body, status, headers} = store.getState().response;
 		
 	if(status === 301 || status === 302)
 	{
@@ -228,6 +233,7 @@ const Render = ({store}) => {
 	}
 	else
 	{
+		const isHtml = () => headers['content-type'] && headers['content-type'].includes('text/html');
 		const response = new Response(body, {
 			status
 		});
@@ -242,6 +248,6 @@ const Render = ({store}) => {
 			response.headers.set(key, secureHeaders[key])
 		}
 
-		return (format === 'html') ? htmlRewriter().transform(response) : response;		
+		return (isHtml()) ? htmlRewriter().transform(response) : response;		
 	}	
 }

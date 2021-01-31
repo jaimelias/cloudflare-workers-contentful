@@ -11,9 +11,7 @@ export const handleHtml = async ({langConfig, currentLanguage, website, hostName
 	const globalVars = {...website};
 	
 	return {
-		format: 'html',
-		pageNotFound,
-		status: 200,
+		status: (pageNotFound) ? 404 : 200,
 		headers: {
 			'content-type': 'text/html;charset=UTF-8'
 		},

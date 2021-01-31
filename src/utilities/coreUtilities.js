@@ -241,13 +241,13 @@ export const slugRegex = (value) => {
 	return (value) ? regex.test(value) : true;
 };
 
-export const imageFileRegex = (value) => {
+export const imageFileRegex = (str) => {
 	
 	let valid = false;
 	const extensions = ['apng', 'gif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp', 'svg']
 	
 	extensions.forEach(row => {
-		if(value.endsWith(row))
+		if(str.endsWith(row))
 		{
 			valid = true;
 		}
@@ -256,10 +256,10 @@ export const imageFileRegex = (value) => {
 	return valid;
 };
 
-export const isUrl = (value) => {
+export const isUrl = (str) => {
 	const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/igm;
 
-	return (value) ? regex.test(value) : false;
+	return (str) ? regex.test(str) : false;
 }
 
 export const findPageBySlug = ({slug, pages}) => {
