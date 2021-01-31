@@ -60,14 +60,26 @@ export const handleImages = async ({requestObj, langConfig}) =>  {
 													
 							e.assets.forEach(a => {
 								const fields = a.fields;
+								let title = fields.title[e.defaultLanguage];
 								let file = fields.file[e.defaultLanguage];
+								
+								langList.forEach(l => {
+									if(typeof title === 'undefined' && fields.title.hasOwnProperty(l))
+									{
+										title = fields.title[l];
+									}
+									if(typeof file === 'undefined' && fields.file.hasOwnProperty(l))
+									{
+										file = fields.file[l];
+									}
+								});
 								
 								if(decodeURI(file.fileName) === decodeURI(fileName))
 								{									
 									image = {
 										fileName: file.fileName,
 										src: file.url,
-										title: fields.title[e.defaultLanguage],
+										title: title,
 										width: file.details.image.width,
 										height: file.details.image.height,
 										type: file.contentType

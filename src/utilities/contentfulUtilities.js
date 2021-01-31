@@ -56,6 +56,7 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 						}
 					}
 					
+					
 					for(let key in fields)
 					{
 						if(key !== 'websites')
@@ -63,11 +64,22 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 							const currentLanguage = altLang || defaultLanguage;
 							let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage];
 							
+							if(typeof thisField === 'undefined')
+							{
+								langList.forEach(l => {
+									if(typeof thisField === 'undefined' && fields[key].hasOwnProperty(l))
+									{
+										thisField = fields[key][l];
+									}
+								});
+							}
+							
 							const fieldArg = {
 								assets, 
 								entries, 
 								currentLanguage, 
-								defaultLanguage, 
+								defaultLanguage,
+								langList,
 								contentType, 
 								websiteId
 							};
@@ -203,7 +215,7 @@ const args = async () => {
 	};
 };
 
-const linkEntry = ({id, entries, defaultLanguage, currentLanguage}) => {
+const linkEntry = ({id, entries, defaultLanguage, currentLanguage, langList}) => {
 	
 	const entry = entries.find(i => i.sys.id === id);
 	const output = {};
@@ -214,21 +226,34 @@ const linkEntry = ({id, entries, defaultLanguage, currentLanguage}) => {
 		
 		for(let f in fields)
 		{
-			output[f] = fields[f][currentLanguage] || fields[f][defaultLanguage];
+			let thisField = fields[f][currentLanguage] || fields[f][defaultLanguage];
+			
+			if(typeof thisField === 'undefined')
+			{
+				langList.forEach(l => {
+					if(typeof thisField === 'undefined' && fields[f].hasOwnProperty(l))
+					{
+						thisField = fields[f][l];
+					}
+				});
+			}
+			
+			output[f] = thisField;
 		}
 	}
 	
 	return output;
 };
 
-const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, contentType, websiteId}) =>{
+const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, contentType, websiteId, langList}) =>{
 	
 	const args = {
 		id: field.sys.id,
 		currentLanguage,
 		defaultLanguage,
 		contentType,
-		websiteId
+		websiteId,
+		langList
 	};
 	
 	switch(field.sys.linkType)
@@ -239,12 +264,12 @@ const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, co
 		case 'Entry':
 			field = linkEntry({...args, entries});
 			break;
-	}											
+	}	
 	
 	return field;
 };
 
-const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, websiteId}) => {
+const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, websiteId, langList}) => {
 	const image = assets.find(i => i.sys.id === id);
 	
 	if(image.fields.hasOwnProperty('file'))
@@ -255,6 +280,17 @@ const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, w
 		
 		title = title[currentLanguage] || title[defaultLanguage];
 		file = file[currentLanguage] || file[defaultLanguage];
+		
+		langList.forEach(l => {
+			if(typeof file === 'undefined' && fields.file.hasOwnProperty(l))
+			{
+				file = fields.file[l];
+			}
+			if(typeof title === 'undefined' && fields.title.hasOwnProperty(l))
+			{
+				title = fields.title[l];
+			}
+		});
 				
 		return {
 			fileName: file.fileName,
