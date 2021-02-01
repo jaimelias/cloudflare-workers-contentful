@@ -278,12 +278,14 @@ export const findPageBySlug = ({slug, pages}) => {
 	return output;
 };
 
-export const listLangItems = ({defaultLanguage, currentLanguage, langConfig, page, slug, siteUrl}) => {
+export const listLangItems = ({defaultLanguage, currentLanguage, page, slug, siteUrl}) => {
 	
 	let output = [];
-	for(const k in langConfig)
+	const {langLabels} = LangConfig;
+	
+	for(const k in langLabels)
 	{		
-		const thisName = langConfig[k].name;
+		const thisName = langLabels[k].name;
 		
 		let thisUrl = (k !== defaultLanguage) ? k : '';
 	
@@ -317,7 +319,7 @@ export const listLangItems = ({defaultLanguage, currentLanguage, langConfig, pag
 
 export const secureHeaders = {
 	'Content-Security-Policy' : 'upgrade-insecure-requests',
-	'Strict-Transport-Security' : 'max-age=1000',
+	'Strict-Transport-Security' : 'max-age=2592000',
 	'X-Xss-Protection' : '1; mode=block',
 	'X-Frame-Options' : 'DENY',
 	'X-Content-Type-Options' : 'nosniff',
@@ -396,3 +398,15 @@ export const contentTypeIsHtml = ({headers}) => {
 	return output;
 };
 
+export const getFallBackLang = obj =>  {
+	let output = null;
+
+	LangConfig.langList.forEach(i => {
+		if(obj.hasOwnProperty(i))
+		{
+			output = obj[i];
+		}
+	})
+	
+	return output;
+};

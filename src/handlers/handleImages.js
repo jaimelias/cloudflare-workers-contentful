@@ -1,13 +1,14 @@
-export const handleImages = async ({requestObj, langConfig}) =>  {
+export const handleImages = async ({requestObj, langLabels}) =>  {
 	
+	const {stringToHash, getFallBackLang} = Utilities;
 	const {pathName, isDev, searchParams} = requestObj;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';
 	const pathSplit = pathName.split('/').filter(i => i);
-	const hash = await Utilities.stringToHash({text: `${pathName}?width=${width}`, algorithm: 'SHA-256'});
+	const hash = await stringToHash({text: `${pathName}?width=${width}`, algorithm: 'SHA-256'});
 	const assetCdnUrl = 'images.ctfassets.net';
 	let imageUrl = '';
-	const langList = Object.keys(langConfig);
+	const langList = Object.keys(langLabels);
 	const isSvg = (pathName.includes('.svg')) ? true : false;
 		
 	let output = {
@@ -60,19 +61,8 @@ export const handleImages = async ({requestObj, langConfig}) =>  {
 													
 							e.assets.forEach(a => {
 								const fields = a.fields;
-								let title = fields.title[e.defaultLanguage];
-								let file = fields.file[e.defaultLanguage];
-								
-								langList.forEach(l => {
-									if(typeof title === 'undefined' && fields.title.hasOwnProperty(l))
-									{
-										title = fields.title[l];
-									}
-									if(typeof file === 'undefined' && fields.file.hasOwnProperty(l))
-									{
-										file = fields.file[l];
-									}
-								});
+								let title = fields.title[e.defaultLanguage] || getFallBackLang(fields.title);
+								let file = fields.file[e.defaultLanguage] || getFallBackLang(fields.file);
 								
 								if(decodeURI(file.fileName) === decodeURI(fileName))
 								{									

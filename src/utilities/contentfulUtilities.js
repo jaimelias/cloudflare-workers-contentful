@@ -1,7 +1,9 @@
+const {langList} = LangConfig;
+const {stringToHash, getFallBackLang} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
 
-export const getEntries = async ({altLang, langList, contentType, websiteId}) => {
+export const getEntries = async ({altLang, contentType, websiteId}) => {
 	
 	let output = {
 		status: 500
@@ -62,24 +64,13 @@ export const getEntries = async ({altLang, langList, contentType, websiteId}) =>
 						if(key !== 'websites')
 						{
 							const currentLanguage = altLang || defaultLanguage;
-							let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage];
-							
-							if(typeof thisField === 'undefined')
-							{
-								langList.forEach(l => {
-									if(typeof thisField === 'undefined' && fields[key].hasOwnProperty(l))
-									{
-										thisField = fields[key][l];
-									}
-								});
-							}
+							let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage] || getFallBackLang(fields[key]);
 							
 							const fieldArg = {
 								assets, 
 								entries, 
 								currentLanguage, 
 								defaultLanguage,
-								langList,
 								contentType, 
 								websiteId
 							};
@@ -181,7 +172,7 @@ const getEndPoint = ({contentType, KV, websiteId}) => {
 
 const getCf = async ({contentType}) => {
 
-	const hash = await Utilities.stringToHash({text: CONTENTFUL_DOMAIN, algorithm: 'SHA-256'});
+	const hash = await stringToHash({text: CONTENTFUL_DOMAIN, algorithm: 'SHA-256'});
 
 	if(hash)
 	{
@@ -214,7 +205,7 @@ const args = async () => {
 	};
 };
 
-const linkEntry = ({id, entries, defaultLanguage, currentLanguage, langList}) => {
+const linkEntry = ({id, entries, defaultLanguage, currentLanguage}) => {
 	
 	const entry = entries.find(i => i.sys.id === id);
 	const output = {};
@@ -225,18 +216,7 @@ const linkEntry = ({id, entries, defaultLanguage, currentLanguage, langList}) =>
 		
 		for(let f in fields)
 		{
-			let thisField = fields[f][currentLanguage] || fields[f][defaultLanguage];
-			
-			if(typeof thisField === 'undefined')
-			{
-				langList.forEach(l => {
-					if(typeof thisField === 'undefined' && fields[f].hasOwnProperty(l))
-					{
-						thisField = fields[f][l];
-					}
-				});
-			}
-			
+			let thisField = fields[f][currentLanguage] || fields[f][defaultLanguage] || getFallBackLang(fields[f]);
 			output[f] = thisField;
 		}
 	}
@@ -244,15 +224,14 @@ const linkEntry = ({id, entries, defaultLanguage, currentLanguage, langList}) =>
 	return output;
 };
 
-const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, contentType, websiteId, langList}) =>{
+const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, contentType, websiteId}) =>{
 	
 	const args = {
 		id: field.sys.id,
 		currentLanguage,
 		defaultLanguage,
 		contentType,
-		websiteId,
-		langList
+		websiteId
 	};
 	
 	switch(field.sys.linkType)
@@ -268,7 +247,7 @@ const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, co
 	return field;
 };
 
-const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, websiteId, langList}) => {
+const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, websiteId}) => {
 	const image = assets.find(i => i.sys.id === id);
 	
 	if(image.fields.hasOwnProperty('file'))
@@ -277,19 +256,8 @@ const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, w
 		let title = fields.title;
 		let file = fields.file;
 		
-		title = title[currentLanguage] || title[defaultLanguage];
-		file = file[currentLanguage] || file[defaultLanguage];
-		
-		langList.forEach(l => {
-			if(typeof file === 'undefined' && fields.file.hasOwnProperty(l))
-			{
-				file = fields.file[l];
-			}
-			if(typeof title === 'undefined' && fields.title.hasOwnProperty(l))
-			{
-				title = fields.title[l];
-			}
-		});
+		title = title[currentLanguage] || title[defaultLanguage] || getFallBackLang(title);
+		file = file[currentLanguage] || file[defaultLanguage] || getFallBackLang(file);
 				
 		return {
 			fileName: file.fileName,
@@ -303,3 +271,4 @@ const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, w
 		};		
 	}
 };
+

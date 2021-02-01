@@ -5,7 +5,7 @@ import {handleStaticFiles} from './src/handlers/handleStatic';
 import {handleContentful} from './src/handlers/handleContentful';
 import {ReduxStore} from './src/redux/configureStore';
 import * as actionTypes from './src/redux/actionTypes';
-import {langConfig} from './src/lang/langConfig';
+import {langLabels} from './src/lang/langConfig';
 
 const {slugRegex, imageFileRegex, secureHeaders, isUrl, isDevMode, pathNameToArr} = Utilities;
 
@@ -94,7 +94,7 @@ const handleRouting = async ({request, store}) => {
 				{	
 					data = await handleImages({
 						requestObj,
-						langConfig
+						langLabels
 					});				
 				}
 			}
@@ -113,7 +113,7 @@ const handleRouting = async ({request, store}) => {
 				data = await handleContentful({
 					...requestObj, 
 					format: 'sitemap',
-					langConfig
+					langLabels
 				});			
 			}
 			else
@@ -123,7 +123,7 @@ const handleRouting = async ({request, store}) => {
 					data =  await handleContentful({
 						...requestObj, 
 						format: 'html',
-						langConfig,
+						langLabels,
 						store
 					});				
 				}
@@ -168,7 +168,7 @@ const handleRouting = async ({request, store}) => {
 						{							
 							data = await handleFormRequest({
 								payload,
-								langConfig
+								langLabels
 							});	
 						}					
 					}

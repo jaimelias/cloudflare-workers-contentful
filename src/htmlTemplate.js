@@ -9,8 +9,10 @@ import {getMenuItems} from './menuItems';
 import {enqueueScripts} from './enqueue';
 import {enqueueHook} from './hooks/preRenderHooks';
 
-export const htmlTemplate = ({langConfig, currentLanguage, globalVars, labels, slug, hostName, pathName, is404, store}) => {
+export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathName, is404, store}) => {
 	
+	const {langLabels} = LangConfig;
+	const labels = langLabels[currentLanguage].labels;
 	const {getState, dispatch, actionTypes} = store;
 	const {accommodationTypes} = dataUtilities;
 	const {
@@ -87,7 +89,6 @@ export const htmlTemplate = ({langConfig, currentLanguage, globalVars, labels, s
 	const langItems = listLangItems({
 		defaultLanguage,
 		currentLanguage,
-		langConfig,
 		page,
 		slug,
 		siteUrl
@@ -96,7 +97,6 @@ export const htmlTemplate = ({langConfig, currentLanguage, globalVars, labels, s
 	const menuItems = getMenuItems({
 		pages,
 		langItems,
-		currentLanguageName: langConfig[currentLanguage].name,
 		currentLanguage,
 		defaultLanguage
 	});

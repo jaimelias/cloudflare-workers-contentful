@@ -1,15 +1,16 @@
 import {sendGridSend} from '../utilities/sendGridUtilities';
 import {formFields} from '../utilities/dataUtilities';
 
-export const handleFormRequest = async ({payload, langConfig}) => {
+export const handleFormRequest = async ({payload}) => {
 	
 	let output = {
 		status: 500
 	};
+	
+	const {langList} = LangConfig;
 
 	if(typeof payload === 'object')
-	{
-		const langList = Object.keys(langConfig);		
+	{	
 		let invalids = [];
 
 		for(let key in formFields)
@@ -81,7 +82,6 @@ export const handleFormRequest = async ({payload, langConfig}) => {
 		{
 			
 			let website = await Contentful.getEntries({
-				langList,
 				contentType: 'websites',
 				stringToHash: Utilities.stringToHash,
 				altLang: false
@@ -104,7 +104,6 @@ export const handleFormRequest = async ({payload, langConfig}) => {
 					output = await sendGridSend({
 						payload: outputPayload,
 						sendGrid,
-						labels: langConfig[payload.language].labels,
 						website
 					});				
 				}

@@ -1,8 +1,9 @@
-export const getMenuItems = ({pages, langItems, currentLanguageName, currentLanguage, defaultLanguage}) => {
+export const getMenuItems = ({pages, langItems, currentLanguage, defaultLanguage}) => {
 	
 	let output = [];
 	
 	const langSubmenu = [];
+	const currentLanguageName = LangConfig.langLabels[currentLanguage].name;
 
 	if(pages)
 	{		

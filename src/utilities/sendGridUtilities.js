@@ -1,4 +1,4 @@
-export const sendGridSend = async ({payload, sendGrid, labels, website}) => {
+export const sendGridSend = async ({payload, sendGrid, website}) => {
 
 	let output = {
 		status: 500
@@ -9,7 +9,6 @@ export const sendGridSend = async ({payload, sendGrid, labels, website}) => {
 	const htmlMessage = (typeof message === 'string') ? marked(message) : '';
 		
 	const template = emailTemplate({
-		labels,
 		payload,
 		htmlMessage,
 		isoWhatsapp: Utilities.isoNumber({number: whatsappNumber}),
@@ -59,8 +58,9 @@ export const sendGridSend = async ({payload, sendGrid, labels, website}) => {
 	return output;
 };
 
-const emailTemplate = ({labels, payload, htmlMessage, isoWhatsapp, siteName}) => {
+const emailTemplate = ({payload, htmlMessage, isoWhatsapp, siteName}) => {
 
+	const labels = LangConfig.langLabels[payload.language].labels;
 	const {firstName} = payload;
 	const {labelHello, labelOriginalData} = labels;
 	const urlEncodedsiteName = encodeURIComponent(siteName);

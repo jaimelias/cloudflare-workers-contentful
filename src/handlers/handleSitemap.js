@@ -1,8 +1,8 @@
-export const handleSitemap = async ({langConfig, website, hostName}) => {
+export const handleSitemap = async ({website, hostName}) => {
 	
 	let urls = [];
 	const langPaths = {};
-	const langList = Object.keys(langConfig);
+	const langList = LangConfig.langList;
 	let output = {
 		status: 404
 	};

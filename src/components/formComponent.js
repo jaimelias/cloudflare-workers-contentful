@@ -1,4 +1,4 @@
-export const RequestForm = ({type, grid, labels, currentLanguage}) => {
+export const RequestForm = ({type, grid, labels, currentLanguage, accommodationTypes}) => {
 		
 	const {	
 		labelStartDate, 
@@ -18,7 +18,6 @@ export const RequestForm = ({type, grid, labels, currentLanguage}) => {
 	let classCol = (grid) ? 'col-md' : '';
 	let classFormControl = (grid) ? '' : 'form-control-sm';
 	let classMB = (grid) ? 'mb-3' : 'mb-1';
-	const accommodationTypes = ['Accommodation', 'Hotel', 'Resort'];
 	const isAccommodationForm = (accommodationTypes.includes(type)) ? true: false;
 	const floating = 'class="form-floating mb-3"';
 	const fc = 'class="form-control"';

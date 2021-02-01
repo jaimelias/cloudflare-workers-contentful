@@ -1,13 +1,13 @@
 import {handleHtml} from './handleHtml';
 import {handleSitemap} from './handleSitemap';
 
-export const handleContentful = async ({headers, pathNameArr, hostName, pathName, isDev, format, langConfig, store}) => {
+export const handleContentful = async ({headers, pathNameArr, hostName, pathName, isDev, format, langLabels, store}) => {
 
 	let output = {
 		status: 500
 	};
 
-	const langList = Object.keys(langConfig);
+	const langList = Object.keys(langLabels);
 	const altLang = (pathNameArr.first.length === 2) ? langList.find(i => i === pathNameArr.first) : false;
 
 	//host
@@ -73,7 +73,6 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 					{
 						case 'html':
 							output = handleHtml({ 
-								langConfig,
 								currentLanguage: altLang || website.defaultLanguage,
 								website: (pages) ? {...website, pages: pages.data} : website,
 								hostName,
@@ -85,7 +84,6 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 							break;
 						case 'sitemap':
 							output = handleSitemap({ 
-								langConfig,
 								website: (pages) ? {...website, pages: pages.data} : website,
 								hostName,
 								isDev
