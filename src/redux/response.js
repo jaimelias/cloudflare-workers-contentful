@@ -1,4 +1,3 @@
-import * as actionTypes from './actionTypes';
 export const headers = {'content-type': 'text/plain'};
 
 export const response = (state = {
@@ -8,7 +7,7 @@ export const response = (state = {
 	isDefault: true
 }, action) => {
     switch (action.type) {
-        case actionTypes.RESPONSE_SUCCESS:
+        case ActionTypes.RESPONSE_SUCCESS:
             return {
                 ...state,
 				body: action.body,
@@ -16,7 +15,7 @@ export const response = (state = {
 				headers: action.headers || headers,
 				isDefault: false
             };
-        case actionTypes.RESPONSE_REDIRECT:
+        case ActionTypes.RESPONSE_REDIRECT:
             return {
                 ...state,
 				body: action.body,
@@ -24,7 +23,7 @@ export const response = (state = {
 				headers: {},
 				isDefault: false
             };
-        case actionTypes.RESPONSE_BAD_REQUEST:
+        case ActionTypes.RESPONSE_BAD_REQUEST:
             return {
                 ...state,
 				body: action.body || 'bad request', 
@@ -32,7 +31,7 @@ export const response = (state = {
 				headers: action.headers || headers,
 				isDefault: false
             };
-        case actionTypes.RESPONSE_FORBIDDEN:
+        case ActionTypes.RESPONSE_FORBIDDEN:
             return {
                 ...state, 
 				body: action.body || 'forbidden', 
@@ -40,7 +39,7 @@ export const response = (state = {
 				headers: action.headers || headers,
 				isDefault: false
             };
-        case actionTypes.RESPONSE_NOT_FOUND:
+        case ActionTypes.RESPONSE_NOT_FOUND:
             return {
                 ...state, 
 				body: action.body || 'resource not found', 
@@ -48,7 +47,7 @@ export const response = (state = {
 				headers: action.headers || headers,
 				isDefault: false
             };
-        case actionTypes.RESPONSE_METHOD_NOT_ALLOWED:
+        case ActionTypes.RESPONSE_METHOD_NOT_ALLOWED:
             return {
                 ...state, 
 				body: 'method not allowed', 
@@ -56,7 +55,7 @@ export const response = (state = {
 				headers: headers,
 				isDefault: false
             };
-        case actionTypes.RESPONSE_SERVER:
+        case ActionTypes.RESPONSE_SERVER:
             return {
                 ...state, 
 				body: action.body || 'internal server error', 

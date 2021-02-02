@@ -1,7 +1,7 @@
 import {sendGridSend} from '../utilities/sendGridUtilities';
 import {formFields} from '../utilities/dataUtilities';
 
-export const handleFormRequest = async ({payload}) => {
+export const handleFormRequest = async ({payload, store}) => {
 	
 	let output = {
 		status: 500
@@ -83,7 +83,7 @@ export const handleFormRequest = async ({payload}) => {
 			
 			let website = await Contentful.getEntries({
 				contentType: 'websites',
-				stringToHash: Utilities.stringToHash,
+				store,
 				altLang: false
 			}); 
 					

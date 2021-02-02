@@ -7,8 +7,7 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 		status: 500
 	};
 
-	const langList = Object.keys(langLabels);
-	const altLang = (pathNameArr.first.length === 2) ? langList.find(i => i === pathNameArr.first) : false;
+	const altLang = (pathNameArr.first.length === 2) ? LangConfig.langList.find(i => i === pathNameArr.first) : false;
 
 	//host
 	const ip = headers.get('CF-Connecting-IP');
@@ -16,8 +15,8 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 	
 	const args = {
 		altLang,
-		langList,
-		contentType: 'websites'
+		contentType: 'websites',
+		store
 	};
 	
 	//contentful

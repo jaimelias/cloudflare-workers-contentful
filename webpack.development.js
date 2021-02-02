@@ -11,7 +11,8 @@ module.exports = {
 			marked: 'marked',
 			Utilities: path.resolve(__dirname, './src/utilities/coreUtilities'),
 			Contentful: path.resolve(__dirname, './src/utilities/contentfulUtilities'),
-			LangConfig: path.resolve(__dirname, './src/lang/langConfig')
+			LangConfig: path.resolve(__dirname, './src/lang/langConfig'),
+			ActionTypes: path.resolve(__dirname, './src/redux/actionTypes')
 		}),
 	]
 }

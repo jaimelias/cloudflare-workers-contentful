@@ -4,8 +4,6 @@ import {htmlRewriter} from './src/handlers/htmlRewriter';
 import {handleStaticFiles} from './src/handlers/handleStatic';
 import {handleContentful} from './src/handlers/handleContentful';
 import {ReduxStore} from './src/redux/configureStore';
-import * as actionTypes from './src/redux/actionTypes';
-import {langLabels} from './src/lang/langConfig';
 
 const {slugRegex, imageFileRegex, secureHeaders, isUrl, pathNameToArr} = Utilities;
 
@@ -17,7 +15,7 @@ addEventListener('fetch', event => {
 
 const handleSecurity = async ({request}) => {
 	
-	const store = {...ReduxStore(), actionTypes};
+	const store = ReduxStore();
 	
 	try
 	{
@@ -43,12 +41,12 @@ const handleSecurity = async ({request}) => {
 		
 		if(isBadRequest)
 		{
-			store.dispatch({type: actionTypes.RESPONSE_BAD_REQUEST});
+			store.dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
 		}
 	}
 	catch(err)
 	{
-		store.dispatch({type: actionTypes.RESPONSE_BAD_REQUEST});
+		store.dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
 	}
 	
 	return handleRouting({
@@ -60,7 +58,7 @@ const handleSecurity = async ({request}) => {
 
 const handleRouting = async ({request, store}) => {
 	
-	const {dispatch, getState, actionTypes} = store;
+	const {dispatch, getState} = store;
 
 	if(!getState().response.isDefault)
 	{
@@ -92,7 +90,7 @@ const handleRouting = async ({request, store}) => {
 				{	
 					data = await handleImages({
 						requestObj,
-						langLabels
+						store
 					});				
 				}
 			}
@@ -111,7 +109,7 @@ const handleRouting = async ({request, store}) => {
 				data = await handleContentful({
 					...requestObj, 
 					format: 'sitemap',
-					langLabels
+					store
 				});			
 			}
 			else
@@ -121,7 +119,6 @@ const handleRouting = async ({request, store}) => {
 					data =  await handleContentful({
 						...requestObj, 
 						format: 'html',
-						langLabels,
 						store
 					});				
 				}
@@ -166,7 +163,7 @@ const handleRouting = async ({request, store}) => {
 						{							
 							data = await handleFormRequest({
 								payload,
-								langLabels
+								store
 							});	
 						}					
 					}
@@ -195,28 +192,28 @@ const dispatchers = ({dispatch, status, data}) => {
 	switch(status)
 	{
 		case 200:
-			dispatch({type: actionTypes.RESPONSE_SUCCESS, ...data});
+			dispatch({type: ActionTypes.RESPONSE_SUCCESS, ...data});
 			break;
 		case 301:
-			dispatch({type: actionTypes.RESPONSE_REDIRECT, ...data});
+			dispatch({type: ActionTypes.RESPONSE_REDIRECT, ...data});
 			break;
 		case 302:
-			dispatch({type: actionTypes.RESPONSE_REDIRECT, ...data});
+			dispatch({type: ActionTypes.RESPONSE_REDIRECT, ...data});
 			break;			
 		case 400:
-			dispatch({type: actionTypes.RESPONSE_BAD_REQUEST, ...data});
+			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, ...data});
 			break;
 		case 403:
-			dispatch({type: actionTypes.RESPONSE_FORBIDDEN, ...data});
+			dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, ...data});
 			break;
 		case 404:
-			dispatch({type: actionTypes.RESPONSE_NOT_FOUND, ...data});
+			dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, ...data});
 			break;
 		case 405:
-			dispatch({type: actionTypes.RESPONSE_METHOD_NOT_ALLOWED, ...data});
+			dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, ...data});
 			break;
 		case 500:
-			dispatch({type: actionTypes.RESPONSE_SERVER, ...data});
+			dispatch({type: ActionTypes.RESPONSE_SERVER, ...data});
 			break;
 	};	
 }

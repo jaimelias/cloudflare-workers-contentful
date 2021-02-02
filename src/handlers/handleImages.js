@@ -1,6 +1,6 @@
 const {stringToHash, getFallBackLang} = Utilities;
 
-export const handleImages = async ({requestObj, langLabels}) =>  {
+export const handleImages = async ({requestObj, store}) =>  {
 	
 	const {pathName, hostName, searchParams} = requestObj;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
@@ -9,7 +9,6 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 	const hash = await stringToHash({text: `${pathName}?width=${width}`, algorithm: 'SHA-256'});
 	const assetCdnUrl = 'images.ctfassets.net';
 	let imageUrl = '';
-	const langList = Object.keys(langLabels);
 	const isSvg = (pathName.includes('.svg')) ? true : false;
 		
 	let output = {
@@ -36,8 +35,8 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 				const validContentTypes = ['websites', 'pages'];
 				const fileName = pathSplit[1];
 				let entryArgs = {
-					langList,
-					altLang: false
+					altLang: false,
+					store
 				};
 				let image = '';
 				
