@@ -400,13 +400,18 @@ export const contentTypeIsHtml = ({headers}) => {
 
 export const getFallBackLang = obj =>  {
 	let output = null;
-
-	LangConfig.langList.forEach(i => {
-		if(obj.hasOwnProperty(i))
-		{
-			output = obj[i];
-		}
-	})
 	
+	if(typeof obj === 'object')
+	{
+		for(let k in obj)
+		{
+			if(obj.hasOwnProperty(k))
+			{
+				output = obj[k];
+				break;
+			}
+		}
+	}
+
 	return output;
 };
