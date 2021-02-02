@@ -1,9 +1,8 @@
-export const handleStaticFiles = async ({fileName, requestObj, errorNotFound}) => {
+export const handleStaticFiles = async ({fileName, requestObj}) => {
 	
-	let fileOk = false;
-	const {isDev, request, searchParams, hostName, pathNameArr} = requestObj;
+	const {searchParams, hostName, pathNameArr} = requestObj;
 	
-	const thirtyDaysInSeconds = (!isDev) ? 60*60*24*30 : 0;
+	const thirtyDaysInSeconds = (hostName === CONTENTFUL_DOMAIN) ? 60*60*24*30 : 0;
 
 	let output = {
 		status: 404

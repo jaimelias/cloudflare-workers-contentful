@@ -2,7 +2,7 @@ const {stringToHash, getFallBackLang} = Utilities;
 
 export const handleImages = async ({requestObj, langLabels}) =>  {
 	
-	const {pathName, isDev, searchParams} = requestObj;
+	const {pathName, hostName, searchParams} = requestObj;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';
 	const pathSplit = pathName.split('/').filter(i => i);
@@ -137,7 +137,7 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 			{
 				imageUrl = (isSvg) ? imageUrl : `${imageUrl}?fm=webp${widthParam}`;
 
-				const thirtyDaysInSeconds = (!isDev) ? 60*60*24*30 : 0;
+				const thirtyDaysInSeconds = (hostName === CONTENTFUL_DOMAIN) ? 60*60*24*30 : 0;
 				
 				let response = await fetch(decodeURI(imageUrl), {
 					cf: {

@@ -1,7 +1,7 @@
 import {handleHtml} from './handleHtml';
 import {handleSitemap} from './handleSitemap';
 
-export const handleContentful = async ({headers, pathNameArr, hostName, pathName, isDev, format, langLabels, store}) => {
+export const handleContentful = async ({headers, pathNameArr, hostName, pathName, format, langLabels, store}) => {
 
 	let output = {
 		status: 500
@@ -77,7 +77,6 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 								website: (pages) ? {...website, pages: pages.data} : website,
 								hostName,
 								pathName,
-								isDev,
 								store
 							});
 							
@@ -85,8 +84,7 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 						case 'sitemap':
 							output = handleSitemap({ 
 								website: (pages) ? {...website, pages: pages.data} : website,
-								hostName,
-								isDev
+								hostName
 							});
 							break;
 					}

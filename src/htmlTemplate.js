@@ -13,7 +13,7 @@ export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathN
 	
 	const {langLabels} = LangConfig;
 	const labels = langLabels[currentLanguage].labels;
-	const {getState, dispatch, actionTypes} = store;
+	const {getState} = store;
 	const {accommodationTypes} = dataUtilities;
 	const {
 		siteName,

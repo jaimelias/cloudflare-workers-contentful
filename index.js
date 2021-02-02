@@ -7,7 +7,7 @@ import {ReduxStore} from './src/redux/configureStore';
 import * as actionTypes from './src/redux/actionTypes';
 import {langLabels} from './src/lang/langConfig';
 
-const {slugRegex, imageFileRegex, secureHeaders, isUrl, isDevMode, pathNameToArr} = Utilities;
+const {slugRegex, imageFileRegex, secureHeaders, isUrl, pathNameToArr} = Utilities;
 
 addEventListener('fetch', event => {
     event.respondWith(handleSecurity({
@@ -74,7 +74,6 @@ const handleRouting = async ({request, store}) => {
 		const url = new URL(requestUrl);
 		const {pathname: pathName, searchParams} = url;	
 		const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
-		const isDev = isDevMode({headers, hostName, isUrl});
 		const pathNameArr = pathNameToArr(pathName);
 		
 		let requestObj = {
@@ -82,8 +81,7 @@ const handleRouting = async ({request, store}) => {
 			hostName,
 			pathName,
 			searchParams,
-			pathNameArr,
-			isDev
+			pathNameArr
 		};
 
 		if(method === 'GET')

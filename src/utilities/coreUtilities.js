@@ -130,7 +130,7 @@ export const Media = (obj) => {
 	}
 };
 
-export const getHomeUrl = ({isDev, siteUrl, currentLanguage, defaultLanguage}) => {
+export const getHomeUrl = ({currentLanguage, defaultLanguage}) => {
 	const output = (currentLanguage === defaultLanguage) ? '/' : `/${currentLanguage}`;
 	return output;
 };
@@ -326,29 +326,9 @@ export const secureHeaders = {
 	'Referrer-Policy' : 'strict-origin-when-cross-origin',
 };
 
-export const isDevMode = ({headers, hostName, isUrl}) => {
-	let output = false;
-	let referer = headers.get('Referer');
-	referer = (isUrl(referer)) ? new URL(referer).hostname : '';
-	
-	if(hostName === 'example.com')
-	{
-		output = true;
-	}
-	if(referer)
-	{
-		if(referer.endsWith('cloudflareworkers.com'))
-		{
-			output = true;
-		}
-	}
-	
-	return output;
-};
-
 export const isNumber = val => /^\d+$/.test(val);
 export const isEmail = val => /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val);
-export const recaptcha = val => true;
+export const recaptcha = () => true;
 
 	
 export const capitalize = (s) => {
