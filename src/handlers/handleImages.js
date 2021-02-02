@@ -1,6 +1,7 @@
+const {stringToHash, getFallBackLang} = Utilities;
+
 export const handleImages = async ({requestObj, langLabels}) =>  {
 	
-	const {stringToHash, getFallBackLang} = Utilities;
 	const {pathName, isDev, searchParams} = requestObj;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';
@@ -30,66 +31,106 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 				}
 			}
 			
-			if(pathSplit.length === 2 && searchParams.has('contentType'))
+			if(pathSplit.length === 2)
 			{
 				const validContentTypes = ['websites', 'pages'];
-				const contentType = searchParams.get('contentType');
+				const fileName = pathSplit[1];
+				let entryArgs = {
+					langList,
+					altLang: false
+				};
+				let image = '';
 				
-				if(validContentTypes.includes(contentType))
+				if(searchParams.has('contentType'))
 				{
-					const fileName = pathSplit[1];
+					const contentType = searchParams.get('contentType');
+					entryArgs.contentType = contentType;
 					
-					let entryArgs = {
-						langList,
-						contentType,
-						altLang: false
-					};
 					
-					if(searchParams.has('websiteId'))
+					if(validContentTypes.includes(contentType))
 					{
-						entryArgs.websiteId = searchParams.get('websiteId');
-					}
-					
-					let entries = await Contentful.getEntries(entryArgs);
-					
-					if(entries.status === 200)
-					{
-						let assets = false;
-						let image = '';
-						
-						entries.data.forEach(e => {
-													
-							e.assets.forEach(a => {
-								const fields = a.fields;
-								let title = fields.title[e.defaultLanguage] || getFallBackLang(fields.title);
-								let file = fields.file[e.defaultLanguage] || getFallBackLang(fields.file);
-								
-								if(decodeURI(file.fileName) === decodeURI(fileName))
-								{									
-									image = {
-										fileName: file.fileName,
-										src: file.url,
-										title: title,
-										width: file.details.image.width,
-										height: file.details.image.height,
-										type: file.contentType
-									};
-								}
-							});
-						});
-						
-						if(image)
+						if(searchParams.has('websiteId'))
 						{
-							imageUrl = `http:${image.src}`;
-						}				
-					}
-					
+							entryArgs.websiteId = searchParams.get('websiteId');
+						}
+						
+						const data = await Contentful.getEntries(entryArgs);
+						
+						if(data.status === 200)
+						{
+							image = getImageByName({
+								entries: data, 
+								fileName
+							});				
+						}
+					}				
 				}
 				else
 				{
-					output.status = 403;
-					output.body = 'invalid contentType';
+					//delete this else on april
+					//this is a temporary fix for urls with no contentType and websiteId params
+					const websites = await Contentful.getEntries({
+						...entryArgs, 
+						contentType: 'websites'
+					});
+					
+					if(websites.status === 200)
+					{
+						image = getImageByName({
+							entries: websites,
+							fileName
+						});
+						
+						if(!image)
+						{
+							let data = websites;
+							let websitesIds = websites.data.map(w => w.id);
+							
+							const websitesPromise = websitesIds.map(async (id) => {
+																			
+								const dataPromise = validContentTypes.filter(i => i !== 'websites').map(async (i) => {
+									
+									return await Contentful.getEntries({
+										...entryArgs, 
+										contentType: i,
+										websiteId: id
+									});
+								});
+								
+								return await Promise.all(dataPromise);
+							});
+							
+							const resolvedPromise = await Promise.all(websitesPromise);	
+							
+							if(resolvedPromise)
+							{
+								resolvedPromise.forEach(r1 => {
+									r1.forEach(r2 => {
+										
+										if(r2.hasOwnProperty('data'))
+										{
+											if(typeof r2.data[0] !== 'undefined')
+											{
+												r2.data[0].assets.forEach(a => data.data[0].assets.push(a));
+											}
+										}
+									});
+								});
+								
+								image = getImageByName({
+									entries: data,
+									fileName
+								});
+							}
+						}
+					}
+					//delete until here
 				}
+				
+				if(image)
+				{
+					imageUrl = `http:${image.src}`;
+				}	
 			}
 
 			if(imageUrl)
@@ -133,12 +174,29 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 	return output;
 };
 
-export const findCtfImageByName = ({fileName, assets}) => {
-	const edge = assets;
-	const image = edge.find(i => i.fields.file.fileName === decodeURIComponent(fileName));
+const getImageByName = ({entries, fileName}) => {
 	
-	if(image)
-	{
-		
-	}
+	let image = '';
+	
+	entries.data.forEach(e => {					
+		e.assets.forEach(a => {
+			const fields = a.fields;
+			let title = fields.title[e.defaultLanguage] || getFallBackLang(fields.title);
+			let file = fields.file[e.defaultLanguage] || getFallBackLang(fields.file);
+			
+			if(decodeURI(file.fileName) === decodeURI(fileName))
+			{									
+				image = {
+					fileName: file.fileName,
+					src: file.url,
+					title: title,
+					width: file.details.image.width,
+					height: file.details.image.height,
+					type: file.contentType
+				};
+			}
+		});
+	});
+
+	return image;
 };
