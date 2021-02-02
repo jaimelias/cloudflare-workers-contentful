@@ -26,12 +26,13 @@ export const getEntries = async ({altLang, contentType, websiteId}) => {
 		{
 			const data = await response.json();
 			const outputData = [];
+			let assets = [];
 			
 			if(data)
 			{
 				const items = data.items;
 				const includes = data.includes;
-				const assets = includes.Asset;
+				assets = includes.Asset;
 				const entries = includes.Entry;
 								
 				items.forEach(entry => {
@@ -123,7 +124,6 @@ export const getEntries = async ({altLang, contentType, websiteId}) => {
 						entryOutput.slugs = entry.fields.slug;
 					}
 					
-					entryOutput.assets = assets;
 					entryOutput.id = entry.sys.id;
 					outputData.push(entryOutput);
 				});
@@ -134,6 +134,7 @@ export const getEntries = async ({altLang, contentType, websiteId}) => {
 				output.status = 200;	
 				output.statusText = response.statusText;
 				output.data = outputData;
+				output.assets = assets;
 			}
 			else
 			{

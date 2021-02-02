@@ -59,9 +59,9 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 						if(data.status === 200)
 						{
 							image = getImageByName({
-								entries: data, 
+								assets: data.assets, 
 								fileName
-							});				
+							});			
 						}
 					}				
 				}
@@ -75,15 +75,15 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 					});
 					
 					if(websites.status === 200)
-					{
+					{						
 						image = getImageByName({
-							entries: websites,
+							assets: websites.assets,
 							fileName
-						});
+						});	
 						
 						if(!image)
 						{
-							let data = websites;
+							let assets = websites.assets;
 							let websitesIds = websites.data.map(w => w.id);
 							
 							const websitesPromise = websitesIds.map(async (id) => {
@@ -106,19 +106,12 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 							{
 								resolvedPromise.forEach(r1 => {
 									r1.forEach(r2 => {
-										
-										if(r2.hasOwnProperty('data'))
-										{
-											if(typeof r2.data[0] !== 'undefined')
-											{
-												r2.data[0].assets.forEach(a => data.data[0].assets.push(a));
-											}
-										}
+										assets = [...assets, ...r2.assets];
 									});
 								});
 								
 								image = getImageByName({
-									entries: data,
+									assets,
 									fileName
 								});
 							}
@@ -174,28 +167,26 @@ export const handleImages = async ({requestObj, langLabels}) =>  {
 	return output;
 };
 
-const getImageByName = ({entries, fileName}) => {
+const getImageByName = ({assets, fileName}) => {
 	
 	let image = '';
-	
-	entries.data.forEach(e => {					
-		e.assets.forEach(a => {
-			const fields = a.fields;
-			let title = fields.title[e.defaultLanguage] || getFallBackLang(fields.title);
-			let file = fields.file[e.defaultLanguage] || getFallBackLang(fields.file);
-			
-			if(decodeURI(file.fileName) === decodeURI(fileName))
-			{									
-				image = {
-					fileName: file.fileName,
-					src: file.url,
-					title: title,
-					width: file.details.image.width,
-					height: file.details.image.height,
-					type: file.contentType
-				};
-			}
-		});
+		
+	assets.forEach(a => {					
+		const fields = a.fields;
+		let title = getFallBackLang(fields.title);
+		let file = getFallBackLang(fields.file);
+		
+		if(decodeURI(file.fileName) === decodeURI(fileName))
+		{									
+			image = {
+				fileName: file.fileName,
+				src: file.url,
+				title: title,
+				width: file.details.image.width,
+				height: file.details.image.height,
+				type: file.contentType
+			};
+		}
 	});
 
 	return image;
