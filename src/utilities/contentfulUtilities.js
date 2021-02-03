@@ -5,87 +5,42 @@ const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.l
 
 export const getEntries = async ({altLang, contentType, websiteId, store}) => {
 	
-	let output = {
-		status: 500
-	};
+	let output = {status: 500};
 	const KV = await args();
-	const CF = await getCf({contentType});
+	const init = await getInit({contentType});
 	const {dispatch} = store;
 	
-	if(KV && CF)
+	if(KV && init)
 	{
-		const endpoint = getEndPoint({
-			contentType,
-			KV,
-			websiteId
-		});
-	
-		fetch(new URL(endpoint).href, CF)
-		.then(res => {
-			if(res.ok)
-			{
-				return res;
-			}
-			else
-			{
-				let err = Error(res.statusText);
-				err.status = res.status;
-				throw err;
-			}
-		})
-		.then(async (res) => await res.json())
-		.then(data => parseData({data, altLang, contentType, websiteId}))
-		.then(data => {
-			if(data.status === 200)
-			{
-				return data;
-			}
-			else
-			{
-				let err = Error(data.statusText);
-				err.status = data.status;
-				throw err;
-			}
-		})
-		.then(data => dispatch({
-			type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, 
-			...data
-		}))
-		.catch(err => dispatch({
-			type: ActionTypes.FETCH_CONTENTFUL_FAIL, 
-			status: err.status, 
-			statusText: err.message
-		}));
-
-		const response = await fetch(new URL(endpoint).href, CF);
+		const endpoint = getEndPoint({contentType, KV, websiteId});
+		const response = await fetch(new URL(endpoint).href, init);
 		
 		if(response.ok)
 		{
 			const promise = await response.json();
-			let data = [];
+			const data = (promise) ? parseData({data: promise, altLang, contentType, websiteId}) : {};
 			
-			if(promise)
+			if(data.status === 200)
 			{
-				data = parseData({data: promise, altLang, contentType, websiteId});
-			}
-			
-			if(data.data.length > 0)
-			{
-				output.status = 200;	
-				output.statusText = response.statusText;
-				output.data = data.data;
-				output.assets = data.assets;
+				output = data;
+				dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, ...data});
 			}
 			else
 			{
-				output.status = 404;
-				output.statusText = `${contentType} not found`;
+				dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, ...data});
 			}
+			
 		}
 		else
 		{
 			output.status = response.status;
 			output.statusText = response.statusText;
+			
+			dispatch({
+				type: ActionTypes.FETCH_CONTENTFUL_FAIL, 
+				status: response.status, 
+				statusText: response.statusText
+			});
 		}
 	}
 	
@@ -111,7 +66,7 @@ const getEndPoint = ({contentType, KV, websiteId}) => {
 	return endpoint;
 };
 
-const getCf = async ({contentType}) => {
+const getInit = async ({contentType}) => {
 
 	const hash = await stringToHash({text: CONTENTFUL_DOMAIN, algorithm: 'SHA-256'});
 
@@ -214,118 +169,123 @@ const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, w
 };
 
 const parseData = ({data, altLang, contentType, websiteId}) => {
-			
-	const items = data.items;
-	const includes = data.includes;
-	const assets = includes.Asset;
-	const entries = includes.Entry;
+
 	let output = {
-		assets,
-		data: [], 
+		contentType,
+		data: [],
 		status: 500, 
 		statusText: `error parsing ${contentType}`
 	};
 	
-	items.forEach(entry => {
-		let fields = entry.fields;
-		let defaultLanguage =  '';
-		let entryOutput = {};
-		
-		if(fields.hasOwnProperty('defaultLanguage'))
+	if(typeof data === 'object')
+	{
+		if(data.hasOwnProperty('items') && data.hasOwnProperty('includes'))
 		{
-			defaultLanguage = Object.values(fields.defaultLanguage)[0];
-		}
-		if(fields.hasOwnProperty('websites'))
-		{
-			for(let w in fields.websites)
-			{
-				fields.websites[w].forEach(r => {
+			const items = data.items;
+			const includes = data.includes;
 
-					const findDefLang = entries.find(i => i.sys.id === r.sys.id);
-					
-					if(findDefLang)
-					{
-						defaultLanguage = getFallBackLang(findDefLang.fields.defaultLanguage);
-					}	
-				});
-			}
-		}
-		
-		
-		for(let key in fields)
-		{
-			if(key !== 'websites')
+			if(includes.hasOwnProperty('Asset') && includes.hasOwnProperty('Entry'))
 			{
-				const currentLanguage = altLang || defaultLanguage;
-				let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage] || getFallBackLang(fields[key]);
+				const assets = includes.Asset;
+				const entries = includes.Entry;
+				output.assets = assets;
 				
-				const fieldArg = {
-					assets, 
-					entries, 
-					currentLanguage, 
-					defaultLanguage,
-					contentType, 
-					websiteId
-				};
-				
-				if(typeof thisField === 'object')
-				{
-					if(isLinkTypeEntry(thisField) || isLinkTypeAsset(thisField))
+				items.forEach(entry => {
+					let fields = entry.fields;
+					let defaultLanguage =  '';
+					let entryOutput = {
+						id: entry.sys.id
+					};		
+					
+					if(fields.hasOwnProperty('defaultLanguage'))
 					{
-						thisField = linkField({
-							...fieldArg,
-							field: thisField
-						});											
-					}							
-				}
-				if(Array.isArray(thisField))
-				{
-					if(thisField.every(isLinkTypeEntry) || thisField.every(isLinkTypeAsset))
+						defaultLanguage = Object.values(fields.defaultLanguage)[0];
+					}
+					if(fields.hasOwnProperty('websites'))
 					{
-						thisField = thisField.map(item => {
-							if(typeof item === 'object')
-							{
-								if(item.hasOwnProperty('sys'))
+						for(let w in fields.websites)
+						{
+							fields.websites[w].forEach(r => {
+
+								const findDefLang = entries.find(i => i.sys.id === r.sys.id);
+								
+								if(findDefLang)
 								{
-									if(item.sys.type === 'Link')
-									{
-										item = linkField({
-											...fieldArg,
-											field: item
-										});	
-									}
+									defaultLanguage = getFallBackLang(findDefLang.fields.defaultLanguage);
+								}	
+							});
+						}
+					}
+					
+					for(let key in fields)
+					{
+						if(key !== 'websites')
+						{
+							const currentLanguage = altLang || defaultLanguage;
+							let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage] || getFallBackLang(fields[key]);
+							
+							const fieldArg = {assets, entries, currentLanguage, defaultLanguage, contentType, websiteId};
+							
+							if(typeof thisField === 'object')
+							{
+								if(isLinkTypeEntry(thisField) || isLinkTypeAsset(thisField))
+								{
+									thisField = linkField({
+										...fieldArg,
+										field: thisField
+									});											
+								}							
+							}
+							if(Array.isArray(thisField))
+							{
+								if(thisField.every(isLinkTypeEntry) || thisField.every(isLinkTypeAsset))
+								{
+									thisField = thisField.map(item => {
+										if(typeof item === 'object')
+										{
+											if(item.hasOwnProperty('sys'))
+											{
+												if(item.sys.type === 'Link')
+												{
+													item = linkField({
+														...fieldArg,
+														field: item
+													});	
+												}
+											}
+										}
+										
+										return item;
+									});									
 								}
 							}
 							
-							return item;
-						});									
+							entryOutput[key] = thisField;
+						}
 					}
-				}
+					
+					if(!entryOutput.hasOwnProperty('defaultLanguage'))
+					{
+						entryOutput.defaultLanguage = defaultLanguage;
+					}
+					
+					if(entryOutput.hasOwnProperty('slug'))
+					{
+						entryOutput.slugs = entry.fields.slug;
+					}
+					
+					output.data.push(entryOutput);
+				});
 				
-				entryOutput[key] = thisField;
+				if(output.data.length > 0)
+				{
+					output.status = 200;
+					output.statusText = `${contentType} parsed`;
+				}				
 			}
 		}
-		
-		if(!entryOutput.hasOwnProperty('defaultLanguage'))
-		{
-			entryOutput.defaultLanguage = defaultLanguage;
-		}
-		
-		if(entryOutput.hasOwnProperty('slug'))
-		{
-			entryOutput.slugs = entry.fields.slug;
-		}
-		
-		entryOutput.id = entry.sys.id;
-		output.data.push(entryOutput);
-	});
-	
-	if(output.data.length > 0)
-	{
-		output.status = 200;
-		output.statusText = 'OK';
 	}
-	
+
 	return output;
 };				
 

@@ -1,5 +1,5 @@
 export const contentful = (state = {
-    data: [],
+	data: {},
 	assets: [],
     status: 500,
 	statusText: 'internal server error',
@@ -7,20 +7,22 @@ export const contentful = (state = {
 }, action) => {
     switch (action.type) {
         case ActionTypes.FETCH_CONTENTFUL_SUCCESS:
+			const data = {[action.contentType]: action.data}
             return {
                 ...state,
-				data: action.data,
-				assets: action.assets,
+				data: {...state.data, ...data},
+				assets: [...state.assets, ...action.assets],
 				status: 200,
-				statusText: 'OK'
+				statusText: `${action.contentType} OK`
             };
         case ActionTypes.FETCH_CONTENTFUL_FAIL:
+			const failStatusText = action.statusText || state.statusText;
             return {
                 ...state,
-				data: [],
+				data: {},
 				assets: [],
 				status: action.status || state.status,
-				statusText: action.statusText || state.statusText
+				statusText: `${action.contentType} ${failStatusText}`
             };
         default:
             return state;

@@ -88,39 +88,25 @@ const handleRouting = async ({request, store}) => {
 			{
 				if(imageFileRegex(pathName))
 				{	
-					data = await handleImages({
-						requestObj,
-						store
-					});				
+					data = await handleImages({requestObj, store});				
 				}
 			}
 			else if(pathNameArr.first === 'static')
 			{			
 				if(pathNameArr.first !== pathNameArr.last)
 				{				
-					data = await handleStaticFiles({
-						fileName: pathNameArr.last,
-						requestObj
-					});				
+					data = await handleStaticFiles({fileName: pathNameArr.last, requestObj});				
 				}
 			}
 			else if(pathNameArr.first === 'sitemap.xml' && pathNameArr.last === 'sitemap.xml')
 			{				
-				data = await handleContentful({
-					...requestObj, 
-					format: 'sitemap',
-					store
-				});			
+				data = await handleContentful({...requestObj, format: 'sitemap', store});			
 			}
 			else
 			{	
 				if(pathNameArr.full.some(slugRegex) || !pathNameArr.first )
 				{
-					data =  await handleContentful({
-						...requestObj, 
-						format: 'html',
-						store
-					});				
+					data =  await handleContentful({...requestObj, format: 'html', store});				
 				}
 				else
 				{
@@ -161,10 +147,7 @@ const handleRouting = async ({request, store}) => {
 						
 						if(payload)
 						{							
-							data = await handleFormRequest({
-								payload,
-								store
-							});	
+							data = await handleFormRequest({payload, store});	
 						}					
 					}
 					catch(err)
