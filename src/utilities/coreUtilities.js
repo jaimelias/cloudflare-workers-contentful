@@ -395,3 +395,24 @@ export const getFallBackLang = obj =>  {
 
 	return output;
 };
+
+export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectIp, redirectCountryCodes}) => {
+	
+	let output = false;
+			
+	if(CONTENTFUL_DOMAIN === hostName)
+	{
+		const ip = headers.get('CF-Connecting-IP');
+		const country = headers.get('cf-ipcountry');
+		
+		if(Array.isArray(bypassCountryRedirectIp) && Array.isArray(redirectCountryCodes))
+		{
+			if(!bypassCountryRedirectIp.includes(ip) && redirectCountryCodes.includes(country))
+			{
+				output = true;
+			}
+		}
+	}
+	
+	return output;
+};

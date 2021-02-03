@@ -11,7 +11,6 @@ module.exports = {
 			Utilities: path.resolve(__dirname, './src/utilities/coreUtilities'),
 			Contentful: path.resolve(__dirname, './src/utilities/contentfulUtilities'),
 			LangConfig: path.resolve(__dirname, './src/lang/langConfig'),
-			path.resolve(__dirname, './src/lang/langConfig'),
 			ActionTypes: path.resolve(__dirname, './src/redux/actionTypes')
 		}),
 	]	

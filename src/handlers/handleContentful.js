@@ -7,11 +7,8 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 		status: 500
 	};
 
+	const {isRedirectByCountryOk, getBatchRedirectUrl} = Utilities;
 	const altLang = LangConfig.langList.find(i => i === pathNameArr.first) || false;
-
-	//host
-	const ip = headers.get('CF-Connecting-IP');
-    const country = headers.get('cf-ipcountry');
 	
 	const args = {
 		altLang,
@@ -19,7 +16,6 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 		store
 	};
 	
-	//contentful
 	let website = await Contentful.getEntries(args);
 	
 	if(website.hasOwnProperty('status'))
@@ -37,11 +33,14 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 				siteUrl
 			} = website;
 			
-			const isRedirectBypassed = (Array.isArray(bypassCountryRedirectIp)) ? bypassCountryRedirectIp.includes(ip) : false;
-			
-			const isCountryRedirect = (Array.isArray(redirectCountryCodes)) ? redirectCountryCodes.includes(country) : false;
+			const redirectByCountryOk = isRedirectByCountryOk({
+				headers,
+				hostName, 
+				bypassCountryRedirectIp, 
+				redirectCountryCodes
+			});
 					
-			if(hostName !== 'example.com' && !isRedirectBypassed && isCountryRedirect && redirectCountryCodesUrl)
+			if(redirectByCountryOk)
 			{
 				output = {
 					body: redirectCountryCodesUrl, 
@@ -50,7 +49,7 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 			}
 			else
 			{
-				const batchRedirectUrl = Utilities.getBatchRedirectUrl({
+				const batchRedirectUrl = getBatchRedirectUrl({
 					pathName, 
 					batchRedirect,
 					siteUrl
