@@ -2,6 +2,7 @@ const {langList} = LangConfig;
 const {stringToHash, getFallBackLang} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
+export const validContentTypes = ['websites', 'pages'];
 
 export const getEntries = async ({altLang, contentType, websiteId, store}) => {
 	
@@ -287,6 +288,22 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	}
 
 	return output;
-};				
+};
 
+export const getSubEntries = async ({websiteData, store, altLang}) => {
+	
+	const promise = validContentTypes
+	.filter(i => i !== 'websites')
+	.map(async (i) => {
+		
+		return await getEntries({
+			store,
+			altLang,
+			contentType: i,
+			websiteId: websiteData.id
+		});
+	});
 
+	return await Promise.all(promise);
+
+};

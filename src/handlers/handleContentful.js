@@ -22,8 +22,8 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 	{
 		if(website.status === 200)
 		{
-			website = website.data[0];
-			website.siteUrl = new URL(`https://${website.domainName}`).href;
+			let websiteData = website.data[0];
+			websiteData.siteUrl = new URL(`https://${websiteData.domainName}`).href;
 			
 			const {
 				redirectCountryCodes, 
@@ -31,7 +31,7 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 				bypassCountryRedirectIp,
 				batchRedirect,
 				siteUrl
-			} = website;
+			} = websiteData;
 			
 			const redirectByCountryOk = isRedirectByCountryOk({
 				headers,
@@ -49,30 +49,26 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 			}
 			else
 			{
-				const batchRedirectUrl = getBatchRedirectUrl({
-					pathName, 
-					batchRedirect,
-					siteUrl
-				});
+				const batchRedirectUrl = getBatchRedirectUrl({pathName, batchRedirect, siteUrl});
 				
 				if(batchRedirectUrl)
 				{
-					output =  {
-						body: batchRedirectUrl, 
-						status: 301
-					};
+					output =  { body: batchRedirectUrl, status: 301};
 				}
 				else
 				{
-
-					const pages = await Contentful.getEntries({...args, contentType: 'pages', websiteId: website.id});
+					const pages = await Contentful.getEntries({
+						...args, 
+						contentType: 'pages', 
+						websiteId: websiteData.id
+					});
 					
 					switch(format)
 					{
 						case 'html':
 							output = handleHtml({ 
-								currentLanguage: altLang || website.defaultLanguage,
-								website: (pages) ? {...website, pages: pages.data} : website,
+								currentLanguage: altLang || websiteData.defaultLanguage,
+								websiteData: (pages) ? {...websiteData, pages: pages.data} : websiteData,
 								hostName,
 								pathName,
 								store
@@ -81,8 +77,7 @@ export const handleContentful = async ({headers, pathNameArr, hostName, pathName
 							break;
 						case 'sitemap':
 							output = handleSitemap({ 
-								website: (pages) ? {...website, pages: pages.data} : website,
-								hostName
+								websiteData: (pages) ? {...websiteData, pages: pages.data} : websiteData,
 							});
 							break;
 					}

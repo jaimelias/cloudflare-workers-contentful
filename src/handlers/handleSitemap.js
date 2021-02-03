@@ -1,4 +1,4 @@
-export const handleSitemap = async ({website, hostName}) => {
+export const handleSitemap = async ({websiteData}) => {
 	
 	let urls = [];
 	const langPaths = {};
@@ -7,33 +7,34 @@ export const handleSitemap = async ({website, hostName}) => {
 		status: 404
 	};
 	const {MediaSrc, escUrl} = Utilities;
+	const {defaultLanguage, image, pages, domainName} = websiteData;
 	
 	langList.forEach(key => {
-		langPaths[key] = (key === website.defaultLanguage) ? '' : key;
+		langPaths[key] = (key === defaultLanguage) ? '' : key;
 	});
 	
 	for(let k in langPaths)
 	{
-		if(k === website.defaultLanguage)
+		if(k === defaultLanguage)
 		{
 			let urlObj = {
-				loc: new URL(langPaths[k], `https://${hostName}`).href,
+				loc: new URL(langPaths[k], `https://${domainName}`).href,
 				alternates: [],
 				images: []
 			};
 			
-			if(website.image.hasOwnProperty('fileName'))
+			if(image.hasOwnProperty('fileName'))
 			{
-				const imageUrl = MediaSrc(website.image);
-				urlObj.images.push(escUrl(new URL(imageUrl, `https://${hostName}`).href));
+				const imageUrl = MediaSrc(image);
+				urlObj.images.push(escUrl(new URL(imageUrl, `https://${domainName}`).href));
 			}
 			
 			langList.forEach(key => {
-				if(key !== website.defaultLanguage)
+				if(key !== defaultLanguage)
 				{
 					urlObj.alternates.push({
 						hreflang: key,
-						href: new URL(key, `https://${hostName}`).href
+						href: new URL(key, `https://${domainName}`).href
 					});
 				}
 			});
@@ -42,24 +43,24 @@ export const handleSitemap = async ({website, hostName}) => {
 		}
 	}
 	
-	website.pages.forEach(row => {
+	pages.forEach(row => {
 		
 		const imageGallery = (row.hasOwnProperty('imageGallery')) ? row.imageGallery : [];
 		
 		let urlObj = {
-			loc: new URL(row.slug, `https://${hostName}`).href,
+			loc: new URL(row.slug, `https://${domainName}`).href,
 			alternates: [],
 			images: []
 		};
 		
 		for(let s in row.slugs)
 		{
-			if(s !== website.defaultLanguage)
+			if(s !== defaultLanguage)
 			{
 				const thisSlug = s + '/' + row.slugs[s];
 				urlObj.alternates.push({
 					hreflang: s,
-					href: new URL(thisSlug, `https://${hostName}`).href
+					href: new URL(thisSlug, `https://${domainName}`).href
 				});
 			}	
 		}
@@ -67,7 +68,7 @@ export const handleSitemap = async ({website, hostName}) => {
 		if(imageGallery)
 		{	
 			imageGallery.forEach(image => {
-				urlObj.images.push(escUrl(new URL(MediaSrc(image), `https://${hostName}`).href));
+				urlObj.images.push(escUrl(new URL(MediaSrc(image), `https://${domainName}`).href));
 			});			
 		}
 		

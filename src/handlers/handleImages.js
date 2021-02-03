@@ -2,6 +2,7 @@ const {stringToHash, getFallBackLang} = Utilities;
 
 export const handleImages = async ({requestObj, store}) =>  {
 	
+	const {getEntries, validContentTypes, getSubEntries} = Contentful;
 	const {pathName, hostName, searchParams} = requestObj;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';
@@ -32,7 +33,6 @@ export const handleImages = async ({requestObj, store}) =>  {
 			
 			if(pathSplit.length === 2)
 			{
-				const validContentTypes = ['websites', 'pages'];
 				const fileName = pathSplit[1];
 				let entryArgs = {
 					altLang: false,
@@ -53,7 +53,7 @@ export const handleImages = async ({requestObj, store}) =>  {
 							entryArgs.websiteId = searchParams.get('websiteId');
 						}
 						
-						const data = await Contentful.getEntries(entryArgs);
+						const data = await getEntries(entryArgs);
 						
 						if(data.status === 200)
 						{
@@ -68,45 +68,32 @@ export const handleImages = async ({requestObj, store}) =>  {
 				{
 					//delete this else on april
 					//this is a temporary fix for urls with no contentType and websiteId params
-					const websites = await Contentful.getEntries({
+					const website = await getEntries({
 						...entryArgs, 
 						contentType: 'websites'
 					});
 					
-					if(websites.status === 200)
+					if(website.status === 200)
 					{						
 						image = getImageByName({
-							assets: websites.assets,
+							assets: website.assets,
 							fileName
 						});	
 						
 						if(!image)
 						{
-							let assets = websites.assets;
-							let websitesIds = websites.data.map(w => w.id);
+							let assets = website.assets;
+
+							const subEntries = await getSubEntries({
+								websiteData: website.data[0], 
+								store, 
+								altLang: false
+							});	
 							
-							const websitesPromise = websitesIds.map(async (id) => {
-																			
-								const dataPromise = validContentTypes.filter(i => i !== 'websites').map(async (i) => {
-									
-									return await Contentful.getEntries({
-										...entryArgs, 
-										contentType: i,
-										websiteId: id
-									});
-								});
-								
-								return await Promise.all(dataPromise);
-							});
-							
-							const resolvedPromise = await Promise.all(websitesPromise);	
-							
-							if(resolvedPromise)
+							if(subEntries)
 							{
-								resolvedPromise.forEach(r1 => {
-									r1.forEach(r2 => {
-										assets = [...assets, ...r2.assets];
-									});
+								subEntries.forEach(r1 => {
+									assets = [...assets, ...r1.assets];
 								});
 								
 								image = getImageByName({

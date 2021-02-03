@@ -1,13 +1,13 @@
 import {htmlTemplate} from '../htmlTemplate';
 
-export const handleHtml = async ({currentLanguage, website, hostName, pathName, store}) => {
+export const handleHtml = async ({currentLanguage, websiteData, hostName, pathName, store}) => {
 	const splitPath = pathName.split('/');
 	const slug = splitPath.filter(i => i !== currentLanguage).join('');
 	const pageNotFound = is404({
 		slug,
-		pages: website.pages
+		pages: websiteData.pages
 	});
-	const globalVars = {...website};
+	const globalVars = {...websiteData};
 	
 	return {
 		status: (pageNotFound) ? 404 : 200,
