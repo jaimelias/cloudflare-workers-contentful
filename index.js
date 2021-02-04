@@ -1,166 +1,144 @@
 import {handleFormRequest} from './src/handlers/handleApi';
 import {handleImages} from './src/handlers/handleImages';
-import {htmlRewriter} from './src/handlers/htmlRewriter';
+import {htmlRewriter} from './src/utilities/htmlRewriter';
 import {handleStaticFiles} from './src/handlers/handleStatic';
 import {handleContentful} from './src/handlers/handleContentful';
 import {ReduxStore} from './src/redux/configureStore';
 
-const {slugRegex, imageFileRegex, secureHeaders, isUrl, pathNameToArr, parseRequest} = Utilities;
+const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters} = Utilities;
 
 addEventListener('fetch', event => {
-    event.respondWith(handleSecurity({
+    event.respondWith(handleFirewall({
 		request: event.request
 	}));
 });
 
-const handleSecurity = ({request}) => {
-	
-	const store = ReduxStore();
+const handleFirewall = ({request}) => {
+
+	const store = ReduxStore();	
 	const {dispatch} = store;
-	
-	const validValueRegex =  /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g;
-	
-	if(!validValueRegex.test(request.url))
+	const {method, url} = request;
+
+	if(!['GET', 'POST'].includes(method))
 	{
-		dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
+		resDispatch({dispatch, status: 405});
+	}
+	else if(!validUrlCharacters(url))
+	{
+		resDispatch({dispatch, status: 400});
 	}
 	else
-	{	
-		dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data: parseRequest(request)}});
+	{
+		dispatch({
+			type: ActionTypes.REQUEST_SUCCESS, 
+			payload: {request, data: parseRequest(request)
+		}});		
 	}
-		
-	return handleRouting({request, store});
+	
+	return handleRouting({store});
 };
 
-const handleRouting = async ({request, store}) => {
+const handleRouting = async ({store}) => {
+
 	
 	const {dispatch, getState} = store;
-
+	
 	if(!getState().response.isDefault)
 	{
 		return Render({store});
 	}
 	else
 	{
-		let data = {};
 		let status = 500;
-		const {url: requestUrl, method, headers, body} = request;
-		const url = new URL(requestUrl);
-		const {pathname: pathName, searchParams} = url;	
-		const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
-		const pathNameArr = pathNameToArr(pathName);
+		let data = {};
+		const {method, pathName, pathNameArr} = getState().request.data;
+		const zone = pathNameArr.first;
+		const last = pathNameArr.last;
 		
-		let requestObj = {
-			...request,
-			hostName,
-			pathName,
-			searchParams,
-			pathNameArr
-		};
-
-		if(method === 'GET')
+		if(zone === 'images' && imageFileRegex(pathName))
 		{
-			if(pathNameArr.first === 'images')
-			{
-				if(imageFileRegex(pathName))
-				{	
-					data = await handleImages({store});				
-				}
-			}
-			else if(pathNameArr.first === 'static')
-			{			
-				if(pathNameArr.first !== pathNameArr.last)
-				{
-					data = await handleStaticFiles({store});				
-				}
-			}
-			else if(pathNameArr.first === 'sitemap.xml' && pathNameArr.last === 'sitemap.xml')
-			{				
-				data = await handleContentful({format: 'sitemap', store});			
-			}
-			else
-			{	
-				if(pathNameArr.full.some(slugRegex) || !pathNameArr.first )
-				{
-					data =  await handleContentful({format: 'html', store});				
-				}
-				else
-				{
-					data.status = 400;
-				}
-			}
-			
-			if(['images', 'icons', 'static'].includes(pathNameArr.first))
-			{
-				if(pathNameArr.first === pathNameArr.last)
-				{
-					data.status = 403;
-				}
-				else
-				{
-					if(!data.hasOwnProperty('status'))
-					{
-						data.status = 404;
-					}				
-				}
-			}
-			
-			status = (data.hasOwnProperty('status')) ? data.status : 500;
+			data = await handleImages({store});	
 		}
-		else if(method === 'POST')
+		else if(zone === 'static' && zone !== last)
+		{			
+			data = await handleStaticFiles({store});
+		}
+		else if(zone === 'sitemap.xml' && last === 'sitemap.xml')
+		{				
+			data = await handleContentful({format: 'sitemap', store});			
+		}
+		else if(['images', 'static'].includes(zone))
 		{
-			if(pathNameArr.first === pathNameArr.last)
+			if(zone === last)
 			{
 				data.status = 403;
 			}
 			else
 			{
-				if(pathNameArr.first === 'api' && pathNameArr.last === 'request-form')
+				if(!data.hasOwnProperty('status'))
 				{
-					data = await handleFormRequest({store});
-				}
+					data.status = 404;
+				}				
 			}
-			
-			status = (data.hasOwnProperty('status')) ? data.status : 500;
+		}
+		else if(zone === 'api')
+		{
+			if(last === 'request-form' && method === 'POST')
+			{
+				data = await handleFormRequest({store});
+			}
+			else
+			{
+				data.status = 403;
+			}
 		}
 		else
-		{
-			status = 405;
-		}		
-
-		dispatchers({dispatch, status, data});
+		{	
+			if(pathNameArr.full.some(slugRegex) || !zone )
+			{
+				data =  await handleContentful({format: 'html', store});				
+			}
+			else
+			{
+				data.status = 400;
+			}
+		}
 		
-		return Render({store});	
+		status = data.status || status;	
+		resDispatch({dispatch, status, data});	
+		return Render({store});			
 	}	
 }
 
-const dispatchers = ({dispatch, status, data}) => {
+const resDispatch = ({dispatch, status, data}) => {
+	
+	const payload = data || {};
 	
 	switch(status)
 	{
 		case 200:
-			dispatch({type: ActionTypes.RESPONSE_SUCCESS, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_SUCCESS, payload});
 			break;
 		case 301:
-			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
 			break;
 		case 302:
-			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
 			break;			
 		case 400:
-			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload});
 			break;
 		case 403:
-			dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, payload});
 			break;
 		case 404:
-			dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, payload});
 			break;
 		case 405:
-			dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, payload});
 			break;
 		case 500:
-			dispatch({type: ActionTypes.RESPONSE_SERVER, payload: {...data}});
+			dispatch({type: ActionTypes.RESPONSE_SERVER, payload});
 			break;
 	};	
 }

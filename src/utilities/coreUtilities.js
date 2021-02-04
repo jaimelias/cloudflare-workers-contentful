@@ -241,7 +241,7 @@ export const slugRegex = (value) => {
 	return (value) ? regex.test(value) : true;
 };
 
-export const imageFileRegex = (str) => {
+export const imageFileRegex = str => {
 	
 	let valid = false;
 	const extensions = ['apng', 'gif', 'jpg', 'jpeg', 'jfif', 'pjpeg', 'pjp', 'png', 'webp', 'svg']
@@ -256,7 +256,7 @@ export const imageFileRegex = (str) => {
 	return valid;
 };
 
-export const isUrl = (str) => {
+export const isUrl = str => {
 	const regex = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/igm;
 
 	return (str) ? regex.test(str) : false;
@@ -417,9 +417,12 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 	return output;
 };
 
+export const validUrlCharacters = (str) => /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g.test(str);
+
 export const parseRequest = (request) => {
 	
-	const {url: requestUrl, method, headers, body} = request;
+	const {method, headers, body} = request;
+	let requestUrl = encodeURI(decodeURI(request.url));
 	const url = new URL(requestUrl);
 	const {pathname: pathName, searchParams} = url;	
 	const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
@@ -427,6 +430,7 @@ export const parseRequest = (request) => {
 	
 	return {
 		...request,
+		url: requestUrl,
 		hostName,
 		pathName,
 		searchParams,
