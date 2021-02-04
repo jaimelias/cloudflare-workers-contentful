@@ -282,7 +282,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	return output;
 };
 
-export const getSubEntries = async ({store, altLang}) => {
+export const getAllEntries = async ({store, altLang}) => {
 
 	let promise = [];
 	let entryArgs = {

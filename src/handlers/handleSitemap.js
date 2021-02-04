@@ -1,4 +1,4 @@
-export const handleSitemap = async ({websiteData}) => {
+export const handleSitemap = async ({store}) => {
 	
 	let urls = [];
 	const langPaths = {};
@@ -7,8 +7,10 @@ export const handleSitemap = async ({websiteData}) => {
 		status: 404
 	};
 	const {escUrl} = Utilities;
-	const {defaultLanguage, image, pages, domainName} = websiteData;
-	
+	const {getState} = store;
+	const {defaultLanguage, image, domainName} = getState().contentful.data.websites[0];
+	const pages = getState().contentful.data.pages;
+		
 	langList.forEach(key => {
 		langPaths[key] = (key === defaultLanguage) ? '' : key;
 	});

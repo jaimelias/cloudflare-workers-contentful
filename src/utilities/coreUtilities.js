@@ -1,3 +1,5 @@
+const {langLabels, langList} = LangConfig;
+
 export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, pathName}) => {
 	
 	let output = false;
@@ -254,7 +256,6 @@ export const findPageBySlug = ({slug, pages}) => {
 export const listLangItems = ({defaultLanguage, currentLanguage, page, slug, siteUrl}) => {
 	
 	let output = [];
-	const {langLabels} = LangConfig;
 	
 	for(const k in langLabels)
 	{		
@@ -401,12 +402,15 @@ export const parseRequest = (request) => {
 	const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
 	const pathNameArr = pathNameToArr(pathName);
 	
+	const altLang = langList.find(i => i === pathNameArr.first) || false;
+	
 	return {
 		...request,
 		url: requestUrl,
 		hostName,
 		pathName,
 		searchParams,
-		pathNameArr
+		pathNameArr,
+		altLang
 	};	
 };

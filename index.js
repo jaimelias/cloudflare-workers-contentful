@@ -2,7 +2,13 @@ import {handleFormRequest} from './src/handlers/handleApi';
 import {handleImages} from './src/handlers/handleImages';
 import {htmlRewriter} from './src/utilities/htmlRewriter';
 import {handleStaticFiles} from './src/handlers/handleStatic';
+
+//delete handleContentful
 import {handleContentful} from './src/handlers/handleContentful';
+import {handleSitemap} from './src/handlers/handleSitemap';
+//import {handleHtml} from './src/handlers/handleHtml';
+
+
 import {ReduxStore} from './src/redux/configureStore';
 
 const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters} = Utilities;
@@ -35,7 +41,23 @@ const firewal = ({request}) => {
 		}});		
 	}
 	
-	return router({store});
+	return connectContentful({store});
+};
+
+const connectContentful = async ({store}) => {
+	
+	const {langList} = LangConfig;
+	const altLang = store.getState().request.data.altLang;
+	
+	const entries = await Contentful.getAllEntries({
+		store, 
+		altLang
+	});
+	
+	if(entries)
+	{
+		return router({store});
+	}
 };
 
 const router = async ({store}) => {
@@ -48,7 +70,6 @@ const router = async ({store}) => {
 	}
 	else
 	{
-		let status = 500;
 		let data = {};
 		const {method, pathName, pathNameArr} = getState().request.data;
 		const zone = pathNameArr.first;
@@ -64,7 +85,7 @@ const router = async ({store}) => {
 		}
 		else if(zone === 'sitemap.xml' && last === 'sitemap.xml')
 		{				
-			data = await handleContentful({format: 'sitemap', store});			
+			data = await handleSitemap({store});			
 		}
 		else if(['images', 'static'].includes(zone))
 		{
@@ -102,9 +123,13 @@ const router = async ({store}) => {
 				data.status = 400;
 			}
 		}
+			
+		resDispatch({
+			dispatch, 
+			status: data.status || 500, 
+			data
+		});
 		
-		status = data.status || status;	
-		resDispatch({dispatch, status, data});	
 		return render({store});			
 	}	
 }
