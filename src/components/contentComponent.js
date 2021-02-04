@@ -2,13 +2,14 @@ import {GalleryComponent} from './galleryComponent';
 import {IndexPageComponent} from './indexPageComponent';
 import {RequestForm} from './formComponent';
 
-export const Content = ({globalVars, slug, title, description, content, labels, is404, pages, thisPageHasForm, dataUtilities, currentLanguage}) => {
+export const Content = ({store, slug, title, description, content, labels, is404, pages, thisPageHasForm, dataUtilities, currentLanguage}) => {
 	
 	let output = '';
+	const {getState} = store;
+	const {amenities, included, notIncluded, image, type} = getState().contentful.data.websites[0];
 	
 	if(slug === '')
 	{
-		const {amenities, included, notIncluded, image} = globalVars;
 		const {labelIncluded, labelNotIncluded, labelAmenities} = labels;
 
 		output = IndexPageComponent({
@@ -48,7 +49,7 @@ export const Content = ({globalVars, slug, title, description, content, labels, 
 				}): '';
 				
 				let formArgs = {
-					type: globalVars.type,
+					type,
 					labels,
 					grid: thisPageHasForm,
 					accommodationTypes: dataUtilities.accommodationTypes,

@@ -4,17 +4,18 @@ const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.l
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
 export const validContentTypes = ['websites', 'pages'];
 
-export const getEntries = async ({altLang, contentType, websiteId, store}) => {
+export const getEntries = async ({contentType, websiteId, store}) => {
 	
 	let output = {status: 500};
 	const KV = await args();
 	const init = await getInit({contentType});
-	const {dispatch} = store;
+	const {dispatch, getState} = store;
 	
 	if(KV && init)
 	{
 		const endpoint = getEndPoint({contentType, KV, websiteId});
 		const response = await fetch(new URL(endpoint).href, init);
+		const altLang = getState().request.data.altLang;
 		
 		if(response.ok)
 		{
@@ -267,6 +268,8 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 						entryOutput.slugs = entry.fields.slug;
 					}
 					
+					entryOutput.currentLanguage = altLang || entryOutput.defaultLanguage;
+					
 					output.data.push(entryOutput);
 				});
 				
@@ -282,12 +285,11 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	return output;
 };
 
-export const getAllEntries = async ({store, altLang}) => {
+export const getAllEntries = async ({store}) => {
 
 	let promise = [];
 	let entryArgs = {
 		store,
-		altLang,
 		websiteId: ''
 	};
 	

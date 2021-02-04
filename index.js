@@ -2,13 +2,8 @@ import {handleFormRequest} from './src/handlers/handleApi';
 import {handleImages} from './src/handlers/handleImages';
 import {htmlRewriter} from './src/utilities/htmlRewriter';
 import {handleStaticFiles} from './src/handlers/handleStatic';
-
-//delete handleContentful
-import {handleContentful} from './src/handlers/handleContentful';
 import {handleSitemap} from './src/handlers/handleSitemap';
-//import {handleHtml} from './src/handlers/handleHtml';
-
-
+import {handleHtml} from './src/handlers/handleHtml';
 import {ReduxStore} from './src/redux/configureStore';
 
 const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters} = Utilities;
@@ -116,7 +111,7 @@ const router = async ({store}) => {
 		{	
 			if(pathNameArr.full.some(slugRegex) || !zone )
 			{
-				data =  await handleContentful({format: 'html', store});				
+				data =  await handleHtml({store});				
 			}
 			else
 			{

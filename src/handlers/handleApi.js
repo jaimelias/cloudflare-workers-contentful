@@ -8,7 +8,8 @@ export const handleFormRequest = async ({store}) => {
 	};
 	
 	const {langList} = LangConfig;
-	const payload = await store.getState().request.request.json();
+	const {getState} = store;
+	const payload = await getState().request.request.json();
 	
 	if(payload)
 	{
@@ -84,32 +85,23 @@ export const handleFormRequest = async ({store}) => {
 			if(invalids.length === 0)
 			{
 				
-				let website = await Contentful.getEntries({
-					contentType: 'websites',
-					store,
-					altLang: false
-				}); 
-						
-				if(website.status === 200)
-				{
-					website = website.data[0];
-					const sendGrid = website.sendGrid;
+				const website = getState().contentful.data.websites[0];
+				const sendGrid = website.sendGrid;
+				
+				if(sendGrid)
+				{					
+					const outputPayload = Object.keys(payload)
+					.filter(i => formFields[i])
+					.reduce((obj, key) => {
+						obj[key] = payload[key];
+						return obj;						
+					}, {});					
 					
-					if(sendGrid)
-					{
-						const outputPayload = Object.keys(payload)
-						.filter(i => formFields[i])
-						.reduce((obj, key) => {
-							obj[key] = payload[key];
-							return obj;						
-						}, {});					
-						
-						output = await sendGridSend({
-							payload: outputPayload,
-							sendGrid,
-							website
-						});				
-					}
+					output = await sendGridSend({
+						payload: outputPayload,
+						sendGrid,
+						website
+					});				
 				}
 			}
 			else

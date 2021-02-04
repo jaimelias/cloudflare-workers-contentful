@@ -253,7 +253,7 @@ export const findPageBySlug = ({slug, pages}) => {
 	return output;
 };
 
-export const listLangItems = ({defaultLanguage, currentLanguage, page, slug, siteUrl}) => {
+export const listLangItems = ({defaultLanguage, currentLanguage, page, slug}) => {
 	
 	let output = [];
 	

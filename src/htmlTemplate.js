@@ -9,12 +9,14 @@ import {getMenuItems} from './menuItems';
 import {enqueueScripts} from './enqueue';
 import {enqueueHook} from './hooks/preRenderHooks';
 
-export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathName, is404, store}) => {
+export const htmlTemplate = ({slug, is404, store}) => {
 	
 	const {langLabels} = LangConfig;
-	const labels = langLabels[currentLanguage].labels;
 	const {getState} = store;
 	const {accommodationTypes} = dataUtilities;
+	const pages = getState().contentful.data.pages;
+	const {hostName, pathName} = getState().request.data;
+	
 	const {
 		siteName,
 		title,
@@ -23,6 +25,7 @@ export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathN
 		description,
 		content,
 		countryCode,
+		currentLanguage,
 		streetAddress,
 		country,
 		stateProvince,
@@ -42,10 +45,11 @@ export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathN
 		actionButtonUrl,
 		actionButtonText,
 		type,
-		pages,
 		defaultLanguage,
 		reCaptchaSiteKey
-	} = globalVars;
+	} = getState().contentful.data.websites[0];
+	
+	const labels = langLabels[currentLanguage].labels;
 
 	const {
 		notFoundTitle,
@@ -120,7 +124,7 @@ export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathN
 	});
 	
 	const RenderContent = Content({
-		globalVars,
+		store,
 		slug,
 		title: pageTitle,
 		description: pageDescription,

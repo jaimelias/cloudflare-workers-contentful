@@ -1,13 +1,19 @@
 import {htmlTemplate} from '../htmlTemplate';
 
-export const handleHtml = async ({currentLanguage, websiteData, hostName, pathName, store}) => {
+export const handleHtml = async ({store}) => {
+	
+	const {getState} = store;
+	const {hostName, pathName} = getState().request.data;
+	const pages = getState().contentful.data.pages;
+	const websiteData = getState().contentful.data.websites[0];
+	const {currentLanguage} = websiteData;
+	
 	const splitPath = pathName.split('/');
 	const slug = splitPath.filter(i => i !== currentLanguage).join('');
 	const pageNotFound = is404({
 		slug,
-		pages: websiteData.pages
+		pages
 	});
-	const globalVars = {...websiteData};
 	
 	return {
 		status: (pageNotFound) ? 404 : 200,
@@ -15,11 +21,7 @@ export const handleHtml = async ({currentLanguage, websiteData, hostName, pathNa
 			'content-type': 'text/html;charset=UTF-8'
 		},
 		body: htmlTemplate({
-			currentLanguage,
-			globalVars,
 			slug,
-			hostName,
-			pathName,
 			is404: pageNotFound,
 			store
 		})
