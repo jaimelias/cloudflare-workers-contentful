@@ -24,11 +24,11 @@ export const getEntries = async ({altLang, contentType, websiteId, store}) => {
 			if(data.status === 200)
 			{
 				output = data;
-				dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, ...data});
+				dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...data}});
 			}
 			else
 			{
-				dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, ...data});
+				dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, payload: {...data}});
 			}
 			
 		}
@@ -37,11 +37,7 @@ export const getEntries = async ({altLang, contentType, websiteId, store}) => {
 			output.status = response.status;
 			output.statusText = response.statusText;
 			
-			dispatch({
-				type: ActionTypes.FETCH_CONTENTFUL_FAIL, 
-				status: response.status, 
-				statusText: response.statusText
-			});
+			dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, payload: {status: response.status, statusText: response.statusText}});
 		}
 	}
 	

@@ -16,6 +16,7 @@ addEventListener('fetch', event => {
 const handleSecurity = async ({request}) => {
 	
 	const store = ReduxStore();
+	const {dispatch} = store;
 	
 	try
 	{
@@ -41,12 +42,12 @@ const handleSecurity = async ({request}) => {
 		
 		if(isBadRequest)
 		{
-			store.dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
+			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
 		}
 	}
 	catch(err)
 	{
-		store.dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
+		dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
 	}
 	
 	return handleRouting({
@@ -175,28 +176,28 @@ const dispatchers = ({dispatch, status, data}) => {
 	switch(status)
 	{
 		case 200:
-			dispatch({type: ActionTypes.RESPONSE_SUCCESS, ...data});
+			dispatch({type: ActionTypes.RESPONSE_SUCCESS, payload: {...data}});
 			break;
 		case 301:
-			dispatch({type: ActionTypes.RESPONSE_REDIRECT, ...data});
+			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {...data}});
 			break;
 		case 302:
-			dispatch({type: ActionTypes.RESPONSE_REDIRECT, ...data});
+			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {...data}});
 			break;			
 		case 400:
-			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, ...data});
+			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload: {...data}});
 			break;
 		case 403:
-			dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, ...data});
+			dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, payload: {...data}});
 			break;
 		case 404:
-			dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, ...data});
+			dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, payload: {...data}});
 			break;
 		case 405:
-			dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, ...data});
+			dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, payload: {...data}});
 			break;
 		case 500:
-			dispatch({type: ActionTypes.RESPONSE_SERVER, ...data});
+			dispatch({type: ActionTypes.RESPONSE_SERVER, payload: {...data}});
 			break;
 	};	
 }

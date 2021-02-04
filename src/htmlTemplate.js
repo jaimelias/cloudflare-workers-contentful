@@ -194,6 +194,9 @@ export const htmlTemplate = ({currentLanguage, globalVars, slug, hostName, pathN
 	const RenderDescriptionTags = (pageDescription) ? `<meta name="description" content="${pageDescription}"/><meta property="og:description" content="${pageDescription}"/>` : '';
 	
 	const scripts = getState().enqueue.scripts;
+	
+	console.log(scripts);
+	
 	const scriptArgs = {
 		scripts, 
 		location: 'footer', 

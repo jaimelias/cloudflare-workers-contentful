@@ -1,11 +1,14 @@
 export const enqueue = (state = {
 	scripts: {}
 }, action) => {
-    switch (action.type) {
+	
+	const {type, payload} = action;
+	
+    switch (type) {
         case ActionTypes.ENQUEUE_SCRIPT:
             return {
 				...state, 
-				scripts: {...state.scripts, ...action.scripts}
+				scripts: {...state.scripts, ...payload.scripts}
 			};
         default:
             return state;

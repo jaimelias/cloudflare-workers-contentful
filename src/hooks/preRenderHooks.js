@@ -2,7 +2,7 @@ export const enqueueHook = ({store, slug, type, is404, reCaptchaSiteKey, accommo
 	
 	const {dispatch} = store;
 	
-	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, scripts: bootstrapScripts});
+	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: bootstrapScripts}});
 	
 	if(slug === '')
 	{
@@ -16,14 +16,11 @@ export const enqueueHook = ({store, slug, type, is404, reCaptchaSiteKey, accommo
 		}
 		else
 		{
-			dispatch({type: ActionTypes.ENQUEUE_SCRIPT, scripts: formScripts(reCaptchaSiteKey)});
+			dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: formScripts(reCaptchaSiteKey)}});
 			
 			if(accommodationTypes.includes(type))
 			{
-				dispatch({type: ActionTypes.ENQUEUE_SCRIPT, scripts: pickadateScripts({
-					currentLanguage,
-					labels
-				})});
+				dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: pickadateScripts({currentLanguage, labels})}});
 			}
 		}
 	}
