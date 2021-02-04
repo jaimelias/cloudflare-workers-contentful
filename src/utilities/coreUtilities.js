@@ -38,33 +38,6 @@ export const escUrl = (str) => {
 	return encodeURI(decodeURI(str).replace(/[&]/g, i => '&amp;'));	
 };
 
-export const MediaSrc = (obj) => {
-	
-	if(obj)
-	{		
-		if(obj.hasOwnProperty('fileName') && obj.hasOwnProperty('type'))
-		{
-			if(obj.type.startsWith('image'))
-			{
-				let params = new URLSearchParams;
-				let imageUrl = encodeURI(decodeURI((`/images/${obj.fileName}`)));
-				
-				if(obj.contentType)
-				{
-					params.set('contentType', obj.contentType);
-				}				
-				
-				if(obj.websiteId)
-				{
-					params.set('websiteId', obj.websiteId);
-				}
-				
-				return `${imageUrl}?${params.toString()}`;
-			}
-		}
-	}
-};
-
 export const Media = (obj) => {
 	if(obj)
 	{

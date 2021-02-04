@@ -6,7 +6,7 @@ export const handleSitemap = async ({websiteData}) => {
 	let output = {
 		status: 404
 	};
-	const {MediaSrc, escUrl} = Utilities;
+	const {escUrl} = Utilities;
 	const {defaultLanguage, image, pages, domainName} = websiteData;
 	
 	langList.forEach(key => {
@@ -25,7 +25,7 @@ export const handleSitemap = async ({websiteData}) => {
 			
 			if(image.hasOwnProperty('fileName'))
 			{
-				const imageUrl = MediaSrc(image);
+				const imageUrl = `/images/${image.fileName}`;
 				urlObj.images.push(escUrl(new URL(imageUrl, `https://${domainName}`).href));
 			}
 			
@@ -68,7 +68,7 @@ export const handleSitemap = async ({websiteData}) => {
 		if(imageGallery)
 		{	
 			imageGallery.forEach(image => {
-				urlObj.images.push(escUrl(new URL(MediaSrc(image), `https://${domainName}`).href));
+				urlObj.images.push(escUrl(new URL(`/images/${image.fileName}`, `https://${domainName}`).href));
 			});			
 		}
 		

@@ -117,14 +117,12 @@ const linkEntry = ({id, entries, defaultLanguage, currentLanguage}) => {
 	return output;
 };
 
-const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, contentType, websiteId}) =>{
+const linkField = ({field, assets, entries, currentLanguage, defaultLanguage}) =>{
 	
 	const args = {
 		id: field.sys.id,
 		currentLanguage,
-		defaultLanguage,
-		contentType,
-		websiteId
+		defaultLanguage
 	};
 	
 	switch(field.sys.linkType)
@@ -140,7 +138,7 @@ const linkField = ({field, assets, entries, currentLanguage, defaultLanguage, co
 	return field;
 };
 
-const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, websiteId}) => {
+const linkAsset = ({id, assets, currentLanguage, defaultLanguage}) => {
 	const image = assets.find(i => i.sys.id === id);
 	
 	if(image.fields.hasOwnProperty('file'))
@@ -153,14 +151,12 @@ const linkAsset = ({id, assets, currentLanguage, defaultLanguage, contentType, w
 		file = file[currentLanguage] || file[defaultLanguage] || getFallBackLang(file);
 				
 		return {
-			fileName: file.fileName,
+			fileName: encodeURIComponent(decodeURIComponent(file.fileName)),
 			src: file.url,
 			title: title,
 			width: file.details.image.width,
 			height: file.details.image.height,
-			type: file.contentType,
-			contentType,
-			websiteId
+			type: file.contentType
 		};		
 	}
 };
@@ -286,20 +282,27 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	return output;
 };
 
-export const getSubEntries = async ({websiteData, store, altLang}) => {
+export const getSubEntries = async ({store, altLang}) => {
+
+	let promise = [];
+	let entryArgs = {
+		store,
+		altLang,
+		websiteId: ''
+	};
 	
-	const promise = validContentTypes
-	.filter(i => i !== 'websites')
-	.map(async (i) => {
+	let website = await getEntries({...entryArgs, contentType: 'websites'});
+	
+	if(website.status === 200)
+	{
+		promise.push(website);
 		
-		return await getEntries({
-			store,
-			altLang,
-			contentType: i,
-			websiteId: websiteData.id
-		});
-	});
+		validContentTypes
+		.filter(i => i !== 'websites')
+		.forEach(contentType => {
+			promise.push(getEntries({...entryArgs, contentType, websiteId: website.data[0].id}));
+		});		
+	}
 
 	return await Promise.all(promise);
-
 };

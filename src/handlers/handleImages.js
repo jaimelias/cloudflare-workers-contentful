@@ -33,77 +33,40 @@ export const handleImages = async ({store}) =>  {
 			
 			if(pathSplit.length === 2)
 			{
+				let image = '';
+				let assets = [];
+				let assetIds = [];
 				const fileName = pathSplit[1];
 				let entryArgs = {
 					altLang: false,
 					store
 				};
-				let image = '';
+
+				const subEntries = await getSubEntries({
+					store, 
+					altLang: false
+				});	
 				
-				if(searchParams.has('contentType'))
+				if(subEntries)
 				{
-					const contentType = searchParams.get('contentType');
-					entryArgs.contentType = contentType;
-					
-					
-					if(validContentTypes.includes(contentType))
-					{
-						if(searchParams.has('websiteId'))
-						{
-							entryArgs.websiteId = searchParams.get('websiteId');
-						}
+					subEntries.forEach(entries => {
+						//assets = [...assets, ...entries.assets];
+
+						entries.assets.forEach(a => {
+							
+							if(!assets.includes(a.sys.id))
+							{
+								assetIds.push(a.sys.id);
+								assets.push(a);								
+							}
+						});
 						
-						const data = await getEntries(entryArgs);
-						
-						if(data.status === 200)
-						{
-							image = getImageByName({
-								assets: data.assets, 
-								fileName
-							});			
-						}
-					}				
-				}
-				else
-				{
-					//delete this else on april
-					//this is a temporary fix for urls with no contentType and websiteId params
-					const website = await getEntries({
-						...entryArgs, 
-						contentType: 'websites'
 					});
 					
-					if(website.status === 200)
-					{						
-						image = getImageByName({
-							assets: website.assets,
-							fileName
-						});	
-						
-						if(!image)
-						{
-							let assets = website.assets;
-
-							const subEntries = await getSubEntries({
-								websiteData: website.data[0], 
-								store, 
-								altLang: false
-							});	
-							
-							if(subEntries)
-							{
-								subEntries.forEach(r1 => {
-									assets = [...assets, ...r1.assets];
-								});
-								
-								image = getImageByName({
-									assets,
-									fileName
-								});
-							}
-						}
-					}
-					//delete until here
+					image = getImageByName({
+						assets,
+						fileName
+					});
 				}
 				
 				if(image)

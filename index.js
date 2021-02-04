@@ -8,12 +8,12 @@ import {ReduxStore} from './src/redux/configureStore';
 const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters} = Utilities;
 
 addEventListener('fetch', event => {
-    event.respondWith(handleFirewall({
+    event.respondWith(firewal({
 		request: event.request
 	}));
 });
 
-const handleFirewall = ({request}) => {
+const firewal = ({request}) => {
 
 	const store = ReduxStore();	
 	const {dispatch} = store;
@@ -35,17 +35,16 @@ const handleFirewall = ({request}) => {
 		}});		
 	}
 	
-	return handleRouting({store});
+	return router({store});
 };
 
-const handleRouting = async ({store}) => {
+const router = async ({store}) => {
 
-	
 	const {dispatch, getState} = store;
 	
 	if(!getState().response.isDefault)
 	{
-		return Render({store});
+		return render({store});
 	}
 	else
 	{
@@ -106,7 +105,7 @@ const handleRouting = async ({store}) => {
 		
 		status = data.status || status;	
 		resDispatch({dispatch, status, data});	
-		return Render({store});			
+		return render({store});			
 	}	
 }
 
@@ -143,7 +142,7 @@ const resDispatch = ({dispatch, status, data}) => {
 	};	
 }
 
-const Render = ({store}) => {
+const render = ({store}) => {
 	
 	const {body, status, headers} = store.getState().response;
 		

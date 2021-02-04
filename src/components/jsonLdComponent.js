@@ -1,9 +1,7 @@
 export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, image, priceRange, slug, type, title, coordinates}) => {
 	
 	let output = '';
-	
-	const imageUrl = Utilities.MediaSrc(image);
-	
+		
 	if(!slug)
 	{
 		output = `
@@ -26,7 +24,7 @@ export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAd
 					"longitude": ${coordinates.lon}
 				},
 				"telephone": "${telephoneNumber}",
-				"photo": "${imageUrl}",
+				"photo": "/images/${image.fileName}",
 				"starRating": {
 					"@type": "Rating",
 					"ratingValue": "5"

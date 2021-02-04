@@ -10,11 +10,12 @@ export const contentful = (state = {
 	
     switch (type) {
         case ActionTypes.FETCH_CONTENTFUL_SUCCESS:
-			const data = {[payload.contentType]: payload.data}
+			const data = {[payload.contentType]: payload.data};
+			const assets = payload.assets.filter(p => !state.assets.find(s => s.sys.id === p.sys.id));
             return {
                 ...state,
 				data: {...state.data, ...data},
-				assets: [...state.assets, ...payload.assets],
+				assets: [...state.assets, ...assets],
 				status: 200,
 				statusText: `${payload.contentType} OK`
             };
