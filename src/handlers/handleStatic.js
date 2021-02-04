@@ -1,7 +1,7 @@
-export const handleStaticFiles = async ({fileName, requestObj}) => {
+export const handleStaticFiles = async ({store}) => {
 	
-	const {searchParams, hostName, pathNameArr} = requestObj;
-	
+	const {searchParams, hostName, pathNameArr} = store.getState().request.data;
+	const fileName = pathNameArr.last;
 	const thirtyDaysInSeconds = (hostName === CONTENTFUL_DOMAIN) ? 60*60*24*30 : 0;
 
 	let output = {

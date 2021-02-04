@@ -416,3 +416,20 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 	
 	return output;
 };
+
+export const parseRequest = (request) => {
+	
+	const {url: requestUrl, method, headers, body} = request;
+	const url = new URL(requestUrl);
+	const {pathname: pathName, searchParams} = url;	
+	const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
+	const pathNameArr = pathNameToArr(pathName);
+	
+	return {
+		...request,
+		hostName,
+		pathName,
+		searchParams,
+		pathNameArr
+	};	
+};

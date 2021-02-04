@@ -5,7 +5,7 @@ import {handleStaticFiles} from './src/handlers/handleStatic';
 import {handleContentful} from './src/handlers/handleContentful';
 import {ReduxStore} from './src/redux/configureStore';
 
-const {slugRegex, imageFileRegex, secureHeaders, isUrl, pathNameToArr} = Utilities;
+const {slugRegex, imageFileRegex, secureHeaders, isUrl, pathNameToArr, parseRequest} = Utilities;
 
 addEventListener('fetch', event => {
     event.respondWith(handleSecurity({
@@ -13,48 +13,23 @@ addEventListener('fetch', event => {
 	}));
 });
 
-const handleSecurity = async ({request}) => {
+const handleSecurity = ({request}) => {
 	
 	const store = ReduxStore();
 	const {dispatch} = store;
 	
-	try
-	{
-		let isBadRequest = false;
-		const rawUrl = encodeURI(decodeURI(request.url));
-		const url = new URL(rawUrl);
-		
-		for(let param of url.searchParams)
-		{
-			const validKeyRegex = /^[\w\d\_\-]{0,25}$/g;
-			const validValueRegex =  /^[\w\d\_\-\#\$\%\&\/\(\)\=\?\¿\@\,\;\.\:\s\t\n\r]{0,1000}$/g;
-			
-			if(!validKeyRegex.test(param[0]))
-			{
-				isBadRequest = true;
-			}
-			
-			if(!validValueRegex.test(param[1]))
-			{
-				isBadRequest = true;
-			}
-		}
-		
-		if(isBadRequest)
-		{
-			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
-		}
-	}
-	catch(err)
+	const validValueRegex =  /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g;
+	
+	if(!validValueRegex.test(request.url))
 	{
 		dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST});
 	}
-	
-	return handleRouting({
-		request: request,
-		store
-	});		
-	
+	else
+	{	
+		dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data: parseRequest(request)}});
+	}
+		
+	return handleRouting({request, store});
 };
 
 const handleRouting = async ({request, store}) => {
@@ -89,25 +64,25 @@ const handleRouting = async ({request, store}) => {
 			{
 				if(imageFileRegex(pathName))
 				{	
-					data = await handleImages({requestObj, store});				
+					data = await handleImages({store});				
 				}
 			}
 			else if(pathNameArr.first === 'static')
 			{			
 				if(pathNameArr.first !== pathNameArr.last)
-				{				
-					data = await handleStaticFiles({fileName: pathNameArr.last, requestObj});				
+				{
+					data = await handleStaticFiles({store});				
 				}
 			}
 			else if(pathNameArr.first === 'sitemap.xml' && pathNameArr.last === 'sitemap.xml')
 			{				
-				data = await handleContentful({...requestObj, format: 'sitemap', store});			
+				data = await handleContentful({format: 'sitemap', store});			
 			}
 			else
 			{	
 				if(pathNameArr.full.some(slugRegex) || !pathNameArr.first )
 				{
-					data =  await handleContentful({...requestObj, format: 'html', store});				
+					data =  await handleContentful({format: 'html', store});				
 				}
 				else
 				{
@@ -142,19 +117,7 @@ const handleRouting = async ({request, store}) => {
 			{
 				if(pathNameArr.first === 'api' && pathNameArr.last === 'request-form')
 				{
-					try
-					{
-						const payload = await request.json();
-						
-						if(payload)
-						{							
-							data = await handleFormRequest({payload, store});	
-						}					
-					}
-					catch(err)
-					{
-						data.status = 400;
-					}
+					data = await handleFormRequest({store});
 				}
 			}
 			

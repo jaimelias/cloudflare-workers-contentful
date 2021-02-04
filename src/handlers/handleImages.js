@@ -1,9 +1,9 @@
 const {stringToHash, getFallBackLang} = Utilities;
 
-export const handleImages = async ({requestObj, store}) =>  {
+export const handleImages = async ({store}) =>  {
 	
 	const {getEntries, validContentTypes, getSubEntries} = Contentful;
-	const {pathName, hostName, searchParams} = requestObj;
+	const {pathName, hostName, searchParams} = store.getState().request.data;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';
 	const pathSplit = pathName.split('/').filter(i => i);

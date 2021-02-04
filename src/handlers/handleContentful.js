@@ -1,12 +1,13 @@
 import {handleHtml} from './handleHtml';
 import {handleSitemap} from './handleSitemap';
 
-export const handleContentful = async ({headers, pathNameArr, hostName, pathName, format, langLabels, store}) => {
+export const handleContentful = async ({format, store}) => {
 
 	let output = {
 		status: 500
 	};
 
+	const {headers, pathNameArr, hostName, pathName} = store.getState().request.data;
 	const {isRedirectByCountryOk, getBatchRedirectUrl} = Utilities;
 	const altLang = LangConfig.langList.find(i => i === pathNameArr.first) || false;
 	
