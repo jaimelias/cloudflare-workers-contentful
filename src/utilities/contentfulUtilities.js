@@ -267,6 +267,10 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 					{
 						entryOutput.slugs = entry.fields.slug;
 					}
+					if(entryOutput.hasOwnProperty('domainName'))
+					{
+						entryOutput.siteUrl = new URL(`https://${entryOutput.domainName}`).href;
+					}
 					
 					entryOutput.currentLanguage = altLang || entryOutput.defaultLanguage;
 					

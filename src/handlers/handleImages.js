@@ -2,7 +2,7 @@ const {stringToHash, getFallBackLang} = Utilities;
 
 export const handleImages = async ({store}) =>  {
 	
-	const {getEntries, validContentTypes, getAllEntries} = Contentful;
+	const {getAllEntries} = Contentful;
 	const {pathName, hostName, searchParams} = store.getState().request.data;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';
@@ -35,12 +35,7 @@ export const handleImages = async ({store}) =>  {
 			{
 				let image = '';
 				let assets = [];
-				let assetIds = [];
 				const fileName = pathSplit[1];
-				let entryArgs = {
-					altLang: false,
-					store
-				};
 
 				const entries = await getAllEntries({
 					store, 

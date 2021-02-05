@@ -6,7 +6,7 @@ import {handleSitemap} from './src/handlers/handleSitemap';
 import {handleHtml} from './src/handlers/handleHtml';
 import {ReduxStore} from './src/redux/configureStore';
 
-const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters} = Utilities;
+const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters, isRedirectByCountryOk, getBatchRedirectUrl} = Utilities;
 
 addEventListener('fetch', event => {
     event.respondWith(firewal({
@@ -41,7 +41,6 @@ const firewal = ({request}) => {
 
 const connectContentful = async ({store}) => {
 	
-	const {langList} = LangConfig;
 	const altLang = store.getState().request.data.altLang;
 	
 	const entries = await Contentful.getAllEntries({
@@ -49,10 +48,48 @@ const connectContentful = async ({store}) => {
 		altLang
 	});
 	
-	if(entries)
+	if(entries.length > 0)
 	{
-		return router({store});
+		return redirects({store});
 	}
+};
+
+const redirects = ({store}) => {
+
+	const {getState} = store;
+	const {headers, hostName, pathName} = getState().request.data;
+	const {
+		redirectCountryCodes, 
+		redirectCountryCodesUrl,
+		bypassCountryRedirectIp,
+		batchRedirect, 
+		siteUrl
+	} = getState().contentful.data.websites[0];
+	const batchRedirectUrl = getBatchRedirectUrl({pathName, batchRedirect, siteUrl});
+
+	const redirectByCountryOk = isRedirectByCountryOk({
+		headers,
+		hostName, 
+		bypassCountryRedirectIp, 
+		redirectCountryCodes
+	});
+
+	if(redirectByCountryOk)
+	{
+		dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {
+			status: 302,
+			body: redirectCountryCodesUrl
+		}});
+	}
+	if(batchRedirectUrl)
+	{
+		dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {
+			status: 301,
+			body: batchRedirectUrl
+		}});
+	}
+
+	return router({store});
 };
 
 const router = async ({store}) => {
