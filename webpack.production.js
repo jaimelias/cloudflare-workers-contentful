@@ -8,8 +8,8 @@ module.exports = {
 	plugins: [
 		new webpack.ProvidePlugin({
 			marked: 'marked',
-			Utilities: path.resolve(__dirname, './src/utilities/coreUtilities'),
-			Contentful: path.resolve(__dirname, './src/utilities/contentfulUtilities'),
+			Utilities: path.resolve(__dirname, './src/utilities/utilities'),
+			Contentful: path.resolve(__dirname, './src/utilities/contentful'),
 			LangConfig: path.resolve(__dirname, './src/lang/langConfig'),
 			ActionTypes: path.resolve(__dirname, './src/redux/actionTypes')
 		}),

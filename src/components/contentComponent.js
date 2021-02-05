@@ -2,7 +2,7 @@ import {GalleryComponent} from './galleryComponent';
 import {IndexPageComponent} from './indexPageComponent';
 import {RequestForm} from './formComponent';
 
-export const Content = ({store, slug, title, description, content, labels, is404, pages, thisPageHasForm, dataUtilities, currentLanguage}) => {
+export const Content = ({store, slug, title, description, content, labels, is404, pages, thisPageHasForm, sharedData, currentLanguage}) => {
 	
 	let output = '';
 	const {getState} = store;
@@ -52,7 +52,7 @@ export const Content = ({store, slug, title, description, content, labels, is404
 					type,
 					labels,
 					grid: thisPageHasForm,
-					accommodationTypes: dataUtilities.accommodationTypes,
+					accommodationTypes: sharedData.accommodationTypes,
 					currentLanguage
 				};
 				

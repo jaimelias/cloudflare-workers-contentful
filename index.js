@@ -6,7 +6,16 @@ import {handleSitemap} from './src/handlers/handleSitemap';
 import {handleHtml} from './src/handlers/handleHtml';
 import {ReduxStore} from './src/redux/configureStore';
 
-const {slugRegex, imageFileRegex, secureHeaders, parseRequest, validUrlCharacters, isRedirectByCountryOk, getBatchRedirectUrl} = Utilities;
+const {
+	slugRegex, 
+	imageFileRegex, 
+	secureHeaders, 
+	parseRequest, 
+	validUrlCharacters, 
+	isRedirectByCountryOk, 
+	getBatchRedirectUrl, 
+	contentTypeIsHtml
+} = Utilities;
 
 addEventListener('fetch', event => {
     event.respondWith(firewal({
@@ -14,7 +23,7 @@ addEventListener('fetch', event => {
 	}));
 });
 
-const firewal = ({request}) => {
+const firewal = async ({request}) => {
 
 	const store = ReduxStore();	
 	const {dispatch} = store;
@@ -22,11 +31,11 @@ const firewal = ({request}) => {
 
 	if(!['GET', 'POST'].includes(method))
 	{
-		resDispatch({dispatch, status: 405});
+		dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED});
 	}
 	else if(!validUrlCharacters(url))
 	{
-		resDispatch({dispatch, status: 400});
+		dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload});
 	}
 	else
 	{
@@ -40,12 +49,10 @@ const firewal = ({request}) => {
 };
 
 const connectContentful = async ({store}) => {
-	
-	const altLang = store.getState().request.data.altLang;
-	
+		
 	const entries = await Contentful.getAllEntries({
 		store, 
-		altLang
+		altLang: store.getState().request.data.altLang
 	});
 	
 	if(entries.length > 0)
@@ -54,7 +61,7 @@ const connectContentful = async ({store}) => {
 	}
 };
 
-const redirects = ({store}) => {
+const redirects = async ({store}) => {
 
 	const {getState} = store;
 	const {headers, hostName, pathName} = getState().request.data;
@@ -107,96 +114,61 @@ const router = async ({store}) => {
 		const zone = pathNameArr.first;
 		const last = pathNameArr.last;
 		
-		if(zone === 'images' && imageFileRegex(pathName))
+		switch(zone)
 		{
-			data = await handleImages({store});	
+			case 'images':
+				data = (imageFileRegex(pathName)) ? await handleImages({store}) : {status: 404};	
+				break;
+			case 'static':
+				data = (zone !== last) ? await handleStaticFiles({store}) : {status: 404};
+				break;
+			case 'sitemap.xml':
+				data = (zone === last) ? await handleSitemap({store}) : {status: 400};
+				break;
+			case 'api':
+				data = (last === 'request-form' && method === 'POST') ? await handleFormRequest({store}) : {status: 403};
+				break;
+			default:
+				data =  (pathNameArr.full.some(slugRegex) || !zone) ? await handleHtml({store}) : {status: 400};
 		}
-		else if(zone === 'static' && zone !== last)
-		{			
-			data = await handleStaticFiles({store});
-		}
-		else if(zone === 'sitemap.xml' && last === 'sitemap.xml')
-		{				
-			data = await handleSitemap({store});			
-		}
-		else if(['images', 'static'].includes(zone))
-		{
-			if(zone === last)
-			{
-				data.status = 403;
-			}
-			else
-			{
-				if(!data.hasOwnProperty('status'))
-				{
-					data.status = 404;
-				}				
-			}
-		}
-		else if(zone === 'api')
-		{
-			if(last === 'request-form' && method === 'POST')
-			{
-				data = await handleFormRequest({store});
-			}
-			else
-			{
-				data.status = 403;
-			}
-		}
-		else
-		{	
-			if(pathNameArr.full.some(slugRegex) || !zone )
-			{
-				data =  await handleHtml({store});				
-			}
-			else
-			{
-				data.status = 400;
-			}
-		}
-			
-		resDispatch({
-			dispatch, 
-			status: data.status || 500, 
-			data
-		});
 		
-		return render({store});			
-	}	
-}
+		if(data)
+		{
+			const payload = data || {};
+			
+			switch(data.status)
+			{
+				case 200:
+					dispatch({type: ActionTypes.RESPONSE_SUCCESS, payload});
+					break;
+				case 301:
+					dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
+					break;
+				case 302:
+					dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
+					break;			
+				case 400:
+					dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload});
+					break;
+				case 403:
+					dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, payload});
+					break;
+				case 404:
+					dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, payload});
+					break;
+				case 405:
+					dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, payload});
+					break;
+				case 500:
+					dispatch({type: ActionTypes.RESPONSE_SERVER, payload});
+					break;
+				default:
+					dispatch({type: ActionTypes.RESPONSE_SERVER});		
+			}
 
-const resDispatch = ({dispatch, status, data}) => {
-	
-	const payload = data || {};
-	
-	switch(status)
-	{
-		case 200:
-			dispatch({type: ActionTypes.RESPONSE_SUCCESS, payload});
-			break;
-		case 301:
-			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
-			break;
-		case 302:
-			dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
-			break;			
-		case 400:
-			dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload});
-			break;
-		case 403:
-			dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, payload});
-			break;
-		case 404:
-			dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, payload});
-			break;
-		case 405:
-			dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, payload});
-			break;
-		case 500:
-			dispatch({type: ActionTypes.RESPONSE_SERVER, payload});
-			break;
-	};	
+			return render({store});	
+		}
+	}	
 }
 
 const render = ({store}) => {
@@ -209,9 +181,7 @@ const render = ({store}) => {
 	}
 	else
 	{		
-		const response = new Response(body, {
-			status
-		});
+		const response = new Response(body, {status});
 				
 		for(let key in headers)
 		{
@@ -223,6 +193,6 @@ const render = ({store}) => {
 			response.headers.set(key, secureHeaders[key])
 		}
 
-		return (Utilities.contentTypeIsHtml({headers})) ? htmlRewriter().transform(response) : response;		
+		return (contentTypeIsHtml({headers})) ? htmlRewriter().transform(response) : response;		
 	}	
 }

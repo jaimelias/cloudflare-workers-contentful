@@ -1,5 +1,5 @@
-import {sendGridSend} from '../utilities/sendGridUtilities';
-import {formFields} from '../utilities/dataUtilities';
+import {sendGridSend} from '../utilities/sendGrid';
+import {formFields} from '../utilities/sharedData';
 
 export const handleFormRequest = async ({store}) => {
 	

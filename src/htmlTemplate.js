@@ -1,4 +1,4 @@
-import * as dataUtilities from './utilities/dataUtilities'
+import * as sharedData from './utilities/sharedData'
 import {FacebookPixel} from './components/facebookPixelComponent'
 import {GoogleAnalytics} from './components/googleAnalyticsComponent';
 import {TopMenu, TopMenuContact} from './components/topMenuComponent';
@@ -13,7 +13,7 @@ export const htmlTemplate = ({slug, is404, store}) => {
 	
 	const {langLabels} = LangConfig;
 	const {getState} = store;
-	const {accommodationTypes} = dataUtilities;
+	const {accommodationTypes} = sharedData;
 	const pages = getState().contentful.data.pages;
 	const {hostName, pathName} = getState().request.data;
 	
@@ -133,7 +133,7 @@ export const htmlTemplate = ({slug, is404, store}) => {
 		is404,
 		pages,
 		thisPageHasForm,
-		dataUtilities,
+		sharedData,
 		currentLanguage
 	});
 	
