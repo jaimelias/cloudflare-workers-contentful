@@ -1,4 +1,12 @@
-export class srcRewriterClass
+export const htmlRewriter = () => {
+	return new HTMLRewriter()
+	.on('img', new srcRewriterClass({
+		attributeName: 'src'
+	}))
+	.on('table', new tableRewriterClass());
+};
+
+class srcRewriterClass
 {
   constructor({attributeName})
   {
@@ -40,19 +48,10 @@ export class srcRewriterClass
   }
 };
 
-export class tableRewriterClass {
+class tableRewriterClass {
 	element(element){
 		element.setAttribute('class', 'table table-bordered table-striped table-sm');
 		element.before('<div class="table-responsive mb-4">', { html: true });
 		element.after('</div>', { html: true });
 	};
-};
-
-export const htmlRewriter = () => {
-	
-	return new HTMLRewriter()
-	.on('img', new srcRewriterClass({
-		attributeName: 'src'
-	}))
-	.on('table', new tableRewriterClass());
 };

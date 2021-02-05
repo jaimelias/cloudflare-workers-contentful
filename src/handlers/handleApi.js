@@ -1,7 +1,30 @@
 import {sendGridSend} from '../utilities/sendGrid';
 import {formFields} from '../utilities/sharedData';
 
-export const handleFormRequest = async ({store}) => {
+
+export const handleApi = async ({store}) =>
+{
+	const {getState, render} = store;
+	const {method, pathNameArr} = getState().request.data;
+	
+	if(method === 'POST' && pathNameArr.last === 'request-form')
+	{
+		const data = await handleFormRequest({store});
+		
+		if(data)
+		{
+			return render.payload(data);
+		}
+		else
+		{
+			return render.payload({status: 500});
+		}
+	}
+	
+	return render.payload({status: 403});
+}		
+
+const handleFormRequest = async ({store}) => {
 	
 	let output = {
 		status: 500

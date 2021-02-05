@@ -1,20 +1,18 @@
-import {handleFormRequest} from './src/handlers/handleApi';
+import {handleApi} from './src/handlers/handleApi';
 import {handleImages} from './src/handlers/handleImages';
-import {htmlRewriter} from './src/utilities/htmlRewriter';
 import {handleStaticFiles} from './src/handlers/handleStatic';
 import {handleSitemap} from './src/handlers/handleSitemap';
 import {handleHtml} from './src/handlers/handleHtml';
 import {ReduxStore} from './src/redux/configureStore';
+import RenderOutput from './src/utilities/render';
 
 const {
 	slugRegex, 
 	imageFileRegex, 
-	secureHeaders, 
 	parseRequest, 
 	validUrlCharacters, 
 	isRedirectByCountryOk, 
-	getBatchRedirectUrl, 
-	contentTypeIsHtml
+	getBatchRedirectUrl
 } = Utilities;
 
 addEventListener('fetch', event => {
@@ -25,17 +23,19 @@ addEventListener('fetch', event => {
 
 const firewal = async ({request}) => {
 
-	const store = ReduxStore();	
+	const configureStore = ReduxStore();
+	const render = new RenderOutput(configureStore);
+	const store = {...configureStore, render};
 	const {dispatch} = store;
 	const {method, url} = request;
 
 	if(!['GET', 'POST'].includes(method))
 	{
-		dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED});
+		return render.payload({status: 405});
 	}
 	else if(!validUrlCharacters(url))
 	{
-		dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload});
+		return render.payload({status: 400});
 	}
 	else
 	{
@@ -80,17 +80,11 @@ const redirects = async ({store}) => {
 
 	if(redirectByCountryOk)
 	{
-		dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {
-			status: 302,
-			body: redirectCountryCodesUrl
-		}});
+		return render.payload({status: 302, body: redirectCountryCodesUrl});
 	}
 	if(batchRedirectUrl)
 	{
-		dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload: {
-			status: 301,
-			body: batchRedirectUrl
-		}});
+		return render.payload({status: 301, body: batchRedirectUrl});
 	}
 
 	return router({store});
@@ -98,98 +92,33 @@ const redirects = async ({store}) => {
 
 const router = async ({store}) => {
 
-	const {dispatch, getState} = store;
+	const {dispatch, getState, render} = store;
 	
-	if(!getState().response.isDefault)
+	let data = {};
+	const {method, pathName, pathNameArr} = getState().request.data;
+	const zone = pathNameArr.first;
+	const last = pathNameArr.last;
+	
+	switch(zone)
 	{
-		return render({store});
+		case 'images':
+			data = (imageFileRegex(pathName)) ? await handleImages({store}) : {status: 404};	
+			break;
+		case 'static':
+			data = (zone !== last) ? await handleStaticFiles({store}) : {status: 404};
+			break;
+		case 'sitemap.xml':
+			data = (zone === last) ? await handleSitemap({store}) : {status: 400};
+			break;
+		case 'api':
+			return await handleApi({store});
+			break;
+		default:
+			data =  (pathNameArr.full.some(slugRegex) || !zone) ? await handleHtml({store}) : {status: 400};
 	}
-	else
-	{
-		let data = {};
-		const {method, pathName, pathNameArr} = getState().request.data;
-		const zone = pathNameArr.first;
-		const last = pathNameArr.last;
-		
-		switch(zone)
-		{
-			case 'images':
-				data = (imageFileRegex(pathName)) ? await handleImages({store}) : {status: 404};	
-				break;
-			case 'static':
-				data = (zone !== last) ? await handleStaticFiles({store}) : {status: 404};
-				break;
-			case 'sitemap.xml':
-				data = (zone === last) ? await handleSitemap({store}) : {status: 400};
-				break;
-			case 'api':
-				data = (last === 'request-form' && method === 'POST') ? await handleFormRequest({store}) : {status: 403};
-				break;
-			default:
-				data =  (pathNameArr.full.some(slugRegex) || !zone) ? await handleHtml({store}) : {status: 400};
-		}
-		
-		if(data)
-		{
-			const payload = data || {};
 			
-			switch(data.status)
-			{
-				case 200:
-					dispatch({type: ActionTypes.RESPONSE_SUCCESS, payload});
-					break;
-				case 301:
-					dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
-					break;
-				case 302:
-					dispatch({type: ActionTypes.RESPONSE_REDIRECT, payload});
-					break;			
-				case 400:
-					dispatch({type: ActionTypes.RESPONSE_BAD_REQUEST, payload});
-					break;
-				case 403:
-					dispatch({type: ActionTypes.RESPONSE_FORBIDDEN, payload});
-					break;
-				case 404:
-					dispatch({type: ActionTypes.RESPONSE_NOT_FOUND, payload});
-					break;
-				case 405:
-					dispatch({type: ActionTypes.RESPONSE_METHOD_NOT_ALLOWED, payload});
-					break;
-				case 500:
-					dispatch({type: ActionTypes.RESPONSE_SERVER, payload});
-					break;
-				default:
-					dispatch({type: ActionTypes.RESPONSE_SERVER});		
-			}
-
-			return render({store});	
-		}
-	}	
-}
-
-const render = ({store}) => {
-	
-	const {body, status, headers} = store.getState().response;
-		
-	if(status === 301 || status === 302)
+	if(data)
 	{
-		return Response.redirect(body, status);
+		return render.payload(data);
 	}
-	else
-	{		
-		const response = new Response(body, {status});
-				
-		for(let key in headers)
-		{
-			response.headers.set(key, headers[key])
-		}
-		
-		for(let key in secureHeaders)
-		{
-			response.headers.set(key, secureHeaders[key])
-		}
-
-		return (contentTypeIsHtml({headers})) ? htmlRewriter().transform(response) : response;		
-	}	
 }
