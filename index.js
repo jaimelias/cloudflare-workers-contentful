@@ -50,10 +50,7 @@ const firewal = async ({request}) => {
 
 const connectContentful = async ({store}) => {
 		
-	const entries = await Contentful.getAllEntries({
-		store, 
-		altLang: store.getState().request.data.altLang
-	});
+	const entries = await Contentful.getAllEntries({store});
 	
 	if(entries.length > 0)
 	{
