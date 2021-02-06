@@ -72,15 +72,7 @@ export const Media = (obj) => {
 				}
 				
 				let params = new URLSearchParams;
-				
-				if(obj.contentType)
-				{
-					params.set('contentType', obj.contentType);
-				}
-				if(obj.websiteId)
-				{
-					params.set('websiteId', obj.websiteId);
-				}
+
 				if(width > 730)
 				{
 					params.set('width', 730);
@@ -395,7 +387,6 @@ export const validUrlCharacters = (str) => /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){
 
 export const parseRequest = (request) => {
 	
-	const {method, headers, body} = request;
 	let requestUrl = encodeURI(decodeURI(request.url));
 	const url = new URL(requestUrl);
 	const {pathname: pathName, searchParams} = url;	
