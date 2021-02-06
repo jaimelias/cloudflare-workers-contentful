@@ -1,61 +1,71 @@
-const {stringToHash, getFallBackLang} = Utilities;
+const {stringToHash, getFallBackLang, imageFileRegex} = Utilities;
 
-export const handleImages = async ({store}) =>  {
+export const handleImages = async ({store}) => {
 	
-	const {getAllEntries} = Contentful;
-	const {pathName, searchParams} = store.getState().request.data;
-	const pathSplit = pathName.split('/').filter(i => i);
-	const assetCdnUrl = 'images.ctfassets.net';
-	let output = {status: 404};
+	const {getState, render} = store;
+	const {pathName, searchParams, method, pathNameArr} = getState().request.data;
 		
-	if(Array.isArray(pathSplit))
+	if(method === 'GET' && imageFileRegex(pathName))
 	{
-		if(pathSplit[0] === 'images')
+		if(searchParams.has('cdnUrl'))
 		{
-			if (searchParams.has('cdnUrl'))
-			{
-				if(searchParams.get('cdnUrl') === assetCdnUrl)
-				{
-					console.log(pathSplit);
-					
-					let filePath = pathSplit.filter((r, i) => i > 0).join('/');
-
-					output = await RenderImage({
-						imageUrl: `http://${assetCdnUrl}/${filePath}`, 
-						store
-					});
-				}
-			}
-			
-			if(pathSplit.length === 2)
-			{
-				let assets = [];
-				const entries = await getAllEntries({store});	
-				
-				if(entries)
-				{
-					entries.forEach(e => {assets = [...assets, ...e.assets]});
-					const image = getImageByName({assets, fileName: pathSplit[1]});
-					
-					if(image)
-					{
-						output = await RenderImage({
-							imageUrl: `http:${image.src}`, 
-							store
-						});
-					}					
-				}
-			}	
+			return render.payload(await getImageByName({store}));
+		}
+		else if(pathNameArr.full.length === 2)
+		{
+			return render.payload(await getImageById({store}));
 		}
 	}
+	
+	return render.payload({status: 403});
+};
+
+const getImageByName = async ({store}) =>  {
+	
+	
+	const {searchParams, pathNameArr} = store.getState().request.data;
+	const assetCdnUrl = 'images.ctfassets.net';
 		
-	return output;
+	if(searchParams.has('cdnUrl'))
+	{
+		if(searchParams.get('cdnUrl') === assetCdnUrl)
+		{			
+			let filePath = pathNameArr.full.filter((r, i) => i > 0).join('/');
+
+			return await RenderImage({
+				imageUrl: `http://${assetCdnUrl}/${filePath}`, 
+				store
+			});
+		}
+		else
+		{
+			return {status: 400};
+		}
+	}
+
+	return {status: 404};
+};
+
+const getImageById = async ({store}) => {
+	
+	if(store.getState().request.data.pathNameArr.full.length === 2)
+	{
+		const image = findImageAsset({store});
+		
+		if(image)
+		{
+			return await RenderImage({
+				imageUrl: `http:${image.src}`, 
+				store
+			});
+		}
+	}
+	
+	return {status: 404};
 };
 
 const RenderImage = async ({imageUrl, store}) => {
-	let output = {
-		status: 500
-	};
+
 	const {pathName, hostName, searchParams} = store.getState().request.data;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';	
@@ -78,7 +88,7 @@ const RenderImage = async ({imageUrl, store}) => {
 
 	if (response.ok)
 	{
-		output = {
+		return {
 			body: response.body,
 			headers: {
 				'Cache-Control': `max-age=${thirtyDaysInSeconds}`,
@@ -89,26 +99,26 @@ const RenderImage = async ({imageUrl, store}) => {
 	}
 	else
 	{
-		output = {
+		return {
 			status: response.status,
 			body: response.statusText
 		}
 	}
-	
-	return output;
 };
 
 
-const getImageByName = ({assets, fileName}) => {
+const findImageAsset = ({store}) => {
 	
 	let image = '';
-		
-	assets.forEach(a => {					
+	const {getState} = store;
+	const {pathNameArr} = getState().request.data;
+
+	getState().contentful.assets.forEach(a => {					
 		const fields = a.fields;
 		let title = getFallBackLang(fields.title);
 		let file = getFallBackLang(fields.file);
 		
-		if(decodeURI(file.fileName) === decodeURI(fileName))
+		if(decodeURI(file.fileName) === decodeURI(pathNameArr.last))
 		{									
 			image = {
 				fileName: file.fileName,
@@ -121,5 +131,12 @@ const getImageByName = ({assets, fileName}) => {
 		}
 	});
 
-	return image;
+	if(image)
+	{
+		return image;
+	}
+	else
+	{
+		throw new Error('image asset ');
+	}
 };

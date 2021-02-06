@@ -1,43 +1,55 @@
 export const handleStaticFiles = async ({store}) => {
 	
+	const {getState, render} = store;
+	const {method, pathNameArr} = getState().request.data;
+	
+	if(pathNameArr.first !== pathNameArr.last && method === 'GET')
+	{
+		return render.payload(await parseStaticFiles({store}));
+	}
+	
+	return render.payload({status: 403});
+};
+
+const parseStaticFiles = async ({store}) => {
+	
 	const {searchParams, hostName, pathNameArr} = store.getState().request.data;
 	const fileName = pathNameArr.last;
 	const thirtyDaysInSeconds = (hostName === CONTENTFUL_DOMAIN) ? 60*60*24*30 : 0;
 
-	let output = {
-		status: 404
-	};
-	
-	if(fileName === 'concat')
+	if(fileName === 'concat' && searchParams.has('files'))
 	{		
-		if(searchParams.has('files'))
+		const filesSplit = searchParams.get('files').split(',');
+		
+		if(Array.isArray(filesSplit))
 		{
-			const filesSplit = searchParams.get('files').split(',');
-			
-			if(Array.isArray(filesSplit))
-			{
-				const mimeType = (filesSplit.every(i => getExtension(i) === getExtension(filesSplit[0]))) ? getExtension(filesSplit[0]) : false;
+			const mimeType = (filesSplit.every(i => getExtension(i) === getExtension(filesSplit[0]))) ? getExtension(filesSplit[0]) : false;
 
-				if(mimeType)
+			if(mimeType)
+			{
+				const promises = filesSplit.map(async (row) => {
+					return await STATIC.get(row);
+				});
+				
+				let concat = await Promise.all(promises);
+								
+				if(Array.isArray(concat))
 				{
-					const promises = filesSplit.map(async (row) => {
-						return await STATIC.get(row);
-					});
-					
-					let concat = await Promise.all(promises);
-									
-					if(Array.isArray(concat))
-					{
-						concat = concat.join('\n');
-						output.body = concat;
-						output.status = 200;
-						output.headers = {
-							'content-type': mimeType
-						};
-					}					
-				}
+					return {
+						body: concat.join('\n'),
+						status: 200,
+						headers: {
+							'content-type': mimeType,
+							'Cache-Control': `max-age=${thirtyDaysInSeconds}`
+						}
+					};
+				}					
 			}
-		}	
+			
+			return {status: 400};
+		}
+		
+		return {status: 404};
 	}
 	else
 	{
@@ -45,34 +57,30 @@ export const handleStaticFiles = async ({store}) => {
 		
 		if(file)
 		{
-			if(file !== '')
-			{				
-				const mimeType = getExtension(fileName);
+			const mimeType = getExtension(fileName);
+			
+			if(mimeType)
+			{
+				const faviconInitial = file => file.replace('INITIAL', hostName.substring(0, 1).toUpperCase());
 				
-				if(mimeType)
-				{
-					const faviconInitial = file => file.replace('INITIAL', hostName.substring(0, 1).toUpperCase());
-					
-					output.body = (pathNameArr.last === 'favicon.svg') ? faviconInitial(file) : file;
-					output.status = 200;
-					output.headers = {
-						'content-type': mimeType
-					};
-				}
+				return {
+					body: (pathNameArr.last === 'favicon.svg') ? faviconInitial(file) : file,
+					status: 200,
+					headers: {
+						'content-type': mimeType,
+						'Cache-Control': `max-age=${thirtyDaysInSeconds}`
+					}
+				};
 			}
+			
+			return {status: 400};
 		}
+		
+		return {status: 404};
 	}
-	
-	if(output.status === 200)
-	{
-		output.headers['Cache-Control'] = `max-age=${thirtyDaysInSeconds}`;
-	}
-
-
-	return output;
 };
 
-export const getExtension = (file) => {
+const getExtension = (file) => {
 	
 	let mimeType = false;
 	const types = {

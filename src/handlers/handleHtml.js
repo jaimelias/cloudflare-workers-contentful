@@ -1,9 +1,22 @@
 import {htmlTemplate} from '../htmlTemplate';
 
 export const handleHtml = async ({store}) => {
+	const {getState, render} = store;
+	
+	const {method, pathNameArr} = getState().request.data;
+	
+	if(method === 'GET' && (pathNameArr.full.some(Utilities.slugRegex) || !pathNameArr.first))
+	{
+		return render.payload(await parseHtml({store}));
+	}
+	
+	return render.payload({status: 400});
+};
+
+const parseHtml = async ({store}) => {
 	
 	const {getState} = store;
-	const {hostName, pathName} = getState().request.data;
+	const {pathName} = getState().request.data;
 	const pages = getState().contentful.data.pages;
 	const websiteData = getState().contentful.data.websites[0];
 	const {currentLanguage} = websiteData;

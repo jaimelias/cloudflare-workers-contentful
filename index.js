@@ -7,8 +7,6 @@ import {ReduxStore} from './src/redux/configureStore';
 import RenderOutput from './src/utilities/render';
 
 const {
-	slugRegex, 
-	imageFileRegex, 
 	parseRequest, 
 	validUrlCharacters, 
 	isRedirectByCountryOk, 
@@ -91,34 +89,18 @@ const redirects = async ({store}) => {
 };
 
 const router = async ({store}) => {
-
-	const {dispatch, getState, render} = store;
-	
-	let data = {};
-	const {method, pathName, pathNameArr} = getState().request.data;
-	const zone = pathNameArr.first;
-	const last = pathNameArr.last;
-	
-	switch(zone)
+		
+	switch(store.getState().request.data.pathNameArr.first)
 	{
 		case 'images':
-			data = (imageFileRegex(pathName)) ? await handleImages({store}) : {status: 404};	
-			break;
+			return await handleImages({store});	
 		case 'static':
-			data = (zone !== last) ? await handleStaticFiles({store}) : {status: 404};
-			break;
+			return await handleStaticFiles({store});
 		case 'sitemap.xml':
-			data = (zone === last) ? await handleSitemap({store}) : {status: 400};
-			break;
+			return await handleSitemap({store});
 		case 'api':
 			return await handleApi({store});
-			break;
 		default:
-			data =  (pathNameArr.full.some(slugRegex) || !zone) ? await handleHtml({store}) : {status: 400};
-	}
-			
-	if(data)
-	{
-		return render.payload(data);
+			return await handleHtml({store});
 	}
 }

@@ -9,16 +9,7 @@ export const handleApi = async ({store}) =>
 	
 	if(method === 'POST' && pathNameArr.last === 'request-form')
 	{
-		const data = await handleFormRequest({store});
-		
-		if(data)
-		{
-			return render.payload(data);
-		}
-		else
-		{
-			return render.payload({status: 500});
-		}
+		return render.payload(await handleFormRequest({store}));
 	}
 	
 	return render.payload({status: 403});

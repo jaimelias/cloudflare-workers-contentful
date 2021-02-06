@@ -1,4 +1,16 @@
 export const handleSitemap = async ({store}) => {
+	const {getState, render} = store;	
+	const {pathNameArr, method} = getState().request.data;	
+	
+	if(pathNameArr.first === pathNameArr.last && method === 'GET')
+	{
+		return render.payload(await SitemapParse({store}));
+	}
+	
+	return render.payload({status: 400});
+};
+
+const SitemapParse = async ({store}) => {
 	
 	let urls = [];
 	const langPaths = {};
@@ -80,17 +92,19 @@ export const handleSitemap = async ({store}) => {
 	
 	if(urls.length)
 	{
-		output.status = 200;
-		output.body = RenderSitemap({urls});
-		output.headers = {
-			'content-type': 'application/xml'
-		};
+		return {
+			status: 200,
+			body: SitemapRender({urls}),
+			headers: {
+				'content-type': 'application/xml'
+			}
+		}
 	}
 	
-	return output;
+	return {status: 500};
 };
 
-export const RenderSitemap = ({urls}) => {
+const SitemapRender = ({urls}) => {
 		
 	const urlSet = urls.map(row => {
 		let item = [`\n\t\t<loc>${row.loc}</loc>`];
@@ -110,4 +124,4 @@ export const RenderSitemap = ({urls}) => {
 	return SiteMapLayout({content: urlSet});
 };
 
-export const SiteMapLayout = ({content}) => (`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${content}\n</urlset>`);
+const SiteMapLayout = ({content}) => (`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${content}\n</urlset>`);
