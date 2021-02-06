@@ -1,11 +1,11 @@
-export const sendGridSend = async ({payload, sendGrid, website}) => {
+export const sendGridSend = async ({payload, crm, website}) => {
 
 	let output = {
 		status: 500
 	};
 	
 	const {whatsappNumber, siteName} = website;
-	const {email, cc, subject, message, name} = sendGrid;
+	const {email, cc, subject, message, name} = crm;
 	const htmlMessage = (typeof message === 'string') ? marked(message) : '';
 		
 	const template = emailTemplate({
@@ -39,7 +39,7 @@ export const sendGridSend = async ({payload, sendGrid, website}) => {
 		method: 'post',
 		headers: {
 			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${sendGrid.webApiKey}`
+			'Authorization': `Bearer ${crm.SendGridWebApiKey}`
 		},
 		body: JSON.stringify(emailPayload)
 	});
@@ -50,7 +50,7 @@ export const sendGridSend = async ({payload, sendGrid, website}) => {
 	}
 	else
 	{
-		output.status = sendGrid.status;
+		output.status = crm.status;
 	}
 	
 	output.body = sendgrid.statusText;

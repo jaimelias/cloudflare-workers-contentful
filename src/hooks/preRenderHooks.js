@@ -1,6 +1,8 @@
-export const enqueueHook = ({store, slug, type, is404, reCaptchaSiteKey, accommodationTypes, currentLanguage, labels}) => {
+export const enqueueHook = ({store, slug, is404, accommodationTypes, labels}) => {
 	
-	const {dispatch} = store;
+	const {dispatch, getState} = store;
+	const {type, currentLanguage, crm} = getState().contentful.data.websites[0]
+	const reCaptchaSiteKey = crm.reCaptchaSiteKey;
 	
 	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: bootstrapScripts}});
 	

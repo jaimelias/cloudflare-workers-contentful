@@ -50,16 +50,14 @@ const getEndPoint = ({contentType, KV, websiteId}) => {
 	
 	let endpoint = `${url}/spaces/${spaceId}/environments/${envId}/entries?access_token=${token}&content_type=${contentType}&include=3&locale=*`;
 	
-	switch(contentType)
+	if(contentType === 'websites')
 	{
-		case 'websites':
-			endpoint += `&fields.domainName=${CONTENTFUL_DOMAIN}&limit=1`;
-			break;
-		case 'pages':
-			endpoint += `&links_to_entry=${websiteId}`;
-			break;
+		endpoint += `&fields.domainName=${CONTENTFUL_DOMAIN}&limit=1`;
 	}
-
+	else
+	{
+		endpoint += `&links_to_entry=${websiteId}`;
+	}
 		
 	return endpoint;
 };

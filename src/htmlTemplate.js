@@ -113,13 +113,10 @@ export const htmlTemplate = ({slug, is404, store}) => {
 	});
 		
 	const RenderHooks = enqueueHook({
-		type,
 		slug,
 		store,
 		is404,
-		reCaptchaSiteKey,
 		accommodationTypes,
-		currentLanguage,
 		labels
 	});
 	

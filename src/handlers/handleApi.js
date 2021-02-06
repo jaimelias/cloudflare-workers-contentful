@@ -1,4 +1,4 @@
-import {sendGridSend} from '../utilities/sendGrid';
+import {sendGridSend} from '../utilities/crm';
 import {formFields} from '../utilities/sharedData';
 
 
@@ -100,9 +100,9 @@ const handleFormRequest = async ({store}) => {
 			{
 				
 				const website = getState().contentful.data.websites[0];
-				const sendGrid = website.sendGrid;
+				const crm = website.crm;
 				
-				if(sendGrid)
+				if(crm)
 				{					
 					const outputPayload = Object.keys(payload)
 					.filter(i => formFields[i])
@@ -113,7 +113,7 @@ const handleFormRequest = async ({store}) => {
 					
 					output = await sendGridSend({
 						payload: outputPayload,
-						sendGrid,
+						crm,
 						website
 					});				
 				}
