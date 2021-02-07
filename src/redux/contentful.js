@@ -2,8 +2,7 @@ export const contentful = (state = {
 	data: {},
 	assets: [],
     status: 500,
-	statusText: 'internal server error',
-	isDefault: true
+	statusText: 'internal server error'
 }, action) => {
 	
 	const {type, payload} = action;

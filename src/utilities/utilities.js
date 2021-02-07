@@ -336,7 +336,6 @@ export const parseRequest = (request) => {
 	const url = new URL(requestUrl);
 	const {pathname: pathName, searchParams, hostname: hostName} = url;	
 	const pathNameArr = pathNameToArr(pathName);
-	
 	const altLang = langList.find(i => i === pathNameArr.first) || false;
 	
 	return {

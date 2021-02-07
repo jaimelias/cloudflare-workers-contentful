@@ -289,24 +289,28 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 
 export const getAllEntries = async ({store}) => {
 
-	let promise = [];
 	let entryArgs = {
 		store,
 		websiteId: ''
 	};
 	
-	let website = await getEntries({...entryArgs, contentType: 'websites'});
-	
-	if(website.status === 200)
-	{
-		promise.push(website);
-		
-		validContentTypes
-		.filter(i => i !== 'websites')
-		.forEach(contentType => {
-			promise.push(getEntries({...entryArgs, contentType, websiteId: website.data[0].id}));
-		});		
-	}
+	return getEntries({...entryArgs, 
+		contentType: 'websites'
+	})
+	.then(async (website) => {
 
-	return await Promise.all(promise);
+		const entries = validContentTypes
+		.filter(i => i !== 'websites')
+		.map(contentType => getEntries({
+			...entryArgs, 
+			contentType,
+			 websiteId: website.data[0].id
+		}));
+
+		return Promise.all([website, ...entries])
+		.then(resp => resp)
+		.catch(err => store.render.payload({status: 500, body: err.message}));
+
+	})
+	.catch(err => store.render.payload({status: 500, body: err.message}));
 };

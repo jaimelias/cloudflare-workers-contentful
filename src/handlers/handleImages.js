@@ -66,15 +66,16 @@ const getImageById = async ({store}) => {
 
 const RenderImage = async ({imageUrl, store}) => {
 
-	const {pathName, searchParams} = store.getState().request.data;
+	const {pathName, searchParams, headers} = store.getState().request.data;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';	
 	const isSvg = (pathName.includes('.svg')) ? true : false;
 	const thirtyDaysInSeconds = (ENVIRONMENT === 'production') ? 60*60*24*30 : 0;
 	const hash = await stringToHash({text: `${pathName}?width=${width}`, algorithm: 'SHA-256'});
 	imageUrl = (isSvg) ? imageUrl : `${imageUrl}?fm=webp${widthParam}`;
+	const imageRequest = new Request(decodeURI(imageUrl), {headers});
 	
-	let response = await fetch(decodeURI(imageUrl), {
+	let response = await fetch(imageRequest, {
 		cf: {
 			cacheTtlBystatus: {
 				'200-299': thirtyDaysInSeconds, 

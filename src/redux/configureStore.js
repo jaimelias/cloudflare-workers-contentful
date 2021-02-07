@@ -7,6 +7,14 @@ import { enqueue } from './enqueue';
 import { contentful } from './contentful';
 
 export const ReduxStore = () => {
+
+    let middleware = [thunk];
+
+    if(ENVIRONMENT === 'dev')
+    {
+        middleware.push(logger);
+    }
+
     return createStore(
  
         combineReducers({
@@ -15,6 +23,6 @@ export const ReduxStore = () => {
 			enqueue,
 			contentful
         }),
-        applyMiddleware(thunk, logger)
+        applyMiddleware(...middleware)
     );
 };

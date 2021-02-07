@@ -7,10 +7,6 @@ import {ReduxStore} from './src/redux/configureStore';
 import RenderOutput from './src/utilities/render';
 import Firewall from './src/utilities/firewall';
 
-const {
-	parseRequest,
-} = Utilities;
-
 addEventListener('fetch', event => {
     event.respondWith(firewallInit({
 		request: event.request
@@ -29,26 +25,16 @@ const firewallInit = async ({request}) => {
 	{
 		return render.payload(firewall);
 	}
-	else
-	{
-		store.dispatch({
-			type: ActionTypes.REQUEST_SUCCESS, 
-			payload: {request, data: parseRequest(request)
-		}});		
-	}
+
+	store.dispatch({
+		type: ActionTypes.REQUEST_SUCCESS, 
+		payload: {request, data: Utilities.parseRequest(request)
+	}});
 	
 	return connectContentful({store});
 };
 
-const connectContentful = async ({store}) => {
-		
-	const entries = await Contentful.getAllEntries({store});
-	
-	if(entries.length > 0)
-	{
-		return firewallRules({store});
-	}
-};
+const connectContentful = async ({store}) => Contentful.getAllEntries({store}).then(() =>  firewallRules({store}));
 
 const firewallRules = async ({store}) => {
 
@@ -63,18 +49,26 @@ const firewallRules = async ({store}) => {
 };
 
 const router = async ({store}) => {
-		
-	switch(store.getState().request.data.pathNameArr.first)
+	
+	const {getState, render} = store;
+
+	if(getState().request.hasOwnProperty('data'))
 	{
-		case 'images':
-			return await handleImages({store});	
-		case 'static':
-			return await handleStaticFiles({store});
-		case 'sitemap.xml':
-			return await handleSitemap({store});
-		case 'api':
-			return await handleApi({store});
-		default:
-			return await handleHtml({store});
+		switch(getState().request.data.pathNameArr.first)
+		{
+			case 'images':
+				return await handleImages({store});	
+			case 'static':
+				return await handleStaticFiles({store});
+			case 'sitemap.xml':
+				return await handleSitemap({store});
+			case 'api':
+				return await handleApi({store});
+			default:
+				return await handleHtml({store});
+		}
 	}
+
+	return render.payload({status: 500});	
+
 }
