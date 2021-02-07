@@ -23,7 +23,6 @@ const firewallInit = async ({request}) => {
 	const configureStore = ReduxStore();
 	const render = new RenderOutput(configureStore);
 	const store = {...configureStore, render};
-	const {dispatch} = store;
 	const firewall = new Firewall(store).init(request);
 
 	if(firewall.status !== 200)
@@ -32,7 +31,7 @@ const firewallInit = async ({request}) => {
 	}
 	else
 	{
-		dispatch({
+		store.dispatch({
 			type: ActionTypes.REQUEST_SUCCESS, 
 			payload: {request, data: parseRequest(request)
 		}});		

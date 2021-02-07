@@ -66,7 +66,7 @@ const getImageById = async ({store}) => {
 
 const RenderImage = async ({imageUrl, store}) => {
 
-	const {pathName, hostName, searchParams} = store.getState().request.data;
+	const {pathName, searchParams} = store.getState().request.data;
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';	
 	const isSvg = (pathName.includes('.svg')) ? true : false;
