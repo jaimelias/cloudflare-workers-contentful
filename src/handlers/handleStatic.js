@@ -15,7 +15,7 @@ const parseStaticFiles = async ({store}) => {
 	
 	const {searchParams, hostName, pathNameArr} = store.getState().request.data;
 	const fileName = pathNameArr.last;
-	const thirtyDaysInSeconds = (hostName === CONTENTFUL_DOMAIN) ? 60*60*24*30 : 0;
+	const thirtyDaysInSeconds = (ENVIRONMENT === 'production') ? 60*60*24*30 : 0;
 
 	if(fileName === 'concat' && searchParams.has('files'))
 	{		

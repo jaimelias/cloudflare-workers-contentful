@@ -167,41 +167,7 @@ export const getDescription = ({slug, description, pages}) => {
 };
 
 
-export const getBatchRedirectUrl = ({pathName, batchRedirect, siteUrl}) => {
-	let output = '';
-	const rows = (batchRedirect) ? batchRedirect.split('\n') : false;
-	const cols = (rows) ? rows.map(row => row.split(':')) : false;
-	const filter = (cols) ? cols.filter(i => {
-		
-		if(Array.isArray(i))
-		{
-			if(i.length === 2)
-			{
-				if(typeof i[0] === 'string' && typeof i[1] === 'string')
-				{
-					return i;
-				}								
-			}
-		}
-		
-	}): false;
-	
-	const find = (filter) ? filter.find(i => {
-		const item = '/' + i[0];
-		
-		if(item === pathName)
-		{
-			return i;
-		}
-	}) : false;
-	
-	if(find)
-	{
-		output = new URL(find[1], siteUrl).href;
-	}
-	
-	return output;
-};
+
 
 export const slugRegex = (value) => {
 	const regex = /^[\w]+(?:-[\w]+)*$/igm;		
@@ -362,35 +328,13 @@ export const getFallBackLang = obj =>  {
 	return output;
 };
 
-export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectIp, redirectCountryCodes}) => {
-	
-	let output = false;
-			
-	if(CONTENTFUL_DOMAIN === hostName)
-	{
-		const ip = headers.get('CF-Connecting-IP');
-		const country = headers.get('cf-ipcountry');
-		
-		if(Array.isArray(bypassCountryRedirectIp) && Array.isArray(redirectCountryCodes))
-		{
-			if(!bypassCountryRedirectIp.includes(ip) && redirectCountryCodes.includes(country))
-			{
-				output = true;
-			}
-		}
-	}
-	
-	return output;
-};
-
 export const validUrlCharacters = (str) => /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g.test(str);
 
 export const parseRequest = (request) => {
 	
 	let requestUrl = encodeURI(decodeURI(request.url));
 	const url = new URL(requestUrl);
-	const {pathname: pathName, searchParams} = url;	
-	const hostName = (url.hostname === 'example.com') ? CONTENTFUL_DOMAIN : url.hostname;
+	const {pathname: pathName, searchParams, hostname: hostName} = url;	
 	const pathNameArr = pathNameToArr(pathName);
 	
 	const altLang = langList.find(i => i === pathNameArr.first) || false;

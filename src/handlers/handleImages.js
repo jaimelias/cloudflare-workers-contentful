@@ -70,7 +70,7 @@ const RenderImage = async ({imageUrl, store}) => {
 	const width = (searchParams.has('width')) ? searchParams.get('width') : 0;
 	const widthParam = (width) ? `&w=${width}` : '';	
 	const isSvg = (pathName.includes('.svg')) ? true : false;
-	const thirtyDaysInSeconds = (hostName === CONTENTFUL_DOMAIN) ? 60*60*24*30 : 0;
+	const thirtyDaysInSeconds = (ENVIRONMENT === 'production') ? 60*60*24*30 : 0;
 	const hash = await stringToHash({text: `${pathName}?width=${width}`, algorithm: 'SHA-256'});
 	imageUrl = (isSvg) ? imageUrl : `${imageUrl}?fm=webp${widthParam}`;
 	

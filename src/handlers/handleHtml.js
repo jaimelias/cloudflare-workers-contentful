@@ -27,7 +27,7 @@ const parseHtml = async ({store}) => {
 		slug,
 		pages
 	});
-	
+
 	return {
 		status: (pageNotFound) ? 404 : 200,
 		headers: {
