@@ -23,19 +23,12 @@ export default class Firewall {
 	{
 		const {getState} = this.store;
 		const {headers, hostName, pathName} = getState().request.data;
-		const {
-			siteUrl,
-			firewall,
-			firewall: {
-				redirectCountryCodes,
-				redirectCountryCodesUrl,
-				bypassCountryRedirectIp,
-				batchRedirect 
-			}
-		} = getState().contentful.data.websites[0];
+		const {siteUrl, firewall} = getState().contentful.data.websites[0];
 	
 		if(typeof firewall === 'object')
 		{
+			const {redirectCountryCodes, redirectCountryCodesUrl, bypassCountryRedirectIp, batchRedirect} = firewall;
+			
 			const redirectByCountryOk = isRedirectByCountryOk({
 				headers,
 				hostName, 
