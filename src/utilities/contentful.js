@@ -31,7 +31,6 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 			{
 				dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, payload: {...data}});
 			}
-			
 		}
 		else
 		{
@@ -173,113 +172,109 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	{
 		if(data.hasOwnProperty('items') && data.hasOwnProperty('includes'))
 		{
-			const items = data.items;
-			const includes = data.includes;
-
-			if(includes.hasOwnProperty('Asset') && includes.hasOwnProperty('Entry'))
-			{
-				const assets = includes.Asset;
-				const entries = includes.Entry;
-				output.assets = assets;
+			const items = data.items || [];
+			const includes = data.includes || {};
+			const assets = includes.Asset || [];
+			const entries = includes.Entry || [];
+			output.assets = assets;
+							
+			items.forEach(entry => {
+				let fields = entry.fields;
+				let defaultLanguage =  '';
+				let entryOutput = {
+					id: entry.sys.id
+				};		
 				
-				items.forEach(entry => {
-					let fields = entry.fields;
-					let defaultLanguage =  '';
-					let entryOutput = {
-						id: entry.sys.id
-					};		
-					
-					if(fields.hasOwnProperty('defaultLanguage'))
+				if(fields.hasOwnProperty('defaultLanguage'))
+				{
+					defaultLanguage = Object.values(fields.defaultLanguage)[0];
+				}
+				if(fields.hasOwnProperty('websites'))
+				{
+					for(let w in fields.websites)
 					{
-						defaultLanguage = Object.values(fields.defaultLanguage)[0];
-					}
-					if(fields.hasOwnProperty('websites'))
-					{
-						for(let w in fields.websites)
-						{
-							fields.websites[w].forEach(r => {
+						fields.websites[w].forEach(r => {
 
-								const findDefLang = entries.find(i => i.sys.id === r.sys.id);
-								
-								if(findDefLang)
-								{
-									defaultLanguage = getFallBackLang(findDefLang.fields.defaultLanguage);
-								}	
-							});
-						}
+							const findDefLang = entries.find(i => i.sys.id === r.sys.id);
+							
+							if(findDefLang)
+							{
+								defaultLanguage = getFallBackLang(findDefLang.fields.defaultLanguage);
+							}	
+						});
 					}
-					
-					for(let key in fields)
+				}
+				
+				for(let key in fields)
+				{
+					if(key !== 'websites')
 					{
-						if(key !== 'websites')
+						const currentLanguage = altLang || defaultLanguage;
+						let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage] || getFallBackLang(fields[key]);
+						
+						const fieldArg = {assets, entries, currentLanguage, defaultLanguage, contentType, websiteId};
+						
+						if(typeof thisField === 'object')
 						{
-							const currentLanguage = altLang || defaultLanguage;
-							let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage] || getFallBackLang(fields[key]);
-							
-							const fieldArg = {assets, entries, currentLanguage, defaultLanguage, contentType, websiteId};
-							
-							if(typeof thisField === 'object')
+							if(isLinkTypeEntry(thisField) || isLinkTypeAsset(thisField))
 							{
-								if(isLinkTypeEntry(thisField) || isLinkTypeAsset(thisField))
-								{
-									thisField = linkField({
-										...fieldArg,
-										field: thisField
-									});											
-								}							
-							}
-							if(Array.isArray(thisField))
+								thisField = linkField({
+									...fieldArg,
+									field: thisField
+								});											
+							}							
+						}
+						if(Array.isArray(thisField))
+						{
+							if(thisField.every(isLinkTypeEntry) || thisField.every(isLinkTypeAsset))
 							{
-								if(thisField.every(isLinkTypeEntry) || thisField.every(isLinkTypeAsset))
-								{
-									thisField = thisField.map(item => {
-										if(typeof item === 'object')
+								thisField = thisField.map(item => {
+									if(typeof item === 'object')
+									{
+										if(item.hasOwnProperty('sys'))
 										{
-											if(item.hasOwnProperty('sys'))
+											if(item.sys.type === 'Link')
 											{
-												if(item.sys.type === 'Link')
-												{
-													item = linkField({
-														...fieldArg,
-														field: item
-													});	
-												}
+												item = linkField({
+													...fieldArg,
+													field: item
+												});	
 											}
 										}
-										
-										return item;
-									});									
-								}
+									}
+									
+									return item;
+								});									
 							}
-							
-							entryOutput[key] = thisField;
 						}
+						
+						entryOutput[key] = thisField;
 					}
-					
-					if(!entryOutput.hasOwnProperty('defaultLanguage'))
-					{
-						entryOutput.defaultLanguage = defaultLanguage;
-					}
-					
-					if(entryOutput.hasOwnProperty('slug'))
-					{
-						entryOutput.slugs = entry.fields.slug;
-					}
-					if(entryOutput.hasOwnProperty('domainName'))
-					{
-						entryOutput.siteUrl = new URL(`https://${entryOutput.domainName}`).href;
-					}
-					
-					entryOutput.currentLanguage = altLang || entryOutput.defaultLanguage;
-					
-					output.data.push(entryOutput);
-				});
+				}
 				
-				if(output.data.length > 0)
+				if(!entryOutput.hasOwnProperty('defaultLanguage'))
 				{
-					output.status = 200;
-					output.statusText = `${contentType} parsed`;
-				}				
+					entryOutput.defaultLanguage = defaultLanguage;
+				}
+				
+				if(entryOutput.hasOwnProperty('slug'))
+				{
+					entryOutput.slugs = entry.fields.slug;
+				}
+				if(entryOutput.hasOwnProperty('domainName'))
+				{
+					entryOutput.siteUrl = new URL(`https://${entryOutput.domainName}`).href;
+				}
+				
+				entryOutput.currentLanguage = altLang || entryOutput.defaultLanguage;
+				
+				output.data.push(entryOutput);
+			});
+			
+			if(output.data.length > 0)
+			{
+				output.status = 200;
+				output.statusText = `${contentType} parsed`;
 			}
 		}
 	}
