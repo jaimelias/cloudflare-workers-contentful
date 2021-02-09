@@ -60,7 +60,7 @@ export const response = (state = {
                 ...state, 
 				body: (payload.body) ? `${err500}: ${payload.body}` : err500, 
 				status: 500, 
-				headers: payload.headers || headers
+				headers: payload.headers || state.headers
             };
         default:
             return state;
