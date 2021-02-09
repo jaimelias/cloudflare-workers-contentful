@@ -4,7 +4,11 @@ export const GalleryComponent = ({data}) => {
 	
 	if(data)
 	{
-		if(data.length > 0)
+		if(data.length === 1)
+		{
+			output = Utilities.Media({className: 'img-fluid rounded', ...data[0]});
+		}
+		else if(data.length > 1)
 		{
 			const carouselInnerItem = data.map((row, index) => {
 				const active = (!index) ? 'active' : '';

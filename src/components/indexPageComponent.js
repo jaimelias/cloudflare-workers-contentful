@@ -1,9 +1,7 @@
-export const IndexPageComponent = ({title, description, content, image, amenities, included, notIncluded, labelIncluded, labelNotIncluded, labelAmenities}) => {
+export const IndexPageComponent = ({title, description, content, imageGallery, amenities, included, notIncluded, labelIncluded, labelNotIncluded, labelAmenities, GalleryComponent}) => {
 	
-	const RenderMedia = Utilities.Media({
-		className: 'img-fluid rounded',
-		...image
-	});
+
+	const RenderGallery = GalleryComponent({data: imageGallery});
 	
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
 	const RenderContent = (content) ? marked(content) : '';
@@ -29,7 +27,7 @@ export const IndexPageComponent = ({title, description, content, image, amenitie
 		<div class="container">
 			<div class="text-center">
 				<div class="mb-5">
-					${RenderMedia}
+					${RenderGallery}
 				</div>
 				<h1 class="h2 serif">${title}</h1>
 				${RenderDescription}

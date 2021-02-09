@@ -5,8 +5,8 @@ import {RequestForm} from './formComponent';
 export const Content = ({store, slug, title, description, content, labels, is404, pages, thisPageHasForm, sharedData, currentLanguage}) => {
 	
 	let output = '';
-	const {getState} = store;
-	const {amenities, included, notIncluded, image, type} = getState().contentful.data.websites[0];
+	const {getState, dispatch} = store;
+	const {amenities, included, notIncluded, imageGallery, type} = getState().contentful.data.websites[0];
 	
 	if(slug === '')
 	{
@@ -16,14 +16,23 @@ export const Content = ({store, slug, title, description, content, labels, is404
 			title, 
 			description, 
 			content,
-			image,
+			imageGallery,
 			amenities,
 			included,
 			notIncluded,
 			labelIncluded,
 			labelNotIncluded,
-			labelAmenities
+			labelAmenities,
+			GalleryComponent
 		});
+		
+		dispatch({type: ActionTypes.FILTER_TEMPLATE, payload: {
+			title,
+			description,
+			content,
+			imageGallery,
+			status: 200
+		}});
 	}
 	else
 	{	

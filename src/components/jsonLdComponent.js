@@ -1,4 +1,4 @@
-export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, image, priceRange, slug, type, title, coordinates}) => {
+export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, slug, type, title, coordinates}) => {
 	
 	let output = '';
 		
@@ -24,7 +24,7 @@ export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAd
 					"longitude": ${coordinates.lon}
 				},
 				"telephone": "${telephoneNumber}",
-				"photo": "/images/${image.fileName}",
+				"photo": "/images/${imageGallery[0].fileName}",
 				"starRating": {
 					"@type": "Rating",
 					"ratingValue": "5"

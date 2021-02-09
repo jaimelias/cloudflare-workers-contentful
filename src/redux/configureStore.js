@@ -5,6 +5,7 @@ import { request } from './request';
 import { response } from './response';
 import { enqueue } from './enqueue';
 import { contentful } from './contentful';
+import { template } from './template';
 
 export const ReduxStore = () => {
 
@@ -21,7 +22,8 @@ export const ReduxStore = () => {
 			request,
 			response,
 			enqueue,
-			contentful
+			contentful,
+			template
         }),
         applyMiddleware(...middleware)
     );
