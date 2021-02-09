@@ -1,8 +1,7 @@
 export const enqueueHook = ({store, slug, is404, accommodationTypes, labels}) => {
 	
 	const {dispatch, getState} = store;
-	const {type, currentLanguage, crm} = getState().contentful.data.websites[0]
-	const reCaptchaSiteKey = crm.reCaptchaSiteKey;
+	const {type, currentLanguage, crm} = getState().contentful.data.websites[0];
 	
 	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: bootstrapScripts}});
 	
@@ -17,8 +16,15 @@ export const enqueueHook = ({store, slug, is404, accommodationTypes, labels}) =>
 			
 		}
 		else
-		{
-			dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: formScripts(reCaptchaSiteKey)}});
+		{			
+			if(typeof crm === 'object')
+			{
+				if(crm.hasOwnProperty('reCaptchaSiteKey'))
+				{
+					dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: formScripts(crm.reCaptchaSiteKey)}});
+				}
+			}
+			
 			
 			if(accommodationTypes.includes(type))
 			{
@@ -125,7 +131,7 @@ const pickadateScripts = ({currentLanguage, labels}) => {
 						input.value = picker.getValue('YYYY-MM-DD');
 						input.blur();
 						document.getElementById('request-form').click();
-					});				
+					});
 					
 				});
 							

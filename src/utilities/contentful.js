@@ -299,8 +299,6 @@ export const getAllEntries = async ({store}) => {
 	})
 	.then(async (website) => {
 
-		console.log(website);
-
 		const entries = validContentTypes
 		.filter(i => i !== 'websites')
 		.map(contentType => getEntries({
