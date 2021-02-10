@@ -23,7 +23,12 @@ export const JsonLd = ({website, slug, title}) => {
 	if(priceRange)
 	{
 		ld.priceRange = priceRange;
-	}		
+	}
+	
+	if(typeof imageGallery[0] === 'object')
+	{
+		ld.photo = `/images/${imageGallery[0].fileName}`;
+	}
 	
 	let showAddress = false;
 	let address = {
