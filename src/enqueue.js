@@ -17,7 +17,7 @@ export const enqueueScripts = ({scripts, location, type}) => {
 		}
 		return {key, order, data};
 	})
-	.filter(i => i.data.location === location && i.data.file.includes(`.${type}`))
+	.filter(i => i.data.location === location && (i.data.type === type || i.data.file.includes(`.${type}`)))
 	.sort(sortByOrderKey)
 	.map(row => {
 		let output = {}

@@ -15,17 +15,16 @@ const {
 	pageHasForm
 } = Utilities;
 
-export const templateHooks = ({slug, store}) => {
+export const templateHooks = ({store}) => {
 	
 	const {langLabels} = LangConfig;
 	const {getState} = store;
 	const {accommodationTypes} = sharedData;
 	const pages = getState().contentful.data.pages;
-	const {hostName, pathName} = getState().request.data;
+	const {hostName, pathName, slug} = getState().request.data;
 	const website = getState().contentful.data.websites[0];
 	const {
 		siteName,
-		domainName,
 		currentLanguage,
 		googleAnalytics, 
 		facebookPixel,
@@ -38,10 +37,6 @@ export const templateHooks = ({slug, store}) => {
 	
 	const labels = langLabels[currentLanguage].labels;
 
-	const {
-		labelCallUs
-	} = labels;
-	
 	const thisPageHasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, pathName});	
 	
 	templateHook({store, slug, labels, thisPageHasForm, sharedData});
@@ -52,8 +47,6 @@ export const templateHooks = ({slug, store}) => {
 	const RenderTitleTag = `<title>${slug ? pageTitle + ' | ' + siteName : siteName + ' | ' + pageTitle}</title>`;
 	
 	const langItems = listLangItems({defaultLanguage, currentLanguage, pages, slug});
-		
-	const menuItems = getMenuItems({pages, langItems, currentLanguage, defaultLanguage});
 	
 	const RenderFooter = Footer({website});
 	
@@ -69,8 +62,12 @@ export const templateHooks = ({slug, store}) => {
 	const RenderCanonical = (canonicalUrl.hasOwnProperty('href')) ? `<link rel="canonical" href="${canonicalUrl.href}" />` : '';
 			
 	const RenderJsonLd = JsonLd({website, slug, title: pageTitle});
-	const RenderTopMenu = TopMenu({menuItems, hostName, website});
-	const RenderTopMenuContact = TopMenuContact({telephoneNumber, labelCallUs});
+	const RenderTopMenu = TopMenu({
+		menuItems: getMenuItems({pages, langItems, currentLanguage, defaultLanguage}),
+		hostName, 
+		website
+	});
+	const RenderTopMenuContact = TopMenuContact({telephoneNumber, labelCallUs: labels.labelCallUs});
 	const RenderFavicon = Favicon({favicon});
 	const RenderDescriptionTags = (pageDescription) ? `<meta name="description" content="${pageDescription}"/><meta property="og:description" content="${pageDescription}"/>` : '';
 	
@@ -82,8 +79,8 @@ export const templateHooks = ({slug, store}) => {
 	const HeaderStyles = enqueueScripts({...scriptArgs, type: 'css'});
 	
 	//tracking scripts
-	const RenderFacebookPixel = (hostName === domainName) ? FacebookPixel({pixel: facebookPixel}) : '';
-	const RenderGoogleAnalytics = (hostName === domainName) ? GoogleAnalytics({gTagId: googleAnalytics}) : '';
+	const RenderFacebookPixel = (ENVIRONMENT === 'production') ? FacebookPixel({pixel: facebookPixel}) : '';
+	const RenderGoogleAnalytics = (ENVIRONMENT === 'production') ? GoogleAnalytics({gTagId: googleAnalytics}) : '';
 	
 	return	`<!doctype html>
 <html lang="${currentLanguage}">

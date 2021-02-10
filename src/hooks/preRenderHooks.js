@@ -29,44 +29,17 @@ export const enqueueHook = ({store, slug, accommodationTypes, labels}) => {
 
 const bootstrapScripts = {
 	bootstrapScriptsCss: {
+		type: 'css',
 		concat: true,
 		file: 'bootstrap.5.0.0.min.css',
 		order: 100,
 		inline: [{
 			location: 'after',
-			content: `
-html, body {
-	height: 100vh;
-}
-.container
-{
-	max-width: 1200px;
-}
-form a.btn
-{
-	color: #fff;
-}
-h1, h2, h3, h4, h5, h6, .serif{
-	font-family: serif;
-}
-#footer a:not(.btn) {
-	color: #444
-}
-.entry-content img {
-	max-width: 100%;
-	height: auto;
-}
-.hidden {
-	display: none;
-}
-.chat-component
-{
-	z-index: 9999;
-}
-			`
+			content: `body,html{height:100vh}.container{max-width:1200px}form a.btn{color:#fff}.serif,h1,h2,h3,h4,h5,h6{font-family:serif}#footer a:not(.btn){color:#444}.entry-content img{max-width:100%;height:auto}.hidden{display:none}.chat-component{z-index:9999}`
 		}]
 	},
 	bootstrapScriptsJs: {
+		type: 'js',
 		location: 'footer',
 		async: true,
 		defer: true,
@@ -78,6 +51,7 @@ h1, h2, h3, h4, h5, h6, .serif{
 
 const formScripts = (reCaptchaSiteKey) => ({
 	recaptcha: {
+		type: 'js',
 		location: 'footer',
 		async: true,
 		defer: true,
@@ -85,6 +59,7 @@ const formScripts = (reCaptchaSiteKey) => ({
 		order: 20
 	},	
 	formValidator: {
+		type: 'js',
 		location: 'footer',
 		async: true,
 		defer: true,
@@ -103,6 +78,7 @@ const pickadateScripts = ({currentLanguage, labels}) => {
 	
 	return {
 		pickadate: {
+			type: 'js',
 			location: 'footer',
 			file: 'pickadate.5.0.0.min.js',
 			inline: [{

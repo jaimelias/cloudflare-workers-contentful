@@ -14,52 +14,15 @@ export const handleHtml = async ({store}) => {
 };
 
 const parseHtml = async ({store}) => {
-	
-	const {getState} = store;
-	const {pathName} = getState().request.data;
-	const pages = getState().contentful.data.pages;
-	const websiteData = getState().contentful.data.websites[0];
-	const {currentLanguage} = websiteData;
-	
-	const splitPath = pathName.split('/');
-	const slug = splitPath.filter(i => i !== currentLanguage).join('');
-	const pageNotFound = is404({
-		slug,
-		pages
-	});
-	const template = templateHooks({
-		slug,
-		is404: pageNotFound,
-		store
-	});
-	
-	const {status} = getState().template;
+
+	const template = templateHooks({store});
+	const {status} = store.getState().template;
 	
 	return {
 		status,
-		headers: {'content-type': 'text/html;charset=UTF-8'
+		headers: {
+			'content-type': 'text/html;charset=UTF-8'
 		},
 		body: template
 	};
-};
-
-const is404 = ({slug, pages}) => {
-	let output = true;
-	
-	if(slug)
-	{
-		if(pages)
-		{
-			if(pages.find(i => i.slug === slug))
-			{
-				output = false;
-			}
-		}
-	}
-	else
-	{
-		output = false;
-	}
-	
-	return output;
 };
