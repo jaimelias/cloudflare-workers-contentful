@@ -25,11 +25,9 @@ export const enqueueScripts = ({scripts, location, type}) => {
 		let scriptName = '';
 		const file = data.file;
 		const remote = (isUrl(file)) ? true : false;
-		const async = data.async || false;
-		let concat = data.concat || false;
-		const defer = data.defer || false;
+		const {async, concat: isConcat, defer} = data || false;
 		const inline = data.inline || [];
-		concat = (remote) ? false : concat;
+		const concat = (remote) ? false : isConcat;
 		
 		switch(type)
 		{
@@ -61,7 +59,7 @@ export const enqueueScripts = ({scripts, location, type}) => {
 		let fileArgs = {
 			files: [{
 				file, 
-				inline: inline
+				inline
 			}],
 			async,
 			defer,
