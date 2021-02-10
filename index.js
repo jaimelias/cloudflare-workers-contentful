@@ -16,7 +16,8 @@ addEventListener('fetch', event => {
 
 const firewallInit = async ({request}) => {
 
-	const configureStore = ReduxStore();
+	const data = Utilities.parseRequest(request);
+	const configureStore = ReduxStore({zone: data.pathNameArr.first});
 	const render = new RenderOutput(configureStore);
 	const store = {...configureStore, render};
 	const firewall = new Firewall(store).init(request);
@@ -26,10 +27,7 @@ const firewallInit = async ({request}) => {
 		return render.payload(firewall);
 	}
 
-	store.dispatch({
-		type: ActionTypes.REQUEST_SUCCESS, 
-		payload: {request, data: Utilities.parseRequest(request)
-	}});
+	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data}});
 	
 	return connectContentful({store});
 };

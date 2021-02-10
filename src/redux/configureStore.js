@@ -7,13 +7,32 @@ import { enqueue } from './enqueue';
 import { contentful } from './contentful';
 import { template } from './template';
 
-export const ReduxStore = () => {
+export const ReduxStore = ({zone}) => {
 
     let middleware = [thunk];
-
-    if(ENVIRONMENT === 'dev')
+	
+	const zones = ['images', 'static', 'sitemap.xml', 'api'];
+	
+    if(ENVIRONMENT === 'dev' && LOGGER_ZONE)
     {
-        middleware.push(logger);
+		if(LOGGER_ZONE === 'html')
+		{
+			if(!zones.includes(zone))
+			{
+				middleware.push(logger);
+			}
+		}
+		else if(LOGGER_ZONE === zone)
+		{
+			if(zones.includes(zone))
+			{
+				middleware.push(logger);
+			}
+		}
+		else if(LOGGER_ZONE === 'all')
+		{
+			middleware.push(logger);
+		}
     }
 
     return createStore(
