@@ -1,7 +1,6 @@
 export const enqueueScripts = ({scripts, location, type}) => {
 
 	let output = '';
-	let fileGroups = {};
 	const {sortByOrderKey, isUrl} = Utilities;
 	const scriptLocations = ['header', 'footer'];
 	
@@ -22,7 +21,6 @@ export const enqueueScripts = ({scripts, location, type}) => {
 	.sort(sortByOrderKey)
 	.map(row => {
 		let output = {}
-		const key = row.key;
 		const data = row.data;
 		let scriptName = '';
 		const file = data.file;

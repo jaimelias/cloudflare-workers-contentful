@@ -1,5 +1,7 @@
-export const IndexPageComponent = ({title, description, content, imageGallery, amenities, included, notIncluded, labelIncluded, labelNotIncluded, labelAmenities, GalleryComponent}) => {
+export const IndexPageComponent = ({website, labels, GalleryComponent}) => {
 	
+	const {title, description, content, imageGallery, amenities, included, notIncluded} = website;
+	const {labelIncluded, labelNotIncluded, labelAmenities} = labels;
 
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	

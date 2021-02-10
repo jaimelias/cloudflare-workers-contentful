@@ -1,4 +1,4 @@
-import {htmlTemplate} from '../htmlTemplate';
+import {templateHooks} from '../templateHooks';
 
 export const handleHtml = async ({store}) => {
 	const {getState, render} = store;
@@ -27,17 +27,19 @@ const parseHtml = async ({store}) => {
 		slug,
 		pages
 	});
-
+	const template = templateHooks({
+		slug,
+		is404: pageNotFound,
+		store
+	});
+	
+	const {status} = getState().template;
+	
 	return {
-		status: (pageNotFound) ? 404 : 200,
-		headers: {
-			'content-type': 'text/html;charset=UTF-8'
+		status,
+		headers: {'content-type': 'text/html;charset=UTF-8'
 		},
-		body: htmlTemplate({
-			slug,
-			is404: pageNotFound,
-			store
-		})
+		body: template
 	};
 };
 

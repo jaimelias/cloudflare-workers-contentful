@@ -3,7 +3,7 @@ export const template = (state = {
 	description: '',
 	content: '',
 	imageGallery: [],
-	status: '',
+	status: 500,
 }, action) => {
 	
 	const {type, payload} = action;

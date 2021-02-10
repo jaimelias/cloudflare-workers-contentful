@@ -1,4 +1,4 @@
-export const enqueueHook = ({store, slug, is404, accommodationTypes, labels}) => {
+export const enqueueHook = ({store, slug, accommodationTypes, labels}) => {
 	
 	const {dispatch, getState} = store;
 	const {type, currentLanguage, crm} = getState().contentful.data.websites[0];
@@ -11,25 +11,18 @@ export const enqueueHook = ({store, slug, is404, accommodationTypes, labels}) =>
 	}
 	else
 	{
-		if(is404)
+		if(typeof crm === 'object')
 		{
-			
+			if(crm.hasOwnProperty('reCaptchaSiteKey'))
+			{
+				dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: formScripts(crm.reCaptchaSiteKey)}});
+			}
 		}
-		else
-		{			
-			if(typeof crm === 'object')
-			{
-				if(crm.hasOwnProperty('reCaptchaSiteKey'))
-				{
-					dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: formScripts(crm.reCaptchaSiteKey)}});
-				}
-			}
-			
-			
-			if(accommodationTypes.includes(type))
-			{
-				dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: pickadateScripts({currentLanguage, labels})}});
-			}
+		
+		
+		if(accommodationTypes.includes(type))
+		{
+			dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: pickadateScripts({currentLanguage, labels})}});
 		}
 	}
 };

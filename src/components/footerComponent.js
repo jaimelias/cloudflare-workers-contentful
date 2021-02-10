@@ -56,7 +56,9 @@ export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername,
 	return output;
 };
 
-export const Footer = ({siteName, whatsappNumber, telephoneNumber, email, instagramUsername, facebookMessengerUsername, location, country, googleMapsUrl}) => {
+export const Footer = ({website}) => {
+	
+	const {siteName, whatsappNumber, telephoneNumber, email, instagramUsername, facebookMessengerUsername, location, country, googleMapsUrl} = website;
 	
 	const RenderCopyRight = copyRight({
 		siteName

@@ -137,38 +137,6 @@ export const stringToHash = async ({text, algorithm}) => {
 	return output;
 };
 
-export const getTitle = ({slug, title, pages}) => {
-	let output = (title) ? title : '';
-	
-	if(slug && pages)
-	{
-		const getPage = pages.find(i => i.slug === slug);
-		if(getPage)
-		{
-			return getPage.title;
-		}
-	}
-	
-	return output;
-};
-export const getDescription = ({slug, description, pages}) => {
-	let output = (description) ? description : '';
-	
-	if(slug && pages)
-	{
-		const getPage = pages.find(i => i.slug === slug);
-		if(getPage)
-		{
-			return getPage.description;
-		}
-	}
-	
-	return output;	
-};
-
-
-
-
 export const slugRegex = (value) => {
 	const regex = /^[\w]+(?:-[\w]+)*$/igm;		
 	return (value) ? regex.test(value) : true;
@@ -211,7 +179,9 @@ export const findPageBySlug = ({slug, pages}) => {
 	return output;
 };
 
-export const listLangItems = ({defaultLanguage, currentLanguage, page, slug}) => {
+export const listLangItems = ({defaultLanguage, currentLanguage, pages, slug}) => {
+
+	const page = findPageBySlug({slug, pages});
 	
 	let output = [];
 	

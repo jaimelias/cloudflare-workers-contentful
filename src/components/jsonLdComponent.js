@@ -1,4 +1,6 @@
-export const JsonLd = ({siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, slug, type, title, coordinates}) => {
+export const JsonLd = ({website, slug, title}) => {
+	
+	const {siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
 	
 	let output = '';
 		

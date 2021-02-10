@@ -45,7 +45,7 @@ export const response = (state = {
         case ActionTypes.RESPONSE_NOT_FOUND:
             return {
                 ...state, 
-				body: (payload.body) ? `${err404}: ${payload.body}` : err404, 
+				body: (payload.body) || err404,
 				status: 404, 
 				headers: payload.headers || state.headers
             };
