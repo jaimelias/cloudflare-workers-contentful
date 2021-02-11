@@ -1,6 +1,4 @@
 import * as sharedData from './utilities/sharedData'
-import {FacebookPixel} from './components/facebookPixelComponent'
-import {GoogleAnalytics} from './components/googleAnalyticsComponent';
 import {TopMenu, TopMenuContact} from './components/topMenuComponent';
 import {JsonLd} from './components/jsonLdComponent';
 import {Footer} from './components/footerComponent';
@@ -9,15 +7,11 @@ import {enqueueScripts} from './enqueue';
 import {enqueueHook} from './hooks/preRenderHooks';
 import {templateHook} from './hooks/renderHooks';
 
-const {
-	Favicon,
-	listLangItems,
-	pageHasForm
-} = Utilities;
+const {Favicon, listLangItems, pageHasForm} = Utilities;
+const {langLabels} = LangConfig;
 
 export const templateHooks = ({store}) => {
-	
-	const {langLabels} = LangConfig;
+
 	const {getState} = store;
 	const {accommodationTypes} = sharedData;
 	const pages = getState().contentful.data.pages;
@@ -26,8 +20,6 @@ export const templateHooks = ({store}) => {
 	const {
 		siteName,
 		currentLanguage,
-		googleAnalytics, 
-		facebookPixel,
 		telephoneNumber,
 		favicon,
 		actionButtonUrl,
@@ -36,7 +28,6 @@ export const templateHooks = ({store}) => {
 	} = website;
 	
 	const labels = langLabels[currentLanguage].labels;
-
 	const thisPageHasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, pathName});	
 	
 	templateHook({store, slug, labels, thisPageHasForm, sharedData});
@@ -50,9 +41,7 @@ export const templateHooks = ({store}) => {
 	
 	const RenderFooter = Footer({website});
 	
-	const RenderLangLinks = langItems.map(row => {
-		return `<link rel="alternate" hreflang="${row.lang}" href="${row.href}" />`;
-	}).join('');
+	const RenderLangLinks = langItems.map(r => `<link rel="alternate" hreflang="${r.lang}" href="${r.href}" />`).join('');
 	
 	const langFallbackUrl = (langItems.length > 0) ? langItems.find(i => i.lang === defaultLanguage) : false;
 	
@@ -78,10 +67,6 @@ export const templateHooks = ({store}) => {
 	const HeaderScripts = enqueueScripts({...scriptArgs, location: 'header'});
 	const HeaderStyles = enqueueScripts({...scriptArgs, type: 'css'});
 	
-	//tracking scripts
-	const RenderFacebookPixel = (ENVIRONMENT === 'production') ? FacebookPixel({pixel: facebookPixel}) : '';
-	const RenderGoogleAnalytics = (ENVIRONMENT === 'production') ? GoogleAnalytics({gTagId: googleAnalytics}) : '';
-	
 	return	`<!doctype html>
 <html lang="${currentLanguage}">
 	<head>
@@ -97,11 +82,9 @@ export const templateHooks = ({store}) => {
 		<meta property="og:title" content="${siteName} | ${pageTitle}"/>
 		${RenderDescriptionTags}
 		${HeaderScripts}
-		${RenderGoogleAnalytics}
 		${RenderJsonLd}
 	</head>
 	<body>
-		${RenderFacebookPixel}
 		${RenderTopMenuContact}
 		${RenderTopMenu}
 		<div class="container-fluid my-5">
