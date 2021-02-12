@@ -2,7 +2,7 @@ const {langList} = LangConfig;
 const {stringToHash, getFallBackLang} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
-export const validContentTypes = ['websites', 'pages'];
+export const validContentTypes = ['websites', 'pages', 'posts'];
 
 export const getEntries = async ({contentType, websiteId, store}) => {
 	
@@ -170,7 +170,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	
 	if(typeof data === 'object')
 	{
-		if(data.hasOwnProperty('items') && data.hasOwnProperty('includes'))
+		if(data.sys.type === 'Array')
 		{
 			const items = data.items || [];
 			const includes = data.includes || {};
@@ -181,9 +181,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			items.forEach(entry => {
 				let fields = entry.fields;
 				let defaultLanguage =  '';
-				let entryOutput = {
-					id: entry.sys.id
-				};		
+				let entryOutput = {id: entry.sys.id};		
 				
 				if(fields.hasOwnProperty('defaultLanguage'))
 				{
@@ -218,10 +216,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 						{
 							if(isLinkTypeEntry(thisField) || isLinkTypeAsset(thisField))
 							{
-								thisField = linkField({
-									...fieldArg,
-									field: thisField
-								});											
+								thisField = linkField({...fieldArg, field: thisField});											
 							}							
 						}
 						if(Array.isArray(thisField))
@@ -271,11 +266,8 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 				output.data.push(entryOutput);
 			});
 			
-			if(output.data.length > 0)
-			{
-				output.status = 200;
-				output.statusText = `${contentType} parsed`;
-			}
+			output.status = 200;
+			output.statusText = `${contentType} parsed`;			
 		}
 	}
 

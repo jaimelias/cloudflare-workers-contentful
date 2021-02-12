@@ -30,8 +30,8 @@ export const templateHooks = ({store}) => {
 	const labels = langLabels[currentLanguage].labels;
 	const thisPageHasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, pathName});	
 	
-	templateHook({store, slug, labels, thisPageHasForm, sharedData});
-	enqueueHook({slug, store, accommodationTypes, labels});
+	templateHook({store, labels, thisPageHasForm, sharedData});
+	enqueueHook({store, accommodationTypes, labels});
 	
 	const {title: pageTitle, description: pageDescription, content: RenderContent} = getState().template;
 	

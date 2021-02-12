@@ -1,7 +1,8 @@
-export const enqueueHook = ({store, slug, accommodationTypes, labels}) => {
+export const enqueueHook = ({store, accommodationTypes, labels}) => {
 	
 	const {dispatch, getState} = store;
 	const {type, currentLanguage, crm, facebookPixel, googleAnalytics} = getState().contentful.data.websites[0];
+	const {slug} = getState().request.data;
 	
 	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: bootstrapScripts}});
 	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: trackingScripts({facebookPixel, googleAnalytics})}});

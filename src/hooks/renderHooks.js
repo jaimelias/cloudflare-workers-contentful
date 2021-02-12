@@ -2,9 +2,10 @@ import {GalleryComponent} from '../components/galleryComponent';
 import {IndexPageComponent} from '../components/indexPageComponent';
 import {RequestForm} from '../components/formComponent';
 
-export const templateHook = ({store, slug, labels, thisPageHasForm, sharedData}) => {
+export const templateHook = ({store, labels, thisPageHasForm, sharedData}) => {
 	
 	const {getState, dispatch} = store;
+	const {slug} = getState().request.data;
 	const website = getState().contentful.data.websites[0];
 	const {imageGallery, type, title, description, content, currentLanguage} = website;
 	const pages = getState().contentful.data.pages;
