@@ -13,9 +13,10 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 	
 	if(KV && init)
 	{
-		const endpoint = getEndPoint({contentType, KV, websiteId});
+		const request = getState().request.data;
+		const {altLang, pageNumber, slug} = request;
+		const endpoint = getEndPoint({contentType, KV, websiteId, pageNumber});
 		const response = await fetch(new URL(endpoint).href, init);
-		const altLang = getState().request.data.altLang;
 		
 		if(response.ok)
 		{
@@ -44,7 +45,7 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 	return output;
 };
 
-const getEndPoint = ({contentType, KV, websiteId}) => {
+const getEndPoint = ({contentType, KV, websiteId, pageNumber}) => {
 	const {url, envId, spaceId, token} = KV;
 	
 	let endpoint = `${url}/spaces/${spaceId}/environments/${envId}/entries?access_token=${token}&content_type=${contentType}&include=3&locale=*`;
@@ -56,6 +57,12 @@ const getEndPoint = ({contentType, KV, websiteId}) => {
 	else
 	{
 		endpoint += `&links_to_entry=${websiteId}`;
+		
+		if(contentType === 'posts')
+		{
+			const skip = pageNumber - 1;
+			endpoint += `&limit=1&skip=${skip}`;
+		}
 	}
 		
 	return endpoint;
@@ -181,7 +188,10 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			items.forEach(entry => {
 				let fields = entry.fields;
 				let defaultLanguage =  '';
-				let entryOutput = {id: entry.sys.id};		
+				let entryOutput = {
+					id: entry.sys.id,
+					updatedAt: entry.sys.updatedAt
+				};
 				
 				if(fields.hasOwnProperty('defaultLanguage'))
 				{

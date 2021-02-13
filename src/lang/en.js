@@ -14,3 +14,4 @@ export const labelLastName = 'Last name';
 export const formSuccess = 'Request sent successfully!';
 export const labelHello = 'Hello';
 export const labelOriginalData = 'This was your request:';
+export const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];

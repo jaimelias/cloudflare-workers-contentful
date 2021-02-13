@@ -1,35 +1,45 @@
 import {GalleryComponent} from '../components/galleryComponent';
 import {IndexPageComponent} from '../components/indexPageComponent';
+import {BlogIndexComponent} from '../components/blogIndexComponent';
 import {RequestForm} from '../components/formComponent';
 
-export const templateHook = ({store, labels, thisPageHasForm, sharedData}) => {
+export const templateHook = ({store, thisPageHasForm, sharedData, labels}) => {
 	
 	const {getState, dispatch} = store;
-	const {slug} = getState().request.data;
+	const {slug, pageNumber} = getState().request.data;
 	const website = getState().contentful.data.websites[0];
-	const {imageGallery, type, title, description, content, currentLanguage} = website;
 	const pages = getState().contentful.data.pages;
 	const getPage = pages.find(i => i.slug === slug);
+	const pageIsBlog = ({slug, blogPage}) => slug === website.blogPage.slug;
+	
+	let payload = {
+		title: labels.notFoundTitle,
+		content: `<div class="container"><h1>${labels.notFoundTitle}</h1></div>`,
+		status: 404
+	}
 		
 	if(slug === '')
-	{		
-		dispatch({type: ActionTypes.FILTER_TEMPLATE, payload: {
+	{
+		const {imageGallery, title, description, content } = website;
+		const indexPage = IndexPageComponent({website, labels, GalleryComponent});
+		
+		payload = {
 			title,
 			description,
-			content: IndexPageComponent({website, labels, GalleryComponent}),
+			content: indexPage,
 			imageGallery,
 			status: 200
-		}});
+		};
 	}
 	else if(typeof getPage  === 'object')
 	{		
-		const {content, description, title, imageGallery} = getPage;
-		const RenderGallery = (imageGallery) ? GalleryComponent({
-			data: imageGallery
-		}): '';
+		const {content, description, title, imageGallery, currentLanguage} = getPage;
+		const RenderGallery = GalleryComponent({data: imageGallery});
+		let pageTitle = title;
+		let status = 200;
 		
 		let formArgs = {
-			type,
+			type: website.type,
 			labels,
 			grid: thisPageHasForm,
 			accommodationTypes: sharedData.accommodationTypes,
@@ -37,7 +47,24 @@ export const templateHook = ({store, labels, thisPageHasForm, sharedData}) => {
 		};
 		
 		const RenderRequestForm = RequestForm(formArgs);
-		const RenderContent = (typeof content === 'string') ? marked(content) : '';
+		let RenderContent = (typeof content === 'string') ? marked(content) : '';
+		const posts = getState().contentful.data.posts;
+				
+		if(pageIsBlog && Array.isArray(posts))
+		{
+			
+			pageTitle = (pageNumber > 1) ? `${pageTitle} | p. ${pageNumber}` : pageTitle;
+			
+			if(posts.length > 0)
+			{
+				RenderContent += BlogIndexComponent({posts});
+			}
+			else
+			{
+				status = 404;
+				RenderContent += 'no posts found';
+			}
+		}
 			
 		const contentWrapper = () => {
 			
@@ -67,23 +94,14 @@ export const templateHook = ({store, labels, thisPageHasForm, sharedData}) => {
 			return output;
 		};		
 		
-		dispatch({type: ActionTypes.FILTER_TEMPLATE, payload: {
-			title,
+		payload = {
+			title: pageTitle,
 			description,
 			content: `<div class="container"><h1>${title}</h1>${contentWrapper()}</div>`,
 			imageGallery,
-			status: 200
-		}});		
-		
+			status
+		};
 	}
-	else
-	{
-		const {notFoundTitle} = labels;		
-		
-		dispatch({type: ActionTypes.FILTER_TEMPLATE, payload: {
-			title: notFoundTitle,
-			content: `<div class="container"><h1>${notFoundTitle}</h1></div>`,
-			status: 404
-		}});
-	}
+	
+	dispatch({type: ActionTypes.FILTER_TEMPLATE, payload});
 }; 

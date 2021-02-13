@@ -14,7 +14,8 @@ export const labelLastName = 'Apellido';
 export const formSuccess = '¡Solicitud enviada exitosamente!';
 export const labelHello = 'Hola';
 export const labelOriginalData = 'Esta fue tu solicitud:';
+export const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 export const templateHookWords = {
-	MMMM: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+	MMMM: months,
 	DDD: ['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'],
 };

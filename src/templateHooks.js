@@ -24,13 +24,14 @@ export const templateHooks = ({store}) => {
 		favicon,
 		actionButtonUrl,
 		actionButtonText,
-		defaultLanguage
+		defaultLanguage,
+		blogPage
 	} = website;
 	
 	const labels = langLabels[currentLanguage].labels;
 	const thisPageHasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, pathName});	
 	
-	templateHook({store, labels, thisPageHasForm, sharedData});
+	templateHook({store, thisPageHasForm, sharedData, labels});
 	enqueueHook({store, accommodationTypes, labels});
 	
 	const {title: pageTitle, description: pageDescription, content: RenderContent} = getState().template;

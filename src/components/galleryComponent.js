@@ -6,7 +6,8 @@ export const GalleryComponent = ({data}) => {
 	{
 		if(data.length === 1)
 		{
-			output = Utilities.Media({className: 'img-fluid rounded', ...data[0]});
+			const RenderMedia = Utilities.Media({className: 'img-fluid rounded', ...data[0]});
+			output = `<div class="mb-5">${RenderMedia}</div>`;
 		}
 		else if(data.length > 1)
 		{
@@ -29,7 +30,7 @@ export const GalleryComponent = ({data}) => {
 				return `<li data-bs-target="#galleryCarousel" data-bs-slide-to="${index}" ${activeClass}></li>`;
 			}).join('');			
 			
-			return `
+			output = `
 				<div class="mb-5">
 					<div id="galleryCarousel" class="carousel slide" data-bs-ride="carousel">
 					  <ol class="carousel-indicators">

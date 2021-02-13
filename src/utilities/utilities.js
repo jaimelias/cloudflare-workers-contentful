@@ -1,5 +1,12 @@
 const {langLabels, langList} = LangConfig;
 
+export const formatDate = ({date, lang}) => {
+	const d = new Date(date);
+	const months = langLabels[lang].labels.months;
+		
+	return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
+};
+
 export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, pathName}) => {
 	
 	let output = false;
@@ -98,7 +105,7 @@ export const Media = (obj) => {
 };
 
 export const getHomeUrl = ({currentLanguage, defaultLanguage}) => {
-	const output = (currentLanguage === defaultLanguage) ? '/' : `/${currentLanguage}`;
+	const output = (currentLanguage === defaultLanguage) ? '/' : `/${currentLanguage}/`;
 	return output;
 };
 
@@ -255,6 +262,10 @@ export const pathNameToArr = pathName => {
 		{
 			output.first = v;
 		}
+		if((i+1) === (arr.length - 1))
+		{
+			output.beforeLast = v;
+		}
 		if((i+1) === arr.length)
 		{
 			output.last = v;
@@ -300,6 +311,25 @@ export const getFallBackLang = obj =>  {
 
 export const validUrlCharacters = (str) => /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g.test(str);
 
+
+const getSlug = ({pathNameArr, hasPagination}) => {
+	
+	return pathNameArr.full
+	.filter(i => !langList.includes(i))
+	.filter(i => {
+		let output = true;
+		if(hasPagination)
+		{
+			if(pathNameArr.beforeLast === i || pathNameArr.last === i)
+			{
+				output = false;
+			}
+		}
+		return output;
+	})
+	.join('/');
+}
+
 export const parseRequest = (request) => {
 	
 	let requestUrl = encodeURI(decodeURI(request.url));
@@ -307,7 +337,9 @@ export const parseRequest = (request) => {
 	const {pathname: pathName, searchParams, hostname: hostName} = url;	
 	const pathNameArr = pathNameToArr(pathName);
 	const altLang = langList.find(i => i === pathNameArr.first) || false;
-	const slug = pathNameArr.full.filter(i => !langList.includes(i)).join('');
+	const hasPagination = (pathNameArr.beforeLast === 'p' && isNumber(pathNameArr.last)) ? true : false;
+	const pageNumber = hasPagination ? parseInt(pathNameArr.last) : 1;
+	const slug = getSlug({pathNameArr, hasPagination});
 	
 	return {
 		...request,
@@ -317,6 +349,7 @@ export const parseRequest = (request) => {
 		searchParams,
 		pathNameArr,
 		slug,
-		altLang
+		altLang,
+		pageNumber
 	};	
 };
