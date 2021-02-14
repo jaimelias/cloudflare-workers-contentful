@@ -13,16 +13,17 @@ export const templateHook = ({store, thisPageHasForm, sharedData, labels}) => {
 	const {slug, pageNumber, homeUrl} = request;
 	const getPage = pages.find(i => i.slug === slug);
 	const pageIsBlog = () => slug === website.blogPage.slug;
+	const getPost = posts.entries.find(i => i.slug === slug);
 	
 	let payload = {
 		title: labels.notFoundTitle,
-		content: `<div class="container"><h1>${labels.notFoundTitle}</h1></div>`,
+		content: entryWrapper({title: labels.notFoundTitle, content: ''}),
 		status: 404
 	}
-		
+
 	if(slug === '')
 	{
-		const {imageGallery, title, description, content } = website;
+		const {imageGallery, title, description } = website;
 		const indexPage = IndexPageComponent({website, labels, GalleryComponent});
 		
 		payload = {
@@ -36,70 +37,86 @@ export const templateHook = ({store, thisPageHasForm, sharedData, labels}) => {
 	else if(typeof getPage  === 'object')
 	{		
 		const {content, description, title, imageGallery, currentLanguage} = getPage;
-		const RenderGallery = GalleryComponent({data: imageGallery});
+		const {labelPageNumber, labelNoPosts} = labels;
+		let entryContent = '';
 		let pageTitle = title;
 		let status = 200;
 		
-		let formArgs = {
-			type: website.type,
-			labels,
-			grid: thisPageHasForm,
-			accommodationTypes: sharedData.accommodationTypes,
-			currentLanguage
-		};
-		
-		const RenderRequestForm = RequestForm(formArgs);
-		let RenderContent = (typeof content === 'string') ? marked(content) : '';
+		entryContent += GalleryComponent({data: imageGallery});
+		entryContent += (typeof content === 'string') ? marked(content) : '';
 				
 		if(pageIsBlog())
 		{
-			pageTitle = (pageNumber > 1) ? `${pageTitle} | p. ${pageNumber}` : pageTitle;
+			pageTitle = (pageNumber > 1) ? `${pageTitle} | ${labelPageNumber} ${pageNumber}` : pageTitle;
 			
 			if(posts.total > 0)
 			{
-				RenderContent += BlogIndexComponent({posts, homeUrl});
+				entryContent += BlogIndexComponent({posts, homeUrl});
 			}
 			else
 			{
 				status = 404;
-				RenderContent += 'no posts found';
+				entryContent += `<hr/><div class="text-muted">${labelNoPosts}.</div>`;
 			}
 		}
-			
-		const contentWrapper = () => {
-			
-			let output = '';
-			let hr = (thisPageHasForm) ? '<hr/>' : '';
-			
-			const entryContent = `
-				<div class="entry-content" >
-					${RenderGallery}
-					${RenderContent}
-					${hr}
-					${thisPageHasForm ? RenderRequestForm : ''}
-				</div>				
-			`;					
-			
-			output = `
-				<div class="row">
-					<div class="col-md-8">
-						${entryContent}
-					</div>
-					<div class="col-md-4" style="border-left: 1px solid #ddd;"></div>
-				</div>
-			`;
-			
-			return output;
-		};		
-		
+
+		entryContent += (thisPageHasForm) ? RequestForm({
+			type: website.type,
+			labels,
+			accommodationTypes: sharedData.accommodationTypes,
+			currentLanguage
+		}) : '';
+
 		payload = {
 			title: pageTitle,
 			description,
-			content: `<div class="container"><h1>${title}</h1>${contentWrapper()}</div>`,
+			content: entryWrapper({title, content: entryContent, date: ''}),
 			imageGallery,
 			status
+		};
+	}
+	else if(typeof getPost === 'object')
+	{
+		const {imageGallery, title, content, description, currentLanguage, updatedAt} = getPost;
+		let entryContent = '';
+		entryContent += GalleryComponent({data: imageGallery});
+		entryContent = (typeof content === 'string') ? marked(content) : '';
+
+		const date = Utilities.formatDate({
+			date: updatedAt,
+			lang: currentLanguage
+		});
+
+		payload = {
+			title,
+			description,
+			content: entryWrapper({title, content: entryContent, date}),
+			imageGallery,
+			status: 200
 		};
 	}
 	
 	dispatch({type: ActionTypes.FILTER_TEMPLATE, payload});
 }; 
+
+const entryWrapper = ({content, title, date}) => {
+
+	let meta = '';
+
+	meta += (date) ? `<div class="mb-2 text-muted fw-light"><small>${date}</small></div>` : '';
+
+	return `
+	<div class="container">
+		${meta}
+		<h1 class="entry-title">${title}</h1>
+			<div class="row">
+				<div class="col-md-8">
+					<div class="entry-content" >
+						${content ? content : ''}
+					</div>
+				</div>
+				<div class="col-md-4" style="border-left: 1px solid #ddd;"></div>
+			</div>
+		</div>
+	`;
+};

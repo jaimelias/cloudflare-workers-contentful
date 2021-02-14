@@ -1,4 +1,4 @@
-export const RequestForm = ({type, grid, labels, currentLanguage, accommodationTypes}) => {
+export const RequestForm = ({type, labels, currentLanguage, accommodationTypes}) => {
 		
 	const {	
 		labelStartDate, 
@@ -14,10 +14,9 @@ export const RequestForm = ({type, grid, labels, currentLanguage, accommodationT
 	
 	let output = '';
 	
-	let attrClassRow = (grid) ? ' class="row" ' : '';
-	let classCol = (grid) ? 'col-md' : '';
-	let classFormControl = (grid) ? '' : 'form-control-sm';
-	let classMB = (grid) ? 'mb-3' : 'mb-1';
+	let attrClassRow = ' class="row" ';
+	let classCol = 'col-md';
+	let classMB = 'mb-3';
 	const isAccommodationForm = (accommodationTypes.includes(type)) ? true: false;
 	const floating = 'class="form-floating mb-3"';
 	const fc = 'class="form-control"';
@@ -58,6 +57,7 @@ export const RequestForm = ({type, grid, labels, currentLanguage, accommodationT
 	` : '';
 
 	output = `
+<hr/>
 <form id="request-form" class="needs-validation" novalidate>
 	<div class="hidden"><input name="language" id="language" value="${currentLanguage}"/></div>
 	
