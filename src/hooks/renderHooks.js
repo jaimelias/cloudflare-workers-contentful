@@ -6,11 +6,13 @@ import {RequestForm} from '../components/formComponent';
 export const templateHook = ({store, thisPageHasForm, sharedData, labels}) => {
 	
 	const {getState, dispatch} = store;
-	const {slug, pageNumber} = getState().request.data;
-	const website = getState().contentful.data.websites[0];
-	const pages = getState().contentful.data.pages;
+	const request = getState().request.data;
+	const website = getState().contentful.data.websites.entries[0];
+	const pages = getState().contentful.data.pages.entries;
+	const posts = getState().contentful.data.posts;
+	const {slug, pageNumber, homeUrl} = request;
 	const getPage = pages.find(i => i.slug === slug);
-	const pageIsBlog = ({slug, blogPage}) => slug === website.blogPage.slug;
+	const pageIsBlog = () => slug === website.blogPage.slug;
 	
 	let payload = {
 		title: labels.notFoundTitle,
@@ -48,16 +50,14 @@ export const templateHook = ({store, thisPageHasForm, sharedData, labels}) => {
 		
 		const RenderRequestForm = RequestForm(formArgs);
 		let RenderContent = (typeof content === 'string') ? marked(content) : '';
-		const posts = getState().contentful.data.posts;
 				
-		if(pageIsBlog && Array.isArray(posts))
+		if(pageIsBlog())
 		{
-			
 			pageTitle = (pageNumber > 1) ? `${pageTitle} | p. ${pageNumber}` : pageTitle;
 			
-			if(posts.length > 0)
+			if(posts.total > 0)
 			{
-				RenderContent += BlogIndexComponent({posts});
+				RenderContent += BlogIndexComponent({posts, homeUrl});
 			}
 			else
 			{
@@ -85,9 +85,7 @@ export const templateHook = ({store, thisPageHasForm, sharedData, labels}) => {
 					<div class="col-md-8">
 						${entryContent}
 					</div>
-					<div class="col-md-4" style="border-left: 1px solid #ddd;">
-						${thisPageHasForm ? '' : RenderRequestForm}
-					</div>
+					<div class="col-md-4" style="border-left: 1px solid #ddd;"></div>
 				</div>
 			`;
 			

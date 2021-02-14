@@ -20,8 +20,8 @@ const SitemapParse = async ({store}) => {
 	};
 	const {escUrl} = Utilities;
 	const {getState} = store;
-	const {defaultLanguage, image, domainName} = getState().contentful.data.websites[0];
-	const pages = getState().contentful.data.pages;
+	const {defaultLanguage, image, domainName} = getState().contentful.data.websites.entries[0];
+	const pages = getState().contentful.data.pages.entries;
 		
 	langList.forEach(key => {
 		langPaths[key] = (key === defaultLanguage) ? '' : key;

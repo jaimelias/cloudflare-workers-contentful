@@ -22,10 +22,8 @@ export const contentful = (state = {
 			const failStatusText = payload.statusText || state.statusText;
             return {
                 ...state,
-				data: {},
-				assets: [],
 				status: payload.status || state.status,
-				statusText: `${payload.contentType} ${failStatusText}`
+				statusText: `${payload.contentType} ${failStatusText}` || state.status
             };
         default:
             return state;

@@ -7,7 +7,7 @@ export const formatDate = ({date, lang}) => {
 	return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
-export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, pathName}) => {
+export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, slug}) => {
 	
 	let output = false;
 	
@@ -17,9 +17,9 @@ export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, pathNa
 		{
 			const actionUrl = new URL(actionButtonUrl);
 			const actionUrlHostName = actionUrl.hostname;
-			const actionUrlPathName = actionUrl.pathname;
+			const actionUrlPathName = actionUrl.pathname.split('/').filter(i => i).filter(i =>  !langList.includes(i)).join('/');
 			
-			if((hostName === actionUrlHostName || CONTENTFUL_DOMAIN === actionUrlHostName) && actionUrlPathName === pathName)
+			if((hostName === actionUrlHostName || CONTENTFUL_DOMAIN === actionUrlHostName) && actionUrlPathName === slug)
 			{
 				output = true;
 			}
@@ -102,11 +102,6 @@ export const Media = (obj) => {
 			}
 		}
 	}
-};
-
-export const getHomeUrl = ({currentLanguage, defaultLanguage}) => {
-	const output = (currentLanguage === defaultLanguage) ? '/' : `/${currentLanguage}/`;
-	return output;
 };
 
 export const isoNumber = ({number}) => {
@@ -340,9 +335,11 @@ export const parseRequest = (request) => {
 	const hasPagination = (pathNameArr.beforeLast === 'p' && isNumber(pathNameArr.last)) ? true : false;
 	const pageNumber = hasPagination ? parseInt(pathNameArr.last) : 1;
 	const slug = getSlug({pathNameArr, hasPagination});
-	
+	const homeUrl = (langList.includes(pathNameArr.first)) ? `/${pathNameArr.first}/` : '/';
+
 	return {
 		...request,
+		homeUrl,
 		url: requestUrl,
 		hostName,
 		pathName,

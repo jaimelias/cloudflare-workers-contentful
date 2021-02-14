@@ -14,9 +14,9 @@ export const templateHooks = ({store}) => {
 
 	const {getState} = store;
 	const {accommodationTypes} = sharedData;
-	const pages = getState().contentful.data.pages;
-	const {hostName, pathName, slug} = getState().request.data;
-	const website = getState().contentful.data.websites[0];
+	const pages = getState().contentful.data.pages.entries;
+	const {hostName, slug, homeUrl} = getState().request.data;
+	const website = getState().contentful.data.websites.entries[0];
 	const {
 		siteName,
 		currentLanguage,
@@ -24,15 +24,14 @@ export const templateHooks = ({store}) => {
 		favicon,
 		actionButtonUrl,
 		actionButtonText,
-		defaultLanguage,
-		blogPage
+		defaultLanguage
 	} = website;
 	
 	const labels = langLabels[currentLanguage].labels;
-	const thisPageHasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, pathName});	
+	const thisPageHasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, slug});	
 	
 	templateHook({store, thisPageHasForm, sharedData, labels});
-	enqueueHook({store, accommodationTypes, labels});
+	enqueueHook({store, accommodationTypes, labels, thisPageHasForm});
 	
 	const {title: pageTitle, description: pageDescription, content: RenderContent} = getState().template;
 	
@@ -55,7 +54,8 @@ export const templateHooks = ({store}) => {
 	const RenderTopMenu = TopMenu({
 		menuItems: getMenuItems({pages, langItems, currentLanguage, defaultLanguage}),
 		hostName, 
-		website
+		website,
+		homeUrl
 	});
 	const RenderTopMenuContact = TopMenuContact({telephoneNumber, labelCallUs: labels.labelCallUs});
 	const RenderFavicon = Favicon({favicon});

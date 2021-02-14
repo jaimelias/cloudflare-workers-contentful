@@ -99,7 +99,7 @@ const handleFormRequest = async ({store}) => {
 			if(invalids.length === 0)
 			{
 				
-				const website = getState().contentful.data.websites[0];
+				const website = getState().contentful.data.websites.entries[0];
 				const crm = website.crm;
 				
 				if(crm)

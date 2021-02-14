@@ -170,9 +170,13 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 
 	let output = {
 		contentType,
-		data: [],
+		data: {
+			entries: [],
+			total: 0
+		},
 		status: 500, 
-		statusText: `error parsing ${contentType}`
+		statusText: `error parsing ${contentType}`,
+		total: 0
 	};
 	
 	if(typeof data === 'object')
@@ -183,6 +187,9 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			const includes = data.includes || {};
 			const assets = includes.Asset || [];
 			const entries = includes.Entry || [];
+			output.data.total = data.total || 0;
+			output.data.limit = data.limit || 0;
+			output.data.skip = data.skip || 0;
 			output.assets = assets;
 							
 			items.forEach(entry => {
@@ -273,7 +280,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 				
 				entryOutput.currentLanguage = altLang || entryOutput.defaultLanguage;
 				
-				output.data.push(entryOutput);
+				output.data.entries.push(entryOutput);
 			});
 			
 			output.status = 200;
@@ -301,7 +308,7 @@ export const getAllEntries = async ({store}) => {
 		.map(contentType => getEntries({
 			...entryArgs, 
 			contentType,
-			 websiteId: website.data[0].id
+			 websiteId: website.data.entries[0].id
 		}));
 
 		return Promise.all([website, ...entries])

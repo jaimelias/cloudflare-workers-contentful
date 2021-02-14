@@ -23,7 +23,7 @@ export default class Firewall {
 	{
 		const {getState} = this.store;
 		const {headers, hostName, pathName} = getState().request.data;
-		const {siteUrl, firewall} = getState().contentful.data.websites[0];
+		const {siteUrl, firewall} = getState().contentful.data.websites.entries[0];
 	
 		if(typeof firewall === 'object')
 		{

@@ -10,14 +10,11 @@ export const TopMenuContact = ({telephoneNumber, labelCallUs}) => {
 	return output;
 };
 
-export const TopMenu = ({hostName, menuItems, website}) => {
+export const TopMenu = ({hostName, menuItems, website, homeUrl}) => {
 	
-	const {siteName, logoType, actionButtonText, actionButtonUrl, currentLanguage, defaultLanguage} = website;
-	const {Media, isUrl, sortByOrderKey, getHomeUrl} = Utilities;
-	const RenderLogo = (logoType) ? Media({alt: siteName, maxHeight: 60, ...logoType}) : siteName;
-	
-	const homeUrl = getHomeUrl({currentLanguage, defaultLanguage});		
-	
+	const {siteName, logoType, actionButtonText, actionButtonUrl} = website;
+	const {Media, isUrl, sortByOrderKey} = Utilities;
+	const RenderLogo = (logoType) ? Media({alt: siteName, maxHeight: 60, ...logoType}) : siteName;	
 	const topMenuLi = menuItems.sort(sortByOrderKey).map((row, i) => {
 		
 		const hasSubmenu = (row.hasOwnProperty('submenu')) ? true : false;

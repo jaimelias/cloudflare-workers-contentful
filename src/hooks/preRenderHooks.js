@@ -1,14 +1,13 @@
-export const enqueueHook = ({store, accommodationTypes, labels}) => {
+export const enqueueHook = ({store, accommodationTypes, labels, thisPageHasForm}) => {
 	
 	const {dispatch, getState} = store;
-	const website = getState().contentful.data.websites[0];
+	const website = getState().contentful.data.websites.entries[0];
 	const {type, currentLanguage, crm, facebookPixel, googleAnalytics} = website;
-	const {slug} = getState().request.data;
 	
 	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: bootstrapScripts}});
 	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: trackingScripts({facebookPixel, googleAnalytics})}});
 	
-	if(slug)
+	if(thisPageHasForm)
 	{
 		if(typeof crm === 'object')
 		{
