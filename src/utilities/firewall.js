@@ -113,9 +113,9 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 		const ip = headers.get('CF-Connecting-IP');
 		const country = headers.get('cf-ipcountry');
 		
-		if(Array.isArray(bypassCountryRedirectIp) && Array.isArray(redirectCountryCodes))
+		if(Array.isArray(redirectCountryCodes))
 		{
-			if(!bypassCountryRedirectIp.includes(ip) && redirectCountryCodes.includes(country))
+			if(isValidIpArr({ipArr: bypassCountryRedirectIp, ip}) && redirectCountryCodes.includes(country))
 			{
 				output = true;
 			}
@@ -124,3 +124,32 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 	
 	return output;
 };
+
+const isValidIpArr = ({ipArr, ip}) => {
+	let output = false;
+	
+	if(typeof ipArr === 'object')
+	{
+		if(ipArr.length > 0)
+		{
+			if(!ipArr.includes(ip))
+			{
+				output = true;
+			}
+			else
+			{
+				output = false;
+			}
+		}
+		else
+		{
+			output = true;
+		}
+	}
+	else
+	{
+		output = true;
+	}
+	
+	return output;
+}

@@ -100,9 +100,24 @@ const RenderImage = async ({imageUrl, store}) => {
 	}
 	else
 	{
+		const {status, statusText, headers} = response;
+
+		if(status === 403)
+		{
+			const body = await response.text();
+			
+			if(body.includes('hotlinking'))
+			{
+				return {
+					status: 302,
+					body: imageUrl
+				}
+			}		
+		}
+		
 		return {
-			status: response.status,
-			body: response.statusText
+			status,
+			body: statusText
 		}
 	}
 };
