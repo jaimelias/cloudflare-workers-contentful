@@ -6,6 +6,9 @@ export default class RenderOutput {
 	{
 		this.store = store;
 	}
+	renderCache(){
+		return this.cache.match(this.cacheKey).then(res => res);
+	}
 	payload(payload)
 	{
 		const dispatch = this.store.dispatch;
@@ -60,26 +63,42 @@ export default class RenderOutput {
 	response()
 	{
 		const {body, status, headers} = this.store.getState().response;
-			
+		const isHtml = contentTypeIsHtml({headers});
+		let response = '';
+		
 		if(status === 301 || status === 302)
 		{
-			return Response.redirect(body, status);
+			response = new Response.redirect(body, status);
 		}
 		else
-		{		
-			const response = new Response(body, {status});
+		{
+			const newResponse = new Response(body, {status});
 					
 			for(let key in headers)
 			{
-				response.headers.set(key, headers[key])
+				newResponse.headers.set(key, headers[key])
 			}
 			
 			for(let key in secureHeaders)
 			{
-				response.headers.set(key, secureHeaders[key])
+				newResponse.headers.set(key, secureHeaders[key])
 			}
+			
+			if(isHtml)
+			{
+				response = htmlRewriter().transform(newResponse);
+				
+				if(ENVIRONMENT === 'production' && status === 200)
+				{
+					response.headers.append('Cache-Control', 'max-age=3600');	
+				}
+			}
+			else
+			{
+				response = newResponse;	
+			}
+		}
 
-			return (contentTypeIsHtml({headers})) ? htmlRewriter().transform(response) : response;		
-		}		
+		return response;
 	}
 }

@@ -8,14 +8,13 @@ import RenderOutput from './src/utilities/render';
 import Firewall from './src/utilities/firewall';
 
 addEventListener('fetch', event => {
-    event.respondWith(firewallInit({
-		request: event.request
-	}));
+    event.respondWith(firewallInit(event));
 });
 
 
-const firewallInit = async ({request}) => {
+const firewallInit = async (event) => {
 
+	const {request} = event;
 	const data = Utilities.parseRequest(request);
 	const configureStore = ReduxStore({zone: data.pathNameArr.first});
 	const render = new RenderOutput(configureStore);
