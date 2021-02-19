@@ -22,17 +22,15 @@ const firewallInit = async (event) => {
 	const firewall = new Firewall(store).init(request);	
 	const responseInCache = await render.renderCache();
 	
-	if(responseInCache)
-	{
-		return responseInCache;
-	}
-
 	if(firewall.status !== 200)
 	{
 		return render.payload(firewall);
 	}
 	
-
+	if(responseInCache)
+	{
+		return responseInCache;
+	}
 
 	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data}});
 	

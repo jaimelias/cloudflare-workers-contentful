@@ -80,7 +80,7 @@ export default class RenderOutput {
 		
 		if(status === 301 || status === 302)
 		{
-			response = new Response.redirect(body, status);
+			response = Response.redirect(body, status);
 		}
 		else
 		{

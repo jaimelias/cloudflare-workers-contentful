@@ -108,14 +108,18 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 	
 	let output = false;
 			
-	if(CONTENTFUL_DOMAIN === hostName && isUrl(redirectCountryCodesUrl))
+	if(isUrl(redirectCountryCodesUrl))
 	{
 		const ip = headers.get('CF-Connecting-IP');
 		const country = headers.get('cf-ipcountry');
 		
 		if(Array.isArray(redirectCountryCodes))
 		{
-			if(isValidIpArr({ipArr: bypassCountryRedirectIp, ip}) && redirectCountryCodes.includes(country))
+			const bypassByIp = bypassCountryRedirectIp || [];
+			
+			console.log({bypassByIp})
+			
+			if(!bypassByIp.includes(ip) && redirectCountryCodes.includes(country))
 			{
 				output = true;
 			}
@@ -124,32 +128,3 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 	
 	return output;
 };
-
-const isValidIpArr = ({ipArr, ip}) => {
-	let output = false;
-	
-	if(typeof ipArr === 'object')
-	{
-		if(ipArr.length > 0)
-		{
-			if(!ipArr.includes(ip))
-			{
-				output = true;
-			}
-			else
-			{
-				output = false;
-			}
-		}
-		else
-		{
-			output = true;
-		}
-	}
-	else
-	{
-		output = true;
-	}
-	
-	return output;
-}
