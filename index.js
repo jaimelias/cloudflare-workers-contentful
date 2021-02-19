@@ -17,14 +17,22 @@ const firewallInit = async (event) => {
 	const {request} = event;
 	const data = Utilities.parseRequest(request);
 	const configureStore = ReduxStore({zone: data.pathNameArr.first});
-	const render = new RenderOutput(configureStore);
+	const render = new RenderOutput({store: configureStore, event});
 	const store = {...configureStore, render};
-	const firewall = new Firewall(store).init(request);
+	const firewall = new Firewall(store).init(request);	
+	const responseInCache = await render.renderCache();
+	
+	if(responseInCache)
+	{
+		return responseInCache;
+	}
 
 	if(firewall.status !== 200)
 	{
 		return render.payload(firewall);
 	}
+	
+
 
 	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data}});
 	

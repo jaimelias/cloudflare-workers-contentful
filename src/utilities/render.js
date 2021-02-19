@@ -2,12 +2,24 @@ import {htmlRewriter} from './htmlRewriter';
 const {contentTypeIsHtml, secureHeaders} = Utilities;
 
 export default class RenderOutput {
-	constructor(store)
+	constructor({store, event})
 	{
 		this.store = store;
+		this.event = event;
+		this.cache = caches.default;
+		this.setCacheKey();
+		this.renderCache();
+	}
+	setCacheKey()
+	{
+		const {request, request: {url, headers}} = this.event;
+		const countryCode = headers.get('cf-ipcountry') || '';
+		let cacheUrl = new URL(url);
+		cacheUrl.hash = countryCode;		
+		this.cacheKey = new Request(cacheUrl.toString(), request);
 	}
 	renderCache(){
-		return this.cache.match(this.cacheKey).then(res => res);
+		return this.cache.match(this.cacheKey).then(response => response);		
 	}
 	payload(payload)
 	{
@@ -90,7 +102,8 @@ export default class RenderOutput {
 				
 				if(ENVIRONMENT === 'production' && status === 200)
 				{
-					response.headers.append('Cache-Control', 'max-age=3600');	
+					response.headers.append('Cache-Control', 'max-age=3600');
+					this.event.waitUntil(this.cache.put(this.cacheKey, response.clone()));
 				}
 			}
 			else

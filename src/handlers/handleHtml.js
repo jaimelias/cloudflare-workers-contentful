@@ -17,7 +17,6 @@ const parseHtml = async ({store}) => {
 
 	const template = templateHooks({store});
 	const {status} = store.getState().template;
-	
 	return {
 		status,
 		headers: {
