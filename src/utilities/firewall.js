@@ -22,7 +22,7 @@ export default class Firewall {
 	rules()
 	{
 		const {getState} = this.store;
-		const {headers, hostName, pathName} = getState().request.data;
+		const {headers, hostName, pathName, url} = getState().request.data;
 		const {siteUrl, firewall} = getState().contentful.data.websites.entries[0];
 		const referer = headers.get('Referer') || '';
 	
@@ -38,26 +38,43 @@ export default class Firewall {
 				redirectCountryCodesUrl
 			});
 	
+			let body = '';
+			const doSoftRedirect = () => (hostName !== CONTENTFUL_DOMAIN || !url.startsWith('https')) ? true : false;
+			const softRedirect = ({text, url}) => (`<!doctype html><html><head><meta http-equiv="refresh" content="2;url=${url}" /></head><body>${text} <a href="${url}">${url}</a></body></html>`);
+			let labelRedirect = 'Redirecting to';
+			let htmlHeader = {'content-type': 'text/html;charset=UTF-8'};
+			
 			if(redirectByCountryOk)
 			{
-				if(referer.includes('instagram.com'))
+				if(doSoftRedirect())
 				{
-					const body = `<!doctype html><html><head><meta http-equiv="refresh" content="2;url=${redirectCountryCodesUrl}" /></head><body>Redirecting to <a href="${redirectCountryCodesUrl}">${redirectCountryCodesUrl}</a></body></html>`
-					return {status: 200, body};
+					body = softRedirect({text: labelRedirect, url: redirectCountryCodesUrl});
+					
+					return {status: 200, body, headers: htmlHeader};
 				}
-				return {status: 302, body: redirectCountryCodesUrl, headers: {'content-type': 'text/html;charset=UTF-8'}};
+				else
+				{
+					return {status: 302, body: redirectCountryCodesUrl};
+				}
 			}
 	
 			const batchRedirectUrl = getBatchRedirectUrl({pathName, batchRedirect, siteUrl, hostName});
 	
 			if(batchRedirectUrl)
 			{
-				return {status: 301, body: batchRedirectUrl};
+				if(doSoftRedirect())
+				{
+					body = softRedirect({text: labelRedirect, url: batchRedirectUrl});
+					return {status: 200, body, headers: htmlHeader};
+				}
+				else{
+					return {status: 301, body: batchRedirectUrl};
+				}
 			}
 	
 		}
 		
-		return {status: 200};
+		return {status: 202};
 	}
 };
 
@@ -119,7 +136,7 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 		const ip = headers.get('CF-Connecting-IP');
 		const country = headers.get('cf-ipcountry');
 		
-		if(Array.isArray(redirectCountryCodes))
+		if(Array.isArray(redirectCountryCodes) && ip && country)
 		{
 			const bypassByIp = bypassCountryRedirectIp || [];
 			

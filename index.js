@@ -42,7 +42,7 @@ const firewallRules = async ({store}) => {
 
 	const firewall = new Firewall(store).rules();
 
-	if(firewall.status !== 200)
+	if(firewall.status !== 202)
 	{
 		return store.render.payload(firewall);
 	}

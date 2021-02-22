@@ -45,12 +45,14 @@ export const templateHooks = ({store}) => {
 
 	if(status === 200)
 	{
-		const canonicalUrl = langItems.find(i => i.lang === currentLanguage);
+		let canonicalUrl = langItems.find(i => i.lang === currentLanguage);
 	
 		if(canonicalUrl)
 		{
+			canonicalUrl = new URL(canonicalUrl.href, `https://${CONTENTFUL_DOMAIN}`);
+
 			render.addHooks({
-				content: `<link rel="canonical" href="${canonicalUrl.href}" >`,
+				content: `<link rel="canonical" href="${canonicalUrl}" >`,
 				order: 10,
 				location: 'head'
 			});
