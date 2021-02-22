@@ -20,9 +20,9 @@ const firewallInit = async (event) => {
 	const store = {...configureStore, render};
 	const firewall = new Firewall(store).init(request);	
 	const responseInCache = await render.renderCache();
-	
+		
 	if(firewall.status !== 200)
-	{
+	{	
 		return render.payload(firewall);
 	}
 	
@@ -42,7 +42,7 @@ const firewallRules = async ({store}) => {
 
 	const firewall = new Firewall(store).rules();
 
-	if(firewall.status !== 202)
+	if(firewall.status !== 200)
 	{
 		return store.render.payload(firewall);
 	}

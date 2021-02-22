@@ -37,44 +37,35 @@ export default class Firewall {
 				redirectCountryCodes,
 				redirectCountryCodesUrl
 			});
-	
-			let body = '';
-			const doSoftRedirect = () => (hostName !== CONTENTFUL_DOMAIN || !url.startsWith('https')) ? true : false;
-			const softRedirect = ({text, url}) => (`<!doctype html><html><head><meta http-equiv="refresh" content="2;url=${url}" /></head><body>${text} <a href="${url}">${url}</a></body></html>`);
-			let labelRedirect = 'Redirecting to';
-			let htmlHeader = {'content-type': 'text/html;charset=UTF-8'};
 			
 			if(redirectByCountryOk)
 			{
-				if(doSoftRedirect())
+				return {status: 302, body: redirectCountryCodesUrl};
+				if(ENVIRONMENT === 'production')
 				{
-					body = softRedirect({text: labelRedirect, url: redirectCountryCodesUrl});
 					
-					return {status: 200, body, headers: htmlHeader};
 				}
-				else
-				{
-					return {status: 302, body: redirectCountryCodesUrl};
-				}
+				else {
+					console.log('redirect not available in dev mode');
+				}				
 			}
 	
 			const batchRedirectUrl = getBatchRedirectUrl({pathName, batchRedirect, siteUrl, hostName});
 	
 			if(batchRedirectUrl)
 			{
-				if(doSoftRedirect())
+				if(ENVIRONMENT === 'production')
 				{
-					body = softRedirect({text: labelRedirect, url: batchRedirectUrl});
-					return {status: 200, body, headers: htmlHeader};
-				}
-				else{
 					return {status: 301, body: batchRedirectUrl};
 				}
+				else {
+					console.log('redirect not available in dev mode');
+				}				
 			}
 	
 		}
 		
-		return {status: 202};
+		return {status: 200};
 	}
 };
 
@@ -113,13 +104,7 @@ const getBatchRedirectUrl = ({pathName, batchRedirect, siteUrl}) => {
 		
 		if(find)
 		{
-			if(ENVIRONMENT === 'production')
-			{
-				output = (isUrl(find[1])) ? encodeURI(find[1]) : new URL(encodeURIComponent(find[1]), siteUrl).href;
-			}
-			else {
-				console.log('redirect not available in dev mode');
-			}
+			output = (isUrl(find[1])) ? encodeURI(find[1]) : new URL(encodeURIComponent(find[1]), siteUrl).href;
 		}
 	}
 	
