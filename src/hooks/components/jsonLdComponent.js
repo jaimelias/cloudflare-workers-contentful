@@ -1,7 +1,7 @@
-export const JsonLd = ({website, slug, title}) => {
+export const JsonLd = ({website}) => {
 	
 	let output = '';
-	const {siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
+	const {siteName, title, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
 	
 	
 	let ld = {
@@ -75,10 +75,7 @@ export const JsonLd = ({website, slug, title}) => {
 		}
 	}
 				
-	if(!slug)
-	{
-		output = `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;		
-	}
+	output = `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;	
 	
 	return output;
 };

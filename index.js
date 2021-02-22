@@ -11,7 +11,6 @@ addEventListener('fetch', event => {
     event.respondWith(firewallInit(event));
 });
 
-
 const firewallInit = async (event) => {
 
 	const {request} = event;

@@ -6,6 +6,7 @@ import { response } from './response';
 import { enqueue } from './enqueue';
 import { contentful } from './contentful';
 import { template } from './template';
+import { hooks } from './hooks';
 
 export const ReduxStore = ({zone}) => {
 
@@ -42,7 +43,8 @@ export const ReduxStore = ({zone}) => {
 			response,
 			enqueue,
 			contentful,
-			template
+			template,
+			hooks
         }),
         applyMiddleware(...middleware)
     );

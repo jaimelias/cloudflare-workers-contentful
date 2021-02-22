@@ -1,4 +1,4 @@
-export const enqueueScripts = ({scripts, location, type}) => {
+export const renderScripts = ({scripts, location, type}) => {
 
 	let output = '';
 	const {sortByOrderKey, isUrl} = Utilities;
@@ -137,7 +137,7 @@ const Link = ({pathName, file, remote, concat}) => {
 		file.forEach(r => {
 			fileName.push(r.file);
 			r.inline.forEach(i => inline.push({
-				script: `<style type="text/css">${i.content}</style>\n`, 
+				script: `<style type="text/css">${i.content}</style>`, 
 				location: i.location
 			}));			
 		});
@@ -145,7 +145,7 @@ const Link = ({pathName, file, remote, concat}) => {
 	else
 	{
 		file.inline.forEach(i => inline.push({
-			script: `<style type="text/css">${i.content}</style>\n`, 
+			script: `<style type="text/css">${i.content}</style>`, 
 			location: i.location
 		}));
 	}
@@ -153,7 +153,7 @@ const Link = ({pathName, file, remote, concat}) => {
 	fileName.join(',');
 	
 	const url = (remote) ? fileName : `/static/${pathName}${fileName}`;
-	output.push(`<link rel="stylesheet" href="${url}">\n`);
+	output.push(`<link rel="stylesheet" href="${url}">`);
 	
 	inline.forEach(row => {		
 		switch(row.location)
@@ -168,8 +168,8 @@ const Link = ({pathName, file, remote, concat}) => {
 				output.unshift(row.script);
 		}
 	});
-	
-	return output.join('');
+
+	return output.join('\n\t\t');
 };
 
 const Script = ({pathName, file, async, defer, remote, concat}) => {
@@ -183,7 +183,7 @@ const Script = ({pathName, file, async, defer, remote, concat}) => {
 		file.forEach(r => {
 			fileName.push(r.file);
 			r.inline.forEach(i => inline.push({
-				script: `<script>${i.content}</script>\n`, 
+				script: `<script>${i.content}</script>`, 
 				location: i.location
 			}));			
 		});
@@ -192,7 +192,7 @@ const Script = ({pathName, file, async, defer, remote, concat}) => {
 	{
 		fileName.push(file.file);
 		file.inline.forEach(i => inline.push({
-			script: `<script>${i.content}</script>\n`, 
+			script: `<script>${i.content}</script>`, 
 			location: i.location
 		}));		
 	}
@@ -201,7 +201,7 @@ const Script = ({pathName, file, async, defer, remote, concat}) => {
 	
 	const url = (remote) ? fileName : `/static/${pathName}${fileName}`;
 	
-	output.push(`<script src="${url}" ${async ? 'async' : ''} ${defer ? 'defer' : ''}></script>\n`);
+	output.push(`<script src="${url}" ${async ? 'async' : ''} ${defer ? 'defer' : ''}></script>`);
 	
 	inline.forEach(row => {
 		switch(row.location)
@@ -217,5 +217,5 @@ const Script = ({pathName, file, async, defer, remote, concat}) => {
 		}
 	});
 		
-	return output.join('');
+	return output.join('\n\t\t');
 };

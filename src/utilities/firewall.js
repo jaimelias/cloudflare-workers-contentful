@@ -24,6 +24,7 @@ export default class Firewall {
 		const {getState} = this.store;
 		const {headers, hostName, pathName} = getState().request.data;
 		const {siteUrl, firewall} = getState().contentful.data.websites.entries[0];
+		const referer = headers.get('Referer') || '';
 	
 		if(typeof firewall === 'object')
 		{
@@ -39,7 +40,12 @@ export default class Firewall {
 	
 			if(redirectByCountryOk)
 			{
-				return {status: 302, body: redirectCountryCodesUrl};
+				if(referer.includes('instagram.com'))
+				{
+					const body = `<!doctype html><html><head><meta http-equiv="refresh" content="2;url=${redirectCountryCodesUrl}" /></head><body>Redirecting to <a href="${redirectCountryCodesUrl}">${redirectCountryCodesUrl}</a></body></html>`
+					return {status: 200, body};
+				}
+				return {status: 302, body: redirectCountryCodesUrl, headers: {'content-type': 'text/html;charset=UTF-8'}};
 			}
 	
 			const batchRedirectUrl = getBatchRedirectUrl({pathName, batchRedirect, siteUrl, hostName});
@@ -116,8 +122,6 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 		if(Array.isArray(redirectCountryCodes))
 		{
 			const bypassByIp = bypassCountryRedirectIp || [];
-			
-			console.log({bypassByIp})
 			
 			if(!bypassByIp.includes(ip) && redirectCountryCodes.includes(country))
 			{

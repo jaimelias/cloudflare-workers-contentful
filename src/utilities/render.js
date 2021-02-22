@@ -1,5 +1,5 @@
 import {htmlRewriter} from './htmlRewriter';
-const {contentTypeIsHtml, secureHeaders} = Utilities;
+const {contentTypeIsHtml, secureHeaders, sortByOrderKey} = Utilities;
 
 export default class RenderOutput {
 	constructor({store, event})
@@ -9,6 +9,40 @@ export default class RenderOutput {
 		this.cache = caches.default;
 		this.setCacheKey();
 		this.renderCache();
+	}
+	addHooks(payload){
+		this.store.dispatch({type: ActionTypes.ADD_HOOKS, payload: {
+			content: payload.content,
+			order: payload.order || 50,
+			location: payload.location
+		}});		
+	}
+	applyHooks(location) {
+		
+		let output = '';
+		const payload = this.store.getState().hooks || [];
+		
+		if(typeof payload === 'object')
+		{
+			if(Array.isArray(payload.content[location]))
+			{
+				output = payload.content[location]
+				.filter(p => typeof p === 'object')
+				.filter(p => typeof p.content === 'string')
+				.map(p => {
+					if(!p.order)
+					{
+						p.order = 50;
+					}
+					return p;
+				})
+				.sort(sortByOrderKey)
+				.map(p => p.content)
+				.join('\n\t\t')
+			}
+		}
+		
+		return output;
 	}
 	setCacheKey()
 	{

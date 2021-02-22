@@ -1,4 +1,40 @@
-export const IndexPageComponent = ({website, labels, GalleryComponent}) => {
+import {GalleryComponent} from './galleryComponent';
+import {JsonLd} from './jsonLdComponent';
+
+export default class IndexComponent {
+
+	constructor({store, labels}){
+		this.store = store;
+		this.labels = labels;
+	}
+	init()
+	{
+		const {labels, store} = this;
+		const {getState, render, dispatch} = store;
+		const website = getState().contentful.data.websites.entries[0];
+		const {imageGallery, title, description} = website;
+		
+		render.addHooks({
+			content: JsonLd({website: website}),
+			order: 60,
+			location: 'head'
+		});			
+		
+		dispatch({
+			type: ActionTypes.FILTER_TEMPLATE, 
+			payload: {
+				title,
+				description,
+				content: IndexWrapper({website, labels}),
+				imageGallery,
+				status: 200
+			}
+		});
+	}
+}
+
+
+const IndexWrapper = ({website, labels}) => {
 	
 	const {title, description, content, imageGallery, amenities, included, notIncluded} = website;
 	const {labelIncluded, labelNotIncluded, labelAmenities} = labels;
