@@ -3,28 +3,42 @@ import {formScripts} from './scripts/formScripts';
 import {pickadateScripts} from './scripts/pickadateScripts';
 import {trackingScripts} from './scripts/trackingScripts';
 
-export const enqueueHook = ({store, accommodationTypes, labels, hasForm}) => {
-	
-	const {dispatch, getState} = store;
-	const website = getState().contentful.data.websites.entries[0];
-	const {type, currentLanguage, crm, facebookPixel, googleAnalytics} = website;
-	
-	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: bootstrapScripts}});
-	dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload:{scripts: trackingScripts({facebookPixel, googleAnalytics})}});
-	
-	if(hasForm)
+export default class EnqueueHooks
+{
+	constructor({store, accommodationTypes, labels, hasForm}){
+		this.store = store;
+		this.accommodationTypes = accommodationTypes;
+		this.labels = labels;
+		this.hasForm = hasForm;
+		this.init();
+	}
+	init()
 	{
-		if(typeof crm === 'object')
+		const {accommodationTypes, labels, hasForm, store} = this;
+		const website = store.getState().contentful.data.websites.entries[0];
+		const {type, currentLanguage, crm, facebookPixel, googleAnalytics} = website;
+		
+		this.enqueue({scripts: bootstrapScripts});
+		this.enqueue({scripts: trackingScripts({facebookPixel, googleAnalytics})});
+		
+		if(hasForm)
 		{
-			if(crm.hasOwnProperty('reCaptchaSiteKey'))
+			if(typeof crm === 'object')
 			{
-				dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: formScripts(crm.reCaptchaSiteKey)}});
+				if(crm.hasOwnProperty('reCaptchaSiteKey'))
+				{
+					this.enqueue({scripts: formScripts(crm.reCaptchaSiteKey)});
+				}
+			}
+			
+			if(accommodationTypes.includes(type))
+			{
+				this.enqueue({scripts: pickadateScripts({currentLanguage, labels})});
 			}
 		}
-		
-		if(accommodationTypes.includes(type))
-		{
-			dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload: {scripts: pickadateScripts({currentLanguage, labels})}});
-		}
 	}
-};
+	enqueue(payload)
+	{
+		this.store.dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload});
+	}
+}

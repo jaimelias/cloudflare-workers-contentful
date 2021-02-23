@@ -1,6 +1,5 @@
 import {htmlRewriter} from './htmlRewriter';
-const {contentTypeIsHtml, secureHeaders, sortByOrderKey} = Utilities;
-const doSoftRedirect = ({hostName, url, status}) => ((status === 301 || status === 302) && (hostName !== CONTENTFUL_DOMAIN || !url.startsWith('https'))) ? true : false;
+const {contentTypeIsHtml, secureHeaders, sortByOrderKey, softRedirectBody, doSoftRedirect} = Utilities;
 
 export default class RenderOutput {
 	constructor({store, event})
@@ -70,14 +69,12 @@ export default class RenderOutput {
 			
 			if(softRedirect)
 			{
-				const url = payload.body;
-
 				payload = {
 					status: 200,
 					headers: {
 						'content-type': 'text/html;charset=UTF-8'
 					},
-					body: `<!doctype html><html><head><meta http-equiv="refresh" content="2;url=${url}" /><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></head><body><a href="${url}">${url}</a></body></html>`
+					body: softRedirectBody(payload.body)
 				}
 			}
 			

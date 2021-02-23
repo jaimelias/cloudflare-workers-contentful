@@ -3,7 +3,7 @@ import {TopMenu, TopMenuContact} from './components/topMenuComponent';
 import {Footer} from './components/footerComponent';
 import {getMenuItems} from '../menuItems';
 import {renderScripts} from '../enqueue';
-import {enqueueHook} from './enqueueHooks';
+import EnqueueHooks from './enqueueHooks';
 import PageHooks from './pageHooks';
 
 const {Favicon, listLangItems, pageHasForm} = Utilities;
@@ -31,7 +31,7 @@ export const templateHooks = ({store}) => {
 	const hasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, slug});	
 		
 	new PageHooks({store, hasForm, sharedData, labels});
-	enqueueHook({store, accommodationTypes, labels, hasForm});
+	new EnqueueHooks({store, accommodationTypes, labels, hasForm});
 	
 	const {title, description, content, status} = getState().template;
 	

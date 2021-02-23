@@ -40,10 +40,9 @@ export default class Firewall {
 			
 			if(redirectByCountryOk)
 			{
-				return {status: 302, body: redirectCountryCodesUrl};
 				if(ENVIRONMENT === 'production')
 				{
-					
+					return {status: 302, body: redirectCountryCodesUrl};
 				}
 				else {
 					console.log('redirect not available in dev mode');
