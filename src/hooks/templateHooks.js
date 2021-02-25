@@ -1,8 +1,6 @@
-import * as sharedData from '../utilities/sharedData'
 import {TopMenu, TopMenuContact} from './components/topMenuComponent';
 import {Footer} from './components/footerComponent';
-import {getMenuItems} from '../menuItems';
-import {renderScripts} from '../enqueue';
+import {renderScripts} from '../utilities/renderScripts';
 import EnqueueHooks from './enqueueHooks';
 import PageHooks from './pageHooks';
 
@@ -12,26 +10,21 @@ const {langLabels} = LangConfig;
 export const templateHooks = ({store}) => {
 
 	const {getState, render} = store;
-	const {accommodationTypes} = sharedData;
 	const pages = getState().contentful.data.pages.entries;
-	const {hostName, slug, homeUrl} = getState().request.data;
+	const request = getState().request.data;
+	const {slug} = request;
 	const website = getState().contentful.data.websites.entries[0];
 	const {
 		siteName,
 		currentLanguage,
-		telephoneNumber,
-		favicon,
-		actionButtonUrl,
-		actionButtonText,
 		defaultLanguage
 	} = website;
 	
-	const langItems = listLangItems({defaultLanguage, currentLanguage, pages, slug});
+	const langItems = listLangItems({website, request});
 	const labels = langLabels[currentLanguage].labels;
-	const hasForm = pageHasForm({actionButtonText, actionButtonUrl, hostName, slug});	
 		
-	new PageHooks({store, hasForm, sharedData, labels});
-	new EnqueueHooks({store, accommodationTypes, labels, hasForm});
+	new PageHooks({store, labels});
+	new EnqueueHooks({store, labels});
 	
 	const {title, description, content, status} = getState().template;
 	
@@ -81,17 +74,17 @@ export const templateHooks = ({store}) => {
 
 	render.addHooks({
 		content: TopMenu({
-			menuItems: getMenuItems({pages, langItems, currentLanguage, defaultLanguage}),
-			hostName, 
+			langItems,
+			pages,
 			website,
-			homeUrl
+			request
 		}),
 		order: 20,
 		location: 'body'
 	});	
 		
 	render.addHooks({
-		content: TopMenuContact({telephoneNumber, labelCallUs: labels.labelCallUs}),
+		content: TopMenuContact({website, labels}),
 		order: 15,
 		location: 'body'
 	});	
@@ -103,7 +96,7 @@ export const templateHooks = ({store}) => {
 	});
 
 	render.addHooks({
-		content: Favicon({favicon}),
+		content: Favicon({website}),
 		order: 10,
 		location: 'head'
 	});

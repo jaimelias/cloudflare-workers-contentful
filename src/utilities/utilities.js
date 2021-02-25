@@ -7,9 +7,11 @@ export const formatDate = ({date, lang}) => {
 	return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
-export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, slug}) => {
+export const pageHasForm = ({website, request}) => {
 	
 	let output = false;
+	const {actionButtonText, actionButtonUrl} = website;
+	const {hostName, slug} = request;
 	
 	if(actionButtonText && actionButtonUrl)
 	{
@@ -29,7 +31,9 @@ export const pageHasForm = ({actionButtonText, actionButtonUrl, hostName, slug})
 	return output;
 };
 
-export const Favicon = ({favicon}) => {
+export const Favicon = ({website}) => {
+	
+	const {favicon} = website;
 	
 	const faviconObj = (favicon) ? {
 		type: favicon.type, 
@@ -181,8 +185,10 @@ export const findPageBySlug = ({slug, pages}) => {
 	return output;
 };
 
-export const listLangItems = ({defaultLanguage, currentLanguage, pages, slug}) => {
+export const listLangItems = ({website, request}) => {
 
+	const {defaultLanguage, currentLanguage, pages} = website;	
+	const {slug} = request;
 	const page = findPageBySlug({slug, pages});
 	
 	let output = [];
@@ -325,8 +331,9 @@ const getSlug = ({pathNameArr, hasPagination}) => {
 	.join('/');
 }
 
-export const parseRequest = (request) => {
+export const parseRequest = (event) => {
 	
+	const {request, waitUntil} = event;
 	let requestUrl = encodeURI(decodeURI(request.url));
 	const url = new URL(requestUrl);
 	const {pathname: pathName, searchParams, hostname: hostName} = url;	
@@ -338,6 +345,7 @@ export const parseRequest = (request) => {
 	const homeUrl = (langList.includes(pathNameArr.first)) ? `/${pathNameArr.first}/` : '/';
 
 	return {
+		waitUntil,
 		...request,
 		homeUrl,
 		url: requestUrl,

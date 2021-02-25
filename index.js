@@ -14,7 +14,7 @@ addEventListener('fetch', event => {
 const firewallInit = async (event) => {
 
 	const {request} = event;
-	const data = Utilities.parseRequest(request);
+	const data = Utilities.parseRequest(event);
 	const configureStore = ReduxStore({zone: data.pathNameArr.first});
 	const render = new RenderOutput({store: configureStore, event});
 	const store = {...configureStore, render};

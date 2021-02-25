@@ -1,6 +1,5 @@
 import {sendGridSend} from '../utilities/crm';
-import {formFields} from '../utilities/sharedData';
-
+const {formFields} = SharedData;
 
 export const handleApi = async ({store}) =>
 {
@@ -23,7 +22,7 @@ const handleFormRequest = async ({store}) => {
 	
 	const {langList} = LangConfig;
 	const {getState} = store;
-	const payload = await getState().request.request.json();
+	const payload = await getState().event.request.json();
 	
 	if(payload)
 	{

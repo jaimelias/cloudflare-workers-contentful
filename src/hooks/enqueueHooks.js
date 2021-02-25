@@ -2,22 +2,24 @@ import {bootstrapScripts} from './scripts/bootstrapScripts';
 import {formScripts} from './scripts/formScripts';
 import {pickadateScripts} from './scripts/pickadateScripts';
 import {trackingScripts} from './scripts/trackingScripts';
+const {accommodationTypes} = SharedData;
+const {pageHasForm} = Utilities;
 
 export default class EnqueueHooks
 {
-	constructor({store, accommodationTypes, labels, hasForm}){
+	constructor({store, labels}){
 		this.store = store;
-		this.accommodationTypes = accommodationTypes;
 		this.labels = labels;
-		this.hasForm = hasForm;
 		this.init();
 	}
 	init()
 	{
-		const {accommodationTypes, labels, hasForm, store} = this;
-		const website = store.getState().contentful.data.websites.entries[0];
+		const {labels, store} = this;
+		const {getState} = store;
+		const website = getState().contentful.data.websites.entries[0];
+		const request = getState().request.data;
 		const {type, currentLanguage, crm, facebookPixel, googleAnalytics} = website;
-		
+		const hasForm = pageHasForm({website, request});
 		this.enqueue({scripts: bootstrapScripts});
 		this.enqueue({scripts: trackingScripts({facebookPixel, googleAnalytics})});
 		

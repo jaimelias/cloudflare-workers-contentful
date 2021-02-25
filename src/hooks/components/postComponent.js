@@ -9,12 +9,18 @@ export default class PostComponent {
 	init(post)
 	{
 		const {store} = this;
-		const {dispatch} = store;
+		const {dispatch, render} = store;
 		const {imageGallery, title, content, description, currentLanguage, updatedAt} = post;
 		
 		let entryContent = '';
 		entryContent += GalleryComponent({data: imageGallery});
 		entryContent = (typeof content === 'string') ? marked(content) : '';
+
+		render.addHooks({
+			content: JsonLd({post, store}),
+			order: 60,
+			location: 'head'
+		});	
 
 		const date = Utilities.formatDate({
 			date: updatedAt,
@@ -54,4 +60,31 @@ const postWrapper = ({content, title, date}) => {
 			</div>
 		</div>
 	`;
+};
+
+const JsonLd = ({post, store}) => {
+
+	const {imageGallery, title, description, currentLanguage, updatedAt, createdAt} = post;
+
+	let ld = {
+		'@context': 'http://schema.org',
+		'@type': 'BlogPosting',
+		dateCreated: createdAt,
+		datePublished: createdAt,
+		dateModified: updatedAt,
+		inLanguage: currentLanguage,
+		headline: title,
+		articleBody: description
+	};
+
+	if(Array.isArray(imageGallery))
+	{
+		if(typeof imageGallery[0] === 'object')
+		{
+			ld.image = `/images/${imageGallery[0].fileName}`;
+		}
+	}
+
+
+	return `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;
 };

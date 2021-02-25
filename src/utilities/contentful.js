@@ -1,12 +1,12 @@
 const {langList} = LangConfig;
-const {stringToHash, getFallBackLang} = Utilities;
+const {getFallBackLang} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
 export const validContentTypes = ['websites', 'pages', 'posts'];
 
 export const getEntries = async ({contentType, websiteId, store}) => {
 	
-	let output = {status: 500};
+	
 	const KV = await args();
 	const init = await getInit({contentType});
 	const {dispatch, getState} = store;
@@ -17,6 +17,7 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 		const {altLang, pageNumber, slug} = request;
 		const endpoint = getEndPoint({contentType, KV, websiteId, pageNumber});
 		const response = await fetch(new URL(endpoint).href, init);
+		const {status, statusText} = response;
 		
 		if(response.ok)
 		{
@@ -25,8 +26,8 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 			
 			if(data.status === 200)
 			{
-				output = data;
 				dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...data}});
+				return data;
 			}
 			else
 			{
@@ -34,15 +35,13 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 			}
 		}
 		else
-		{
-			output.status = response.status;
-			output.statusText = response.statusText;
-			
-			dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, payload: {status: response.status, statusText: response.statusText}});
+		{			
+			dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, payload: {status, statusText}});
+			return {status, statusText};
 		}
 	}
 	
-	return output;
+	return {status: 500};
 };
 
 const getEndPoint = ({contentType, KV, websiteId, pageNumber}) => {
@@ -70,22 +69,17 @@ const getEndPoint = ({contentType, KV, websiteId, pageNumber}) => {
 
 const getInit = async ({contentType}) => {
 
-	const hash = await stringToHash({text: CONTENTFUL_DOMAIN, algorithm: 'SHA-256'});
-
-	if(hash)
-	{
-		return {
-			cf: {
-				cacheTtlByresponseStatus: {
-					'200-299': 60, 
-					'404': -1, 
-					'500-599': -1 
-				},
-				cacheEverything: true,
-				cacheKey: `${contentType}_${hash}`
-			}
-		};
-	}
+	return {
+		cf: {
+			cacheTtlByresponseStatus: {
+				'200-299': 60, 
+				'404': -1, 
+				'500-599': -1 
+			},
+			cacheEverything: true,
+			cacheKey: `${CONTENTFUL_DOMAIN}/${contentType}`
+		}
+	};
 };
 
 const args = async () => {
@@ -175,8 +169,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			total: 0
 		},
 		status: 500, 
-		statusText: `error parsing ${contentType}`,
-		total: 0
+		statusText: `error parsing ${contentType}`
 	};
 	
 	if(typeof data === 'object')
@@ -195,9 +188,12 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			items.forEach(entry => {
 				let fields = entry.fields;
 				let defaultLanguage =  '';
+				const {id, updatedAt, createdAt} = entry.sys;
+
 				let entryOutput = {
-					id: entry.sys.id,
-					updatedAt: entry.sys.updatedAt
+					id,
+					updatedAt,
+					createdAt
 				};
 				
 				if(fields.hasOwnProperty('defaultLanguage'))
@@ -292,29 +288,57 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 };
 
 export const getAllEntries = async ({store}) => {
-
-	let entryArgs = {
-		store,
-		websiteId: ''
-	};
 	
-	return getEntries({...entryArgs, 
-		contentType: 'websites'
-	})
-	.then(async (website) => {
+	const {getState, dispatch} = store;
+	const {waitUntil} = getState().request.data;
+	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
+	const kvCache = await CACHE.get(kvCacheKey);
+	let isCached = false;
 
-		const entries = validContentTypes
-		.filter(i => i !== 'websites')
-		.map(contentType => getEntries({
-			...entryArgs, 
-			contentType,
-			 websiteId: website.data.entries[0].id
-		}));
+	if(kvCache)
+	{
+		return JSON.parse(kvCache).map(entries => {
+			dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...entries}});
+			return entries;
+		});
+	}
+	else
+	{
+		let entryArgs = {
+			store,
+			websiteId: ''
+		};
+		
+		return getEntries({...entryArgs, 
+			contentType: 'websites'
+		})
+		.then(website => {
 
-		return Promise.all([website, ...entries])
-		.then(resp => resp)
-		.catch(err => store.render.payload({status: 500, body: err.message}));
+			const entries = validContentTypes
+			.filter(i => i !== 'websites')
+			.map(contentType => getEntries({
+				...entryArgs, 
+				contentType,
+				 websiteId: website.data.entries[0].id
+			}));
 
-	})
-	.catch(err => store.render.payload({status: 500, body: err.message}));
+			return Promise.all([website, ...entries])
+			.then(resp => {
+				
+				if(ENVIRONMENT === 'production')
+				{
+					waitUntil(CACHE.put(kvCacheKey, JSON.stringify(resp), {expirationTtl: 600}));
+				}
+				else
+				{
+					waitUntil(CACHE.delete(kvCacheKey));
+				}
+				
+				return resp;
+			})
+			.catch(err => store.render.payload({status: 500, body: err.message}));
+
+		})
+		.catch(err => store.render.payload({status: 500, body: err.message}));		
+	}
 };

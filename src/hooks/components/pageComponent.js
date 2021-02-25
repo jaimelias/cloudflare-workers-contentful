@@ -1,24 +1,24 @@
 import {GalleryComponent} from './galleryComponent';
 import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
-
+const {accommodationTypes} = SharedData;
+const {pageHasForm} = Utilities;
 
 export default class PageComponent {
 
-	constructor({store, labels, sharedData, hasForm}){
+	constructor({store, labels}){
 		this.store = store;
 		this.labels = labels;
-		this.hasForm = hasForm,
-		this.sharedData = sharedData;
 	}
 	init(page)
 	{
 		
-		const {labels, sharedData, hasForm, store} = this;
+		const {labels, store} = this;
 		const {getState, dispatch} = store;
 		const request = getState().request.data;
 		const website = getState().contentful.data.websites.entries[0];
 		const posts = getState().contentful.data.posts;
+		const hasForm = pageHasForm({website, request});
 		const {labelPageNumber, labelNoPosts} = labels;
 		const {slug, pageNumber, homeUrl} = request;
 		const {content, description, title, imageGallery, currentLanguage} = page;
@@ -47,7 +47,7 @@ export default class PageComponent {
 		entryContent += (hasForm) ? RequestForm({
 			type: website.type,
 			labels,
-			accommodationTypes: sharedData.accommodationTypes,
+			accommodationTypes,
 			currentLanguage
 		}) : '';
 

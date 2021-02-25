@@ -111,10 +111,14 @@ const JsonLd = ({website}) => {
 		ld.priceRange = priceRange;
 	}
 	
-	if(typeof imageGallery[0] === 'object')
+	if(Array.isArray(imageGallery))
 	{
-		ld.photo = `/images/${imageGallery[0].fileName}`;
+		if(typeof imageGallery[0] === 'object')
+		{
+			ld.photo = `/images/${imageGallery[0].fileName}`;
+		}
 	}
+
 	
 	let showAddress = false;
 	let address = {
@@ -160,8 +164,6 @@ const JsonLd = ({website}) => {
 			};
 		}
 	}
-				
-	output = `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;	
-	
-	return output;
+					
+	return `<script type="application/ld+json">${JSON.stringify(ld)}</script>`;
 };

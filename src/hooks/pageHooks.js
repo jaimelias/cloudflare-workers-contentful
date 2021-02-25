@@ -4,20 +4,18 @@ import PageComponent from './components/pageComponent';
 import PostComponent from './components/postComponent';
 
 export default class PageHooks {
-	constructor({store, hasForm, sharedData, labels})
+	constructor({store, labels})
 	{
 		this.store = store,
-		this.hasForm = hasForm,
-		this.sharedData = sharedData;
 		this.labels = labels;
 		this.init();
 		this.route();
 	}
 	init(){
-		const {store, labels, sharedData, hasForm} = this;
+		const {store, labels} = this;
 		this.homePage = new IndexComponent({store, labels});
 		this.notFoundPage = new NotFoundComponent({store, labels});
-		this.pageComponent = new PageComponent({store, labels, sharedData, hasForm});
+		this.pageComponent = new PageComponent({store, labels});
 		this.postComponent = new PostComponent({store, labels});
 	}
 	route(){
