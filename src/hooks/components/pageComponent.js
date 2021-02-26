@@ -35,7 +35,7 @@ export default class PageComponent {
 			
 			if(posts.total > 0)
 			{
-				entryContent += BlogIndexComponent({posts, homeUrl});
+				entryContent += BlogIndexComponent({store});
 			}
 			else
 			{

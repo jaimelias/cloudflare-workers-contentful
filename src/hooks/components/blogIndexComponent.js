@@ -1,17 +1,30 @@
-export const BlogIndexComponent = ({posts, homeUrl}) => renderPosts({posts, homeUrl});
+const {paginateEntries} = Utilities;
+const postsPerPage = 10;
 
-const renderPosts = ({posts, homeUrl}) => {
-	
-	let output = '';
+export const BlogIndexComponent = ({store}) => {
+	const {getState} = store;
+	const posts = getState().contentful.data.posts;
+	const request = getState().request.data;
+	const {pageNumber, homeUrl} = request;
 	const {entries} = posts;
 	
 	if(Array.isArray(entries))
 	{
-		if(entries.length > 0)
-		{
-			output = '<hr/>';
-			output += entries.map(p => stylePost({post: p, homeUrl})).join('');
-		}
+		const paginatedEntries = paginateEntries({items: entries, pageNumber, itemsPerPage: postsPerPage});
+		return IndexComponent({paginatedEntries, homeUrl});		
+	}
+};
+
+const IndexComponent = ({paginatedEntries, homeUrl}) => {
+	
+	const {data} = paginatedEntries;
+	
+	let output = '';
+	
+	if(data.length > 0)
+	{
+		output = '<hr/>';
+		output += data.map(p => stylePost({post: p, homeUrl})).join('');
 	}
 	
 	return output;
@@ -20,9 +33,9 @@ const renderPosts = ({posts, homeUrl}) => {
 const stylePost = ({post, homeUrl}) => {
 	
 	const {formatDate} = Utilities;
-	const {title, description, updatedAt, currentLanguage, slug} = post;
+	const {title, description, createdAt, currentLanguage, slug} = post;
 	const date = formatDate({
-		date: updatedAt,
+		date: createdAt,
 		lang: currentLanguage
 	});
 	

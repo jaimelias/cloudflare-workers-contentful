@@ -43,15 +43,11 @@ export const ReduxStore = ({zone}) => {
 		else
 		{
 			const splitActions = LOGGER_ACTIONS.split(',') || [];
-			const inActionTypes = (val) => typeof ActionTypes[val] === 'string';
 			
-			if(splitActions.every(inActionTypes))
-			{	
-				pushByAction = true;
-				logger = createLogger({
-					predicate: (getState, action) => splitActions.includes(action.type)
-				});
-			}
+			pushByAction = true;
+			logger = createLogger({
+				predicate: (getState, action) => splitActions.includes(action.type)
+			});
 		}
 		
 		if(pushByZone && pushByAction)

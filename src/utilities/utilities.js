@@ -329,7 +329,24 @@ const getSlug = ({pathNameArr, hasPagination}) => {
 		return output;
 	})
 	.join('/');
-}
+};
+
+export const paginateEntries = ({items, pageNumber, itemsPerPage}) => {
+	
+	const offset = (pageNumber - 1) * itemsPerPage;
+	const paginatedItems = items.slice(offset).slice(0, itemsPerPage);
+	const totalPages = Math.ceil(items.length / itemsPerPage);
+
+	return {
+		pageNumber,
+		itemsPerPage,
+		pre_page: pageNumber - 1 ? pageNumber - 1 : null,
+		next_page: (totalPages > pageNumber) ? pageNumber + 1 : null,
+		total: items.length,
+		totalPages,
+		data: paginatedItems
+	};
+};
 
 export const parseRequest = (event) => {
 	

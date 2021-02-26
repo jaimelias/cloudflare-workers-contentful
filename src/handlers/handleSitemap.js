@@ -20,7 +20,7 @@ const SitemapParse = async ({store}) => {
 	};
 	const {escUrl} = Utilities;
 	const {getState} = store;
-	const {defaultLanguage, image, domainName} = getState().contentful.data.websites.entries[0];
+	const {defaultLanguage, imageGallery, domainName} = getState().contentful.data.websites.entries[0];
 	const pages = getState().contentful.data.pages.entries;
 		
 	langList.forEach(key => {
@@ -37,12 +37,15 @@ const SitemapParse = async ({store}) => {
 				images: []
 			};
 			
-			if(image.hasOwnProperty('fileName'))
-			{
-				const imageUrl = `/images/${image.fileName}`;
-				urlObj.images.push(escUrl(new URL(imageUrl, `https://${domainName}`).href));
-			}
 			
+			if(Array.isArray(imageGallery))
+			{
+				imageGallery.forEach(image => {
+					const imageUrl = `/images/${image.fileName}`;
+					urlObj.images.push(escUrl(new URL(imageUrl, `https://${domainName}`).href));					
+				});
+			}
+
 			langList.forEach(key => {
 				if(key !== defaultLanguage)
 				{

@@ -14,8 +14,8 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 	if(KV && init)
 	{
 		const request = getState().request.data;
-		const {altLang, pageNumber, slug} = request;
-		const endpoint = getEndPoint({contentType, KV, websiteId, pageNumber});
+		const {altLang, slug} = request;
+		const endpoint = getEndPoint({contentType, KV, websiteId});
 		const response = await fetch(new URL(endpoint).href, init);
 		const {status, statusText} = response;
 		
@@ -44,7 +44,7 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 	return {status: 500};
 };
 
-const getEndPoint = ({contentType, KV, websiteId, pageNumber}) => {
+const getEndPoint = ({contentType, KV, websiteId}) => {
 	const {url, envId, spaceId, token} = KV;
 	
 	let endpoint = `${url}/spaces/${spaceId}/environments/${envId}/entries?access_token=${token}&content_type=${contentType}&include=3&locale=*`;
@@ -56,12 +56,6 @@ const getEndPoint = ({contentType, KV, websiteId, pageNumber}) => {
 	else
 	{
 		endpoint += `&links_to_entry=${websiteId}`;
-		
-		if(contentType === 'posts')
-		{
-			const skip = pageNumber - 1;
-			endpoint += `&limit=1&skip=${skip}`;
-		}
 	}
 		
 	return endpoint;
