@@ -1,5 +1,5 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux';
-import logger from 'redux-logger';
+import { createLogger } from 'redux-logger';
 import thunk from 'redux-thunk';
 import { request } from './request';
 import { response } from './response';
@@ -10,31 +10,56 @@ import { hooks } from './hooks';
 
 export const ReduxStore = ({zone}) => {
 
+	let logger = createLogger();
     let middleware = [thunk];
-	
+	let pushByZone = false;
+	let pushByAction = false;
 	const zones = ['images', 'static', 'sitemap.xml', 'api'];
 	
-    if(ENVIRONMENT === 'dev' && LOGGER_ZONE)
+    if(ENVIRONMENT === 'dev')
     {
-		if(LOGGER_ZONE === 'html')
+		if(!LOGGER_ZONES)
 		{
-			if(!zones.includes(zone))
+			pushByZone = true;
+		}
+		else
+		{
+			const splitZones = LOGGER_ZONES.split(',') || [];
+			
+			if(splitZones.includes(zone) && zones.includes(zone))
 			{
-				middleware.push(logger);
+				pushByZone = true;
+			}
+			else if(splitZones.includes('html') && !zones.includes(zone))
+			{
+				pushByZone = true;
 			}
 		}
-		else if(LOGGER_ZONE === zone)
+
+		if(!LOGGER_ACTIONS)
 		{
-			if(zones.includes(zone))
-			{
-				middleware.push(logger);
+			pushByAction = true;
+		}
+		else
+		{
+			const splitActions = LOGGER_ACTIONS.split(',') || [];
+			const inActionTypes = (val) => typeof ActionTypes[val] === 'string';
+			
+			if(splitActions.every(inActionTypes))
+			{	
+				pushByAction = true;
+				logger = createLogger({
+					predicate: (getState, action) => splitActions.includes(action.type)
+				});
 			}
 		}
-		else if(LOGGER_ZONE === 'all')
+		
+		if(pushByZone && pushByAction)
 		{
 			middleware.push(logger);
 		}
     }
+	
 
     return createStore(
  
