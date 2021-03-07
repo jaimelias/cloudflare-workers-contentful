@@ -22,7 +22,16 @@ export default class PageComponent {
 		const {labelPageNumber, labelNoPosts} = labels;
 		const {slug, pageNumber, homeUrl} = request;
 		const {content, description, title, imageGallery, currentLanguage} = page;
-		const pageIsBlog = () => slug === website.blogPage.slug;
+		const pageIsBlog = () => {
+			
+			if(website.hasOwnProperty('blogPage'))
+			{
+				if(slug === website.blogPage.slug)
+				{
+					return true;
+				}
+			}			
+		};
 		let entryContent = '';
 		let pageTitle = title;
 		let status = 200;
