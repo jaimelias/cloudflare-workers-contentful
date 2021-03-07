@@ -1,4 +1,4 @@
-const {stringToHash, getFallBackLang, imageFileRegex} = Utilities;
+const {getFallBackLang, imageFileRegex} = Utilities;
 
 export const handleImages = async ({store}) => {
 	
@@ -71,7 +71,6 @@ const RenderImage = async ({imageUrl, store}) => {
 	const widthParam = (width) ? `&w=${width}` : '';	
 	const isSvg = (pathName.includes('.svg')) ? true : false;
 	const thirtyDaysInSeconds = (ENVIRONMENT === 'production') ? 60*60*24*30 : 0;
-	const hash = await stringToHash({text: `${pathName}?width=${width}`, algorithm: 'SHA-256'});
 	imageUrl = (isSvg) ? imageUrl : `${imageUrl}?fm=webp${widthParam}`;
 	const imageRequest = new Request(decodeURI(imageUrl), {headers});
 	
@@ -82,8 +81,7 @@ const RenderImage = async ({imageUrl, store}) => {
 				404: 1, 
 				'500-599': 0 
 			},
-			cacheEverything: true,
-			cacheKey: hash
+			cacheEverything: true
 		}
 	});	
 

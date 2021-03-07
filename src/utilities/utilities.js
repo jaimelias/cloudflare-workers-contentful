@@ -127,22 +127,6 @@ export const sortByOrderKey = (a, b) => {
 	return 0;		
 };
 
-export const stringToHash = async ({text, algorithm}) => {
-	const validAlgorithms = ['SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'];
-	let output = null;
-	
-	if(validAlgorithms.includes(algorithm))
-	{
-		const msgUint8 = new TextEncoder().encode(text);
-		const hashBuffer = await crypto.subtle.digest(algorithm, msgUint8);
-		const hashArray = Array.from(new Uint8Array(hashBuffer));
-		const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-		output = hashHex;		
-	}
-	
-	return output;
-};
-
 export const slugRegex = (value) => {
 	const regex = /^[\w]+(?:-[\w]+)*$/igm;		
 	return (value) ? regex.test(value) : true;

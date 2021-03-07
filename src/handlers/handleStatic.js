@@ -13,7 +13,9 @@ export const handleStaticFiles = async ({store}) => {
 
 const parseStaticFiles = async ({store}) => {
 	
-	const {searchParams, hostName, pathNameArr} = store.getState().request.data;
+	const {getState} = store;
+	const {searchParams, hostName, pathNameArr} = getState().request.data;
+	const {siteName} = getState().contentful.data.websites.entries[0];	
 	const fileName = pathNameArr.last;
 	const thirtyDaysInSeconds = (ENVIRONMENT === 'production') ? 60*60*24*30 : 0;
 
@@ -61,7 +63,7 @@ const parseStaticFiles = async ({store}) => {
 			
 			if(mimeType)
 			{
-				const faviconInitial = file => file.replace('INITIAL', hostName.substring(0, 1).toUpperCase());
+				const faviconInitial = file => file.replace('INITIAL', siteName.substring(0, 1).toUpperCase());
 				
 				return {
 					body: (pathNameArr.last === 'favicon.svg') ? faviconInitial(file) : file,
