@@ -4,6 +4,17 @@ import {RequestForm} from './formComponent';
 const {accommodationTypes} = SharedData;
 const {pageHasForm} = Utilities;
 
+const pageIsBlog = ({slug, website}) => {
+	
+	if(typeof website.blogPage === 'object')
+	{
+		if(slug === website.blogPage.slug)
+		{
+			return true;
+		}
+	}			
+};
+
 export default class PageComponent {
 
 	constructor({store, labels}){
@@ -22,23 +33,14 @@ export default class PageComponent {
 		const {labelPageNumber, labelNoPosts} = labels;
 		const {slug, pageNumber, homeUrl} = request;
 		const {content, description, title, imageGallery, currentLanguage} = page;
-		const pageIsBlog = () => {
-			
-			if(website.hasOwnProperty('blogPage'))
-			{
-				if(slug === website.blogPage.slug)
-				{
-					return true;
-				}
-			}			
-		};
+		const isBlog = pageIsBlog({slug, website});
 		let entryContent = '';
 		let pageTitle = title;
 		let status = 200;
 		entryContent += GalleryComponent({data: imageGallery});
 		entryContent += (typeof content === 'string') ? marked(content) : '';
 				
-		if(pageIsBlog())
+		if(isBlog)
 		{
 			pageTitle = (pageNumber > 1) ? `${pageTitle} | ${labelPageNumber} ${pageNumber}` : pageTitle;
 			
