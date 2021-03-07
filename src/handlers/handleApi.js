@@ -22,7 +22,7 @@ const handleFormRequest = async ({store}) => {
 	
 	const {langList} = LangConfig;
 	const {getState} = store;
-	const payload = await getState().event.request.json();
+	const payload = await getState().request.request.json();
 	
 	if(payload)
 	{
