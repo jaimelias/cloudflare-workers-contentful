@@ -14,7 +14,7 @@ export default class IndexComponent {
 		const {imageGallery, title, description} = website;
 		
 		render.addHooks({
-			content: JsonLd({website}),
+			content: JsonLd(store),
 			order: 60,
 			location: 'head'
 		});			
@@ -35,7 +35,8 @@ export default class IndexComponent {
 
 const IndexWrapper = ({website, labels}) => {
 	
-	const {title, description, content, imageGallery, amenities, included, notIncluded} = website;
+	const {amenities, included, notIncluded, homepage} = website;	
+	const {title, description, content, imageGallery} = homepage || '';
 	const {labelIncluded, labelNotIncluded, labelAmenities} = labels;
 
 	const RenderGallery = GalleryComponent({data: imageGallery});
@@ -84,12 +85,14 @@ const IndexWrapper = ({website, labels}) => {
 	`;
 };
 
-const JsonLd = ({website}) => {
+const JsonLd = (store) => {
 	
 	let output = '';
-	const {siteName, title, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
-	
-	
+	const {getState} = store;
+	const website = getState().contentful.data.websites.entries[0];
+	const {homepage: {title}} = website || '';
+	const {siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
+
 	let ld = {
 		'@content': 'https://schema.org',
 		"@type": type,

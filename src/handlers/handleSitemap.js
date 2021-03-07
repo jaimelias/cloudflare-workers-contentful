@@ -4,13 +4,13 @@ export const handleSitemap = async ({store}) => {
 	
 	if(pathNameArr.first === pathNameArr.last && method === 'GET')
 	{
-		return render.payload(await SitemapParse({store}));
+		return render.payload(await SitemapParse(store));
 	}
 	
 	return render.payload({status: 400});
 };
 
-const SitemapParse = async ({store}) => {
+const SitemapParse = async (store) => {
 	
 	let urls = [];
 	const langPaths = {};
@@ -20,7 +20,8 @@ const SitemapParse = async ({store}) => {
 	};
 	const {escUrl} = Utilities;
 	const {getState} = store;
-	const {defaultLanguage, imageGallery, domainName} = getState().contentful.data.websites.entries[0];
+	const {defaultLanguage, domainName, homepage} = getState().contentful.data.websites.entries[0];
+	const {imageGallery} = homepage;
 	const pages = getState().contentful.data.pages.entries;
 		
 	langList.forEach(key => {
@@ -62,7 +63,7 @@ const SitemapParse = async ({store}) => {
 	
 	pages.forEach(row => {
 		
-		const imageGallery = (row.hasOwnProperty('imageGallery')) ? row.imageGallery : [];
+		const gallery = (row.hasOwnProperty('imageGallery')) ? row.imageGallery : [];
 		
 		let urlObj = {
 			loc: new URL(row.slug, `https://${domainName}`).href,
@@ -82,14 +83,13 @@ const SitemapParse = async ({store}) => {
 			}	
 		}
 		
-		if(imageGallery)
+		if(gallery)
 		{	
-			imageGallery.forEach(image => {
+			gallery.forEach(image => {
 				urlObj.images.push(escUrl(new URL(`/images/${image.fileName}`, `https://${domainName}`).href));
 			});			
 		}
-		
-		
+
 		urls.push(urlObj);
 	});
 	

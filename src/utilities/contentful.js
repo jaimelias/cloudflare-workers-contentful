@@ -223,30 +223,29 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 						{
 							if(isLinkTypeEntry(thisField) || isLinkTypeAsset(thisField))
 							{
-								thisField = linkField({...fieldArg, field: thisField});											
+								thisField = linkField({...fieldArg, field: thisField});
+
+								for(let subKey in thisField)
+								{
+									if(isLinkTypeEntry(thisField[subKey]) || isLinkTypeAsset(thisField[subKey]))
+									{
+										thisField[subKey] = linkField({...fieldArg, field: thisField[subKey]});
+									}
+									if(Array.isArray(thisField[subKey]))
+									{
+										if(thisField[subKey].every(isLinkTypeEntry) || thisField[subKey].every(isLinkTypeAsset))
+										{
+											thisField[subKey] = mapLinkField({fieldArg, fields: thisField[subKey]});
+										}
+									}
+								}
 							}							
 						}
 						if(Array.isArray(thisField))
 						{
 							if(thisField.every(isLinkTypeEntry) || thisField.every(isLinkTypeAsset))
 							{
-								thisField = thisField.map(item => {
-									if(typeof item === 'object')
-									{
-										if(item.hasOwnProperty('sys'))
-										{
-											if(item.sys.type === 'Link')
-											{
-												item = linkField({
-													...fieldArg,
-													field: item
-												});	
-											}
-										}
-									}
-									
-									return item;
-								});									
+								thisField = mapLinkField({fieldArg, fields: thisField});							
 							}
 						}
 						
@@ -280,6 +279,24 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 
 	return output;
 };
+
+const mapLinkField = ({fieldArg, fields}) => fields.map(item => {
+	if(typeof item === 'object')
+	{
+		if(item.hasOwnProperty('sys'))
+		{
+			if(item.sys.type === 'Link')
+			{
+				item = linkField({
+					...fieldArg,
+					field: item
+				});	
+			}
+		}
+	}
+	
+	return item;
+});
 
 export const getAllEntries = async ({store}) => {
 	
