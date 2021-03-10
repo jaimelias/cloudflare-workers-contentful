@@ -11,7 +11,8 @@ export default class IndexComponent {
 		const {labels, store} = this;
 		const {getState, render, dispatch} = store;
 		const website = getState().contentful.data.websites.entries[0];
-		const {imageGallery, title, description} = website;
+		const {homepage} = website;
+		const {title, description, imageGallery} = homepage || '';
 		
 		render.addHooks({
 			content: JsonLd(store),
