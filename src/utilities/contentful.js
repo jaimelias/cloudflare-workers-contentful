@@ -210,11 +210,12 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 					}
 				}
 				
+				const currentLanguage = altLang || defaultLanguage;
+				
 				for(let key in fields)
 				{
 					if(key !== 'websites')
 					{
-						const currentLanguage = altLang || defaultLanguage;
 						let thisField = fields[key][currentLanguage] || fields[key][defaultLanguage] || getFallBackLang(fields[key]);
 						
 						const fieldArg = {assets, entries, currentLanguage, defaultLanguage, contentType, websiteId};
@@ -267,7 +268,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 					entryOutput.siteUrl = new URL(`https://${entryOutput.domainName}`).href;
 				}
 				
-				entryOutput.currentLanguage = altLang || entryOutput.defaultLanguage;
+				entryOutput.currentLanguage = currentLanguage || defaultLanguage;
 				
 				output.data.entries.push(entryOutput);
 			});
