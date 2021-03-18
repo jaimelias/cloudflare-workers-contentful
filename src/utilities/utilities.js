@@ -169,9 +169,9 @@ export const findPageBySlug = ({slug, pages}) => {
 	return output;
 };
 
-export const listLangItems = ({website, request}) => {
+export const listLangItems = ({website, pages, request}) => {
 
-	const {defaultLanguage, currentLanguage, pages} = website;	
+	const {defaultLanguage, currentLanguage} = website;	
 	const {slug} = request;
 	const page = findPageBySlug({slug, pages});
 	

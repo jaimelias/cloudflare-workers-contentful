@@ -20,7 +20,7 @@ export const templateHooks = ({store}) => {
 		defaultLanguage
 	} = website;
 	
-	const langItems = listLangItems({website, request});
+	const langItems = listLangItems({website, request, pages});
 	const labels = langLabels[currentLanguage].labels;
 		
 	new PageHooks({store, labels});
