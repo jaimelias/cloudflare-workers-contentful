@@ -12,27 +12,14 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 	const {dispatch, getState} = store;
 	
 	if(KV && init)
-	{
-		const request = getState().request.data;
-		const {altLang, slug} = request;
+	{	
 		const endpoint = getEndPoint({contentType, KV, websiteId});
 		const response = await fetch(new URL(endpoint).href, init);
 		const {status, statusText} = response;
 		
 		if(response.ok)
 		{
-			const promise = await response.json();
-			const data = (promise) ? parseData({data: promise, altLang, contentType, websiteId}) : {};
-			
-			if(data.status === 200)
-			{
-				dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...data}});
-				return data;
-			}
-			else
-			{
-				dispatch({type: ActionTypes.FETCH_CONTENTFUL_FAIL, payload: {...data}});
-			}
+			return await response.json();
 		}
 		else
 		{			
@@ -209,7 +196,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 						});
 					}
 				}
-				
+
 				const currentLanguage = altLang || defaultLanguage;
 				
 				for(let key in fields)
@@ -302,16 +289,21 @@ const mapLinkField = ({fieldArg, fields}) => fields.map(item => {
 export const getAllEntries = async ({store}) => {
 	
 	const {getState, dispatch} = store;
-	const {waitUntil} = getState().request.data;
+	const {waitUntil, altLang} = getState().request.data;
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
-	let isCached = false;
-
-	if(kvCache)
+	
+	if(kvCache && ENVIRONMENT === 'production')
 	{
-		return JSON.parse(kvCache).map(entries => {
-			dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...entries}});
-			return entries;
+		const data = JSON.parse(kvCache);
+		const website = data.find(i => i.items[0].sys.contentType.sys.id === 'websites');
+		const websiteId = website.items[0].sys.id;
+		
+		return data.map(d => {
+			const contentType = d.items[0].sys.contentType.sys.id;
+			const output = parseData({data: d, altLang, contentType, websiteId});
+			dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
+			return output;			
 		});
 	}
 	else
@@ -326,27 +318,38 @@ export const getAllEntries = async ({store}) => {
 		})
 		.then(website => {
 
+			
+			const websiteId = website.items[0].sys.id;
 			const entries = validContentTypes
 			.filter(i => i !== 'websites')
 			.map(contentType => getEntries({
 				...entryArgs, 
 				contentType,
-				 websiteId: website.data.entries[0].id
+				 websiteId
 			}));
 
-			return Promise.all([website, ...entries])
-			.then(resp => {
+			return Promise.all(entries)
+			.then(data => {
+				
+				data = [website, ...data];
+				
+				const parsed = data.map(d => {
+					const contentType = d.items[0].sys.contentType.sys.id;
+					const output = parseData({data: d, altLang, contentType, websiteId});
+					dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
+					return output;
+				});
 				
 				if(ENVIRONMENT === 'production')
 				{
-					waitUntil(CACHE.put(kvCacheKey, JSON.stringify(resp), {expirationTtl: 600}));
+					waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
 				}
 				else
 				{
 					waitUntil(CACHE.delete(kvCacheKey));
 				}
 				
-				return resp;
+				return parsed;
 			})
 			.catch(err => store.render.payload({status: 500, body: err.message}));
 

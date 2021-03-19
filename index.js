@@ -33,10 +33,24 @@ const firewallInit = async (event) => {
 
 	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data}});
 	
-	return connectContentful({store});
+	return await connectContentful({store});
 };
 
-const connectContentful = async ({store}) => Contentful.getAllEntries({store}).then(() =>  firewallRules({store}));
+const connectContentful = async ({store}) => Contentful.getAllEntries({store})
+.then(() =>  {
+
+	const {getState, render} = store;
+	const {status, statusText} = getState().contentful;
+	
+	if(status === 200)
+	{
+		return firewallRules({store});
+	}
+	else
+	{
+		return render.payload({status, body: 'connecting database'});
+	}
+});
 
 const firewallRules = async ({store}) => {
 
