@@ -22,11 +22,11 @@ export default class PageHooks {
 		const {store} = this;
 		const {getState} = store;		
 		const request = getState().request.data;
-		const pages = getState().contentful.data.pages.entries;
-		const posts = getState().contentful.data.posts;	
+		const pages = getState().contentful.data.pages.entries || [];
+		const posts = getState().contentful.data.posts || {};	
 		const {slug} = request;
 		const page = pages.find(i => i.slug === slug);
-		const post = posts.entries.find(i => i.slug === slug);
+		const post = (posts.hasOwnProperty('entries')) ? posts.entries.find(i => i.slug === slug) : false;
 		
 		if(slug === '')
 		{
