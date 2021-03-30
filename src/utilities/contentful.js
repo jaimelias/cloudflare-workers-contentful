@@ -152,7 +152,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 		status: 500, 
 		statusText: `error parsing ${contentType}`
 	};
-	
+		
 	if(typeof data === 'object')
 	{
 		if(data.sys.type === 'Array')
@@ -165,6 +165,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			output.data.limit = data.limit || 0;
 			output.data.skip = data.skip || 0;
 			output.assets = assets;
+			output.fetcher = data.fetcher;
 							
 			items.forEach(entry => {
 				let fields = entry.fields;
@@ -293,9 +294,13 @@ export const getAllEntries = async ({store}) => {
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
 	
-	if(kvCache && ENVIRONMENT === 'production')
+	if(kvCache)
 	{
-		const data = JSON.parse(kvCache);
+		const data = JSON.parse(kvCache).map(d => {
+			d.fetcher = 'KV';
+			return d;
+		});
+				
 		const website = data.find(i => i.items[0].sys.contentType.sys.id === 'websites');
 		const websiteId = website.items[0].sys.id;
 		
@@ -331,7 +336,10 @@ export const getAllEntries = async ({store}) => {
 			return Promise.all(entries)
 			.then(data => {
 				
-				data = [website, ...data];
+				data = [website, ...data].map(d => {
+					d.fetcher = 'fetch';
+					return d;
+				});
 				
 				const parsed = data.map(d => {
 					const contentType = d.items[0].sys.contentType.sys.id;
@@ -340,14 +348,7 @@ export const getAllEntries = async ({store}) => {
 					return output;
 				});
 				
-				if(ENVIRONMENT === 'production')
-				{
-					waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
-				}
-				else
-				{
-					waitUntil(CACHE.delete(kvCacheKey));
-				}
+				waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
 				
 				return parsed;
 			})

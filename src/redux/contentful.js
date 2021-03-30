@@ -2,7 +2,8 @@ export const contentful = (state = {
 	data: {},
 	assets: [],
     status: 500,
-	statusText: 'internal server error'
+	statusText: 'internal server error',
+	fetcher: ''
 }, action) => {
 	
 	const {type, payload} = action;
@@ -11,12 +12,14 @@ export const contentful = (state = {
         case ActionTypes.FETCH_CONTENTFUL_SUCCESS:
 			const data = {[payload.contentType]: payload.data};
 			const assets = payload.assets.filter(p => !state.assets.find(s => s.sys.id === p.sys.id));
+
             return {
                 ...state,
 				data: {...state.data, ...data},
 				assets: [...state.assets, ...assets],
 				status: 200,
-				statusText: `${payload.contentType} OK`
+				statusText: `${payload.contentType} OK`,
+				fetcher: payload.fetcher
             };
         case ActionTypes.FETCH_CONTENTFUL_FAIL:
 			const failStatusText = payload.statusText || state.statusText;

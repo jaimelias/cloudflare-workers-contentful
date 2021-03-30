@@ -122,7 +122,9 @@ export default class RenderOutput {
 	}
 	response()
 	{
-		const {body, status, headers} = this.store.getState().response;
+		const {getState} = this.store;
+		const {fetcher} = getState().contentful;
+		const {body, status, headers} = getState().response;
 		const isHtml = contentTypeIsHtml({headers});
 		let response = '';
 		
@@ -133,6 +135,11 @@ export default class RenderOutput {
 		else
 		{
 			const newResponse = new Response(body, {status});
+			
+			if(fetcher)
+			{
+				newResponse.headers.set('Data-Fetcher', fetcher);
+			}
 					
 			for(let key in headers)
 			{

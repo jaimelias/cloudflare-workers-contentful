@@ -8,10 +8,10 @@ import RenderOutput from './src/utilities/render';
 import Firewall from './src/utilities/firewall';
 
 addEventListener('fetch', event => {
-    event.respondWith(firewallInit(event));
+    event.respondWith(handleRequest(event));
 });
 
-const firewallInit = async (event) => {
+const handleRequest = async (event) => {
 
 	const {request} = event;
 	const data = Utilities.parseRequest(event);
