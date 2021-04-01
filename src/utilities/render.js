@@ -134,36 +134,34 @@ export default class RenderOutput {
 		}
 		else
 		{
-			const newResponse = new Response(body, {status});
 			
-			if(fetcher)
-			{
-				newResponse.headers.set('Data-Fetcher', fetcher);
-			}
-					
-			for(let key in headers)
-			{
-				newResponse.headers.set(key, headers[key])
-			}
-			
-			for(let key in secureHeaders)
-			{
-				newResponse.headers.set(key, secureHeaders[key])
-			}
+			let responseHeaders = {
+				...headers, 
+				...secureHeaders,
+				'Data-Fetcher': fetcher
+			};
+				
+			const newResponse = new Response(body, {
+				status,
+				headers: responseHeaders
+			});
 			
 			if(isHtml)
 			{
 				response = htmlRewriter().transform(newResponse);
-				
-				if(ENVIRONMENT === 'production' && status === 200)
-				{
-					response.headers.append('Cache-Control', 'max-age=3600');
-					this.event.waitUntil(this.cache.put(this.cacheKey, response.clone()));
-				}
 			}
 			else
 			{
 				response = newResponse;	
+			}
+			
+			if(ENVIRONMENT === 'production' && status === 200)
+			{
+				this.event.waitUntil(this.cache.put(this.cacheKey, response.clone()));
+			}
+			else
+			{
+				this.event.waitUntil(this.cache.delete(this.cacheKey));
 			}
 		}
 

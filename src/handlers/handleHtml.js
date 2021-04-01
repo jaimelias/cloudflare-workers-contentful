@@ -17,10 +17,13 @@ const parseHtml = async ({store}) => {
 
 	const template = templateHooks({store});
 	const {status} = store.getState().template;
+	const oneHour = (ENVIRONMENT === 'production') ? 3600 : 0;
+	
 	return {
 		status,
 		headers: {
-			'content-type': 'text/html;charset=UTF-8'
+			'content-type': 'text/html;charset=UTF-8',
+			'Cache-Control': `max-age=${oneHour}, s-max-age=${oneHour}`,
 		},
 		body: template
 	};

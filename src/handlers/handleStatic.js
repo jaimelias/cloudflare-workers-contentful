@@ -42,7 +42,7 @@ const parseStaticFiles = async ({store}) => {
 						status: 200,
 						headers: {
 							'content-type': mimeType,
-							'Cache-Control': `max-age=${thirtyDaysInSeconds}`
+							'Cache-Control': `max-age=${thirtyDaysInSeconds}, s-max-age=${thirtyDaysInSeconds}`
 						}
 					};
 				}					
@@ -70,7 +70,7 @@ const parseStaticFiles = async ({store}) => {
 					status: 200,
 					headers: {
 						'content-type': mimeType,
-						'Cache-Control': `max-age=${thirtyDaysInSeconds}`
+						'Cache-Control': `max-age=${thirtyDaysInSeconds}, s-max-age=${thirtyDaysInSeconds}`
 					}
 				};
 			}

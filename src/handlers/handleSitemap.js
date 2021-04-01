@@ -99,7 +99,8 @@ const SitemapParse = async (store) => {
 			status: 200,
 			body: SitemapRender({urls}),
 			headers: {
-				'content-type': 'application/xml'
+				'content-type': 'application/xml',
+				'Cache-Control': `max-age=60, s-max-age=60`
 			}
 		}
 	}

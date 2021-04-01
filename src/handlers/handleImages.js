@@ -87,12 +87,25 @@ const RenderImage = async ({imageUrl, store}) => {
 
 	if (response.ok)
 	{
+		let responseHeaders = {};
+		
+		Array.from(response.headers).forEach(i => {
+			if(!i[0].startsWith('x-'))
+			{
+				if(i[0] === 'cache-control')
+				{	
+					responseHeaders[i[0]] = `${i[1]}, s-${i[1]},`;
+				}
+				else
+				{
+					responseHeaders[i[0]] = i[1];
+				}
+			}
+		});
+		
 		return {
 			body: response.body,
-			headers: {
-				'Cache-Control': `max-age=${thirtyDaysInSeconds}`,
-				'content-type': (isSvg) ? 'image/svg+xml' : 'image/webp'
-			},
+			headers: responseHeaders,
 			status: 200
 		};
 	}
@@ -151,6 +164,6 @@ const findImageAsset = ({store}) => {
 	}
 	else
 	{
-		throw new Error('image asset ');
+		throw new Error('image asset');
 	}
 };
