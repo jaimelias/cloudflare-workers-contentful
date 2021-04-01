@@ -23,7 +23,7 @@ const parseHtml = async ({store}) => {
 		status,
 		headers: {
 			'content-type': 'text/html;charset=UTF-8',
-			'Cache-Control': `max-age=${oneHour}, s-max-age=${oneHour}`,
+			'Cache-Control': `s-maxage=${oneHour}`,
 		},
 		body: template
 	};

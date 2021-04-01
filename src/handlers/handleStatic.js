@@ -42,7 +42,7 @@ const parseStaticFiles = async ({store}) => {
 						status: 200,
 						headers: {
 							'content-type': mimeType,
-							'Cache-Control': `max-age=${thirtyDaysInSeconds}, s-max-age=${thirtyDaysInSeconds}`
+							'Cache-Control': `s-maxage=${thirtyDaysInSeconds}`
 						}
 					};
 				}					
@@ -69,8 +69,8 @@ const parseStaticFiles = async ({store}) => {
 					body: (pathNameArr.last === 'favicon.svg') ? faviconInitial(file) : file,
 					status: 200,
 					headers: {
-						'content-type': mimeType,
-						'Cache-Control': `max-age=${thirtyDaysInSeconds}, s-max-age=${thirtyDaysInSeconds}`
+						'Content-Type': mimeType,
+						'Cache-Control': `s-maxage=${thirtyDaysInSeconds}`
 					}
 				};
 			}

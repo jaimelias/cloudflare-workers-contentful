@@ -94,7 +94,7 @@ const RenderImage = async ({imageUrl, store}) => {
 			{
 				if(i[0] === 'cache-control')
 				{	
-					responseHeaders[i[0]] = `${i[1]}, s-${i[1]},`;
+					responseHeaders[i[0]] = `s-${i[1]},`;
 				}
 				else
 				{
