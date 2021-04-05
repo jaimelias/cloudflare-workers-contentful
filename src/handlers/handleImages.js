@@ -83,31 +83,18 @@ const RenderImage = async ({imageUrl, store}) => {
 			},
 			cacheEverything: true
 		}
-	});	
-
-	if (response.ok)
-	{
-		let responseHeaders = {};
+	});
+	
+	if (response.ok || response.status === 304)
+	{		
+		response = new Response(response.body, response);
 		
-		Array.from(response.headers).forEach(i => {
-			if(!i[0].startsWith('x-'))
-			{
-				if(i[0] === 'cache-control')
-				{	
-					responseHeaders[i[0]] = `s-${i[1]}`;
-				}
-				else
-				{
-					responseHeaders[i[0]] = i[1];
-				}
-			}
-		});
-		
-		return {
-			body: response.body,
-			headers: responseHeaders,
-			status: 200
-		};
+		if(response.status === 200)
+		{
+			response.headers.append('Cache-Control', `s-maxage=${thirtyDaysInSeconds}`);
+		}
+				
+		return {...response};
 	}
 	else
 	{
