@@ -86,11 +86,10 @@ const RenderImage = async ({imageUrl, store}) => {
 	});
 	
 	if (response.ok || response.status === 304)
-	{		
-		response = new Response(response.body, response);
-		
+	{
 		if(response.status === 200)
 		{
+			response = new Response(response.body, response);
 			response.headers.append('Cache-Control', `s-maxage=${thirtyDaysInSeconds}`);
 		}
 				
