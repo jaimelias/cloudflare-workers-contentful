@@ -87,13 +87,22 @@ const RenderImage = async ({imageUrl, store}) => {
 	
 	if (response.ok || response.status === 304)
 	{
+		let responseHeaders = {};
+		
 		if(response.status === 200)
 		{
-			response = new Response(response.body, response);
-			response.headers.append('Cache-Control', `s-maxage=${thirtyDaysInSeconds}`);
+			responseHeaders['Cache-Control'] = `s-maxage=${thirtyDaysInSeconds}`;
 		}
+		
+		Array.from(response.headers).forEach(h => {
+			responseHeaders[h[0]] = h[1];
+		});
 				
-		return {...response};
+		return {
+			status: response.status,
+			body: response.body,
+			headers: responseHeaders
+		};
 	}
 	else
 	{
