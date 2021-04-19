@@ -1,4 +1,4 @@
-export const copyRight = ({siteName}) => (`<div class="mt-5 mb-2 text-center"><span class="text-muted serif ">${siteName}</span></div>`);
+export const copyRight = ({siteName}) => (`<div class="mt-5 mb-2 text-center"><span class="text-muted ">${siteName}</span></div>`);
 
 export const FooterMenu = ({telephoneNumber, instagramUsername, siteName, location, country, googleMapsUrl}) => {
 	
