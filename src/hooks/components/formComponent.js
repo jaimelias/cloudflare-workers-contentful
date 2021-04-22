@@ -93,6 +93,10 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 		</div>
 	</div>
 	
+	<div class="${classMB}">
+		<textarea ${fc} name="message"></textarea>
+	</div>
+	
 	<button type="submit" class="btn btn-primary submit">${labelButtonSubmit}</button>
 	
 	<div class="alert alert-danger hidden mt-3">Error</div>

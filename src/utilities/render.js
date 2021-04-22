@@ -155,7 +155,7 @@ export default class RenderOutput {
 			
 			if(isHtml)
 			{
-				response = htmlRewriter().transform(newResponse);
+				response = htmlRewriter(this.store).transform(newResponse);
 			}
 			else
 			{

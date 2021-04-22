@@ -1,23 +1,15 @@
-export const htmlRewriter = () => {
-	return new HTMLRewriter()
-	.on('img', new srcRewriterClass({
-		attributeName: 'src'
-	}))
-	.on('table', new tableRewriterClass())
-	.on('table > tbody > tr > td > a', new tableLinkToButtonClass());
-};
+export const htmlRewriter = store => new HTMLRewriter()
+.on('a', new aRewriterClass(store))
+.on('img', new imageRewriterClass())
+.on('table', new tableRewriterClass())
+.on('table > tbody > tr > td > a', new tableLinkToButtonClass());
 
-class srcRewriterClass
+class imageRewriterClass
 {
-  constructor({attributeName})
-  {
-    this.attributeName = attributeName;
-  }
-  
   element(element)
   {
-    const attribute = element.getAttribute(this.attributeName);
-	
+    const attribute = element.getAttribute('src');
+		
     if(attribute)
 	{
 		const assetCdnUrl = 'images.ctfassets.net';
@@ -63,4 +55,27 @@ class tableLinkToButtonClass {
 		element.setAttribute('class', 'btn btn-success text-light');
 		element.setAttribute('role', 'button');
 	};	
+};
+
+class aRewriterClass {
+
+	constructor(store){
+		this.store = store;
+	}
+	element(element){
+		const {hostName} = this.store.getState().request.data;
+		const attribute = element.getAttribute('href');
+		
+		if(Utilities.isUrl(attribute))
+		{
+			const url = new URL(attribute)
+
+			if(hostName !== url.hostname)
+			{
+				element.setAttribute('target', '_blank');
+				element.setAttribute('rel', 'noopener');
+			}
+		}
+	};	
+	
 }
