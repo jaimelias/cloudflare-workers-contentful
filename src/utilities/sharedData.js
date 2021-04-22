@@ -43,7 +43,7 @@ export const formFields = {
 	},
 	message: {
 		required: true,
-		minLength: 10,
+		minLength: 6,
 		maxLength: 1000
 	}
 };

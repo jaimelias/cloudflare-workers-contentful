@@ -2,10 +2,11 @@ import {htmlRewriter} from './htmlRewriter';
 const {contentTypeIsHtml, secureHeaders, sortByOrderKey, softRedirectBody, doSoftRedirect} = Utilities;
 
 export default class RenderOutput {
-	constructor({store, event})
+	constructor({store, event, apiBody})
 	{
 		this.store = store;
 		this.event = event;
+		this.apiBody = apiBody;
 		this.cache = caches.default;
 		this.setCacheKey();
 		this.renderCache();
@@ -53,7 +54,8 @@ export default class RenderOutput {
 		this.cacheKey = new Request(cacheUrl.toString(), request);
 	}
 	renderCache(){
-		if(ENVIRONMENT === 'production')
+				
+		if(ENVIRONMENT === 'production' && this.apiBody === false)
 		{
 			return this.cache.match(this.cacheKey).then(response => response);	
 		}
@@ -162,7 +164,7 @@ export default class RenderOutput {
 				response = newResponse;	
 			}
 			
-			if(ENVIRONMENT === 'production' && status === 200)
+			if(ENVIRONMENT === 'production' && status === 200 && this.apiBody === false)
 			{
 				this.event.waitUntil(this.cache.put(this.cacheKey, response.clone()));
 			}

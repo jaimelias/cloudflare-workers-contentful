@@ -332,14 +332,47 @@ export const paginateEntries = ({items, pageNumber, itemsPerPage}) => {
 	};
 };
 
-export const parseRequest = (event) => {
+const getApiBody = async ({pathNameArr, request}) => {
 	
-	const {request, waitUntil} = event;
-	let requestUrl = encodeURI(decodeURI(request.url));
-	const url = new URL(requestUrl);
+	const {headers} = request;
+	
+	if(pathNameArr.first === 'api')
+	{
+		const contentType = headers.get('Content-Type') || '';
+				
+		if(contentType.includes('application/json'))
+		{
+			return await request.json();
+		}
+	}	
+	
+	return false;
+}
+
+const getAltLang = ({pathNameArr, apiBody}) => {
+	
+	let output = langList.find(i => i === pathNameArr.first) || false;
+	
+	if(output === false && typeof apiBody === 'object')
+	{
+		if(apiBody.hasOwnProperty('language'))
+		{
+			output = apiBody.language;
+		}
+	}
+	
+	return output;
+}
+
+export const parseRequest = async (event) => {
+	
+	const {waitUntil, request, request: {url: requestUrl}} = event;
+	const url = new URL(encodeURI(decodeURI(requestUrl)));
 	const {pathname: pathName, searchParams, hostname: hostName} = url;	
 	const pathNameArr = pathNameToArr(pathName);
-	const altLang = langList.find(i => i === pathNameArr.first) || false;
+	let apiBody = await getApiBody({pathNameArr, request: request.clone()});
+	let altLang = getAltLang({pathNameArr, apiBody});
+	
 	const hasPagination = (pathNameArr.beforeLast === 'p' && isNumber(pathNameArr.last)) ? true : false;
 	const pageNumber = hasPagination ? parseInt(pathNameArr.last) : 1;
 	const slug = getSlug({pathNameArr, hasPagination});
@@ -348,6 +381,7 @@ export const parseRequest = (event) => {
 	return {
 		waitUntil,
 		...request,
+		apiBody,
 		homeUrl,
 		url: requestUrl,
 		hostName,

@@ -14,9 +14,11 @@ addEventListener('fetch', event => {
 const handleRequest = async (event) => {
 
 	const {request} = event;
-	const data = Utilities.parseRequest(event);
-	const configureStore = ReduxStore({zone: data.pathNameArr.first});
-	const render = new RenderOutput({store: configureStore, event});
+	const {parseRequest} = Utilities;
+	const data = await parseRequest(event);
+	const {pathNameArr: {first}, apiBody} = data;
+	const configureStore = ReduxStore({zone: first});
+	const render = new RenderOutput({store: configureStore, event, apiBody});
 	const store = {...configureStore, render};
 	const firewall = new Firewall(store).init(request);	
 	const responseInCache = await render.renderCache();
