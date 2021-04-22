@@ -18,7 +18,6 @@ export const formFields = {
 		maxLength: 10
 	},
 	pax1: {
-		required: true,
 		validator: 'isNumber',
 		min: 1,
 		max: 12
