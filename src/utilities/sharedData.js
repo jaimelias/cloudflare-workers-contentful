@@ -43,6 +43,8 @@ export const formFields = {
 		maxLength: 20
 	},
 	message: {
-		required: false
+		required: true,
+		minLength: 10,
+		maxLength: 1000
 	}
 };

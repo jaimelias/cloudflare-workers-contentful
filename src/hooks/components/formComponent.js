@@ -94,7 +94,7 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 	</div>
 	
 	<div class="${classMB}">
-		<textarea ${fc} name="message"></textarea>
+		<textarea ${fc} name="message" required></textarea>
 	</div>
 	
 	<button type="submit" class="btn btn-primary submit">${labelButtonSubmit}</button>
