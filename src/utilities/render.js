@@ -53,7 +53,14 @@ export default class RenderOutput {
 		this.cacheKey = new Request(cacheUrl.toString(), request);
 	}
 	renderCache(){
-		return this.cache.match(this.cacheKey).then(response => response);		
+		if(ENVIRONMENT === 'production')
+		{
+			return this.cache.match(this.cacheKey).then(response => response);	
+		}
+		else
+		{
+			this.event.waitUntil(this.cache.delete(this.cacheKey));
+		}
 	}
 	payload(payload)
 	{

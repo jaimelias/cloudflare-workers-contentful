@@ -294,7 +294,7 @@ export const getAllEntries = async ({store}) => {
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
 	
-	if(kvCache)
+	if(kvCache && ENVIRONMENT === 'production')
 	{
 		const data = JSON.parse(kvCache).map(d => {
 			d.fetcher = 'KV';
@@ -348,7 +348,14 @@ export const getAllEntries = async ({store}) => {
 					return output;
 				});
 				
-				waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
+				if(ENVIRONMENT === 'production')
+				{
+					waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
+				}
+				else
+				{
+					waitUntil(CACHE.delete(kvCacheKey));
+				}
 				
 				return parsed;
 			})

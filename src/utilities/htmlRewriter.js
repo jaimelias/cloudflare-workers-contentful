@@ -3,7 +3,8 @@ export const htmlRewriter = () => {
 	.on('img', new srcRewriterClass({
 		attributeName: 'src'
 	}))
-	.on('table', new tableRewriterClass());
+	.on('table', new tableRewriterClass())
+	.on('table > tbody > tr > td > a', new tableLinkToButtonClass());
 };
 
 class srcRewriterClass
@@ -50,8 +51,16 @@ class srcRewriterClass
 
 class tableRewriterClass {
 	element(element){
-		element.setAttribute('class', 'table table-bordered table-striped table-sm');
+		
+		element.setAttribute('class', 'table table-bordered table-striped');
 		element.before('<div class="table-responsive mb-4">', { html: true });
 		element.after('</div>', { html: true });
 	};
 };
+
+class tableLinkToButtonClass {
+	element(element){
+		element.setAttribute('class', 'btn btn-success text-light');
+		element.setAttribute('role', 'button');
+	};	
+}

@@ -65,7 +65,7 @@ export const TopMenu = ({website, pages, request, langItems}) => {
 	};
 	
 	const RendermenuItems = `<ul class="navbar-nav me-auto mb-2 mb-lg-0">${topMenuLi}</ul>`;
-	const RenderTopMenuForm = (actionUrl()) ? `<form class="d-flex"><a href="${actionUrl()}" class="btn btn-info">${actionButtonText}</a></form>` : '';	
+	const RenderTopMenuForm = (actionUrl()) ? `<form class="d-flex"><a href="${actionUrl()}" class="btn btn-info text-light">${actionButtonText}</a></form>` : '';	
 	
 	
 	return `
