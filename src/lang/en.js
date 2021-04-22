@@ -13,6 +13,7 @@ export const labelTelephone = 'Telephone';
 export const labelEmail = 'Email';
 export const labelFirstName = 'First name';
 export const labelLastName = 'Last name';
+export const labelMessage = 'Message';
 export const formSuccess = 'Request sent successfully!';
 export const labelHello = 'Hello';
 export const labelOriginalData = 'This was your request:';

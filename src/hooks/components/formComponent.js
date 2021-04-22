@@ -9,6 +9,7 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 		labelEmail, 
 		labelFirstName,
 		labelLastName,
+		labelMessage,
 		formSuccess
 	} = labels;
 	
@@ -94,7 +95,10 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 	</div>
 	
 	<div class="${classMB}">
-		<textarea ${fc} name="message" required></textarea>
+		<div ${floating}>
+			<textarea ${fc} name="message" id="message" required></textarea>
+			<label for="message">${labelMessage}</label>
+		</div>
 	</div>
 	
 	<button type="submit" class="btn btn-primary submit">${labelButtonSubmit}</button>
