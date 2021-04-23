@@ -8,12 +8,22 @@ export const sendGridSend = async ({payload, crm, website}) => {
 	const {email, cc, subject, message, name} = crm;
 	const htmlMessage = (typeof message === 'string') ? marked(message) : '';
 		
-	const template = emailTemplate({
+	let template = emailTemplate({
 		payload,
 		htmlMessage,
 		isoWhatsapp: Utilities.isoNumber({number: whatsappNumber}),
 		siteName
 	});
+	
+	template = new Response(template, {
+		headers: {
+			'Content-Type': 'text/html'
+		}
+	});
+	
+	template = emailHtmlRewriter().transform(template);
+	
+	const html = await template.text();
 
 	const emailPayload = {
 		personalizations: [{
@@ -31,7 +41,7 @@ export const sendGridSend = async ({payload, crm, website}) => {
 		subject: `${payload.firstName} - ${subject}`,
 		content: [{
 			type: 'text/html',
-			value: template
+			value: html
 		}]
 	};
 
@@ -67,9 +77,9 @@ const emailTemplate = ({payload, htmlMessage, isoWhatsapp, siteName}) => {
 	
 	const originalData = Object.keys(payload)
 	.filter(i => i !== 'token' && i !== 'language')
-	.map(i => {
-		let label = labels['label' + Utilities.capitalize(i)];
-		return `<tr><td>${label}</td><td>${payload[i]}</td></tr>`;
+	.map(v => {
+		let label = labels['label' + Utilities.capitalize(v)];
+		return `<tr><td>${label}</td><td>${payload[v]}</td></tr>`;
 	}).join('');
 	
 	const whatsappBtn = (isoWhatsapp) ? `<p style="font-size: 20px; text-align: center; font-weight: 900;"><a style="display: block; text-decoration: none; padding: 10px 15px; color: #ffffff; background-color: #25d366;" href="https://wa.me/${isoWhatsapp}?text=${urlEncodedsiteName}">Whatsapp</a></p>` : '';
@@ -82,7 +92,7 @@ const emailTemplate = ({payload, htmlMessage, isoWhatsapp, siteName}) => {
 
 			${htmlMessage}
 
-			<table style="table-layout: fixed; width: 100%;" cellspacing="0" cellpadding="5" border="1">
+			<table style="table-layout: fixed; width: 100%;" cellspacing="0" cellpadding="5" border="0" width="100%">
 			<thead>
 				<tr>
 					<th colspan="2">${labelOriginalData}</th>
@@ -96,3 +106,24 @@ const emailTemplate = ({payload, htmlMessage, isoWhatsapp, siteName}) => {
 		</div>
 	`;
 };
+
+export const emailHtmlRewriter = store => new HTMLRewriter()
+.on('table', new emailTableRewriter())
+.on('table > tbody > tr:nth-child(odd)', new emailTableTrRewriter())
+
+class emailTableTrRewriter {
+	element(element){
+		element.setAttribute('style', 'background-color: #f7f7f7;');
+	}
+}
+
+class emailTableRewriter {
+	element(element)
+	{
+		element.setAttribute('style', 'table-layout: fixed; width: 100%;');
+		element.setAttribute('cellspacing', '0');
+		element.setAttribute('cellpadding', '5');
+		element.setAttribute('border', '0');
+		element.setAttribute('width', '100%');
+	}
+}
