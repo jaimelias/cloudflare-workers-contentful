@@ -1,4 +1,5 @@
 import {GalleryComponent} from './galleryComponent';
+import {RightSideWidget} from './widgets';
 
 export default class IndexComponent {
 
@@ -33,7 +34,6 @@ export default class IndexComponent {
 	}
 }
 
-
 const IndexWrapper = ({website, labels}) => {
 	
 	const {amenities, included, notIncluded, homepage} = website;	
@@ -41,26 +41,13 @@ const IndexWrapper = ({website, labels}) => {
 	const {labelIncluded, labelNotIncluded, labelAmenities} = labels;
 
 	const RenderGallery = GalleryComponent({data: imageGallery});
-	
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
 	const RenderContent = (content) ? marked(content) : '';
-	const amenitiesList = (amenities) ? amenities.map(row => {
-		return `<li class="list-group-item">✔️ ${row}</li>`;
-	}).join('') : '';
-
-	const RenderAmenities = (amenitiesList) ? `<ul class="list-group mb-2"><li class="list-group-item list-group-item-light font-weight-bold">${labelAmenities}</li>${amenitiesList}</ul>` : '';
-
-	const includedList = (included) ? included.map(row => {
-		return `<li class="list-group-item ">✔️ ${row}</li>`;
-	}).join('') : '';
-
-	const RenderIncluded = (includedList) ? `<ul class="list-group  mb-2"><li class="list-group-item list-group-item-light font-weight-bold">${labelIncluded}</li>${includedList}</ul>` : '';
-
-	const notIncludedList = (notIncluded) ? notIncluded.map(row => {
-		return `<li class="list-group-item">❌ ${row}</li>`;
-	}).join('') : '';
-
-	const RenderNotIncluded = (notIncludedList) ? `<ul class="list-group  mb-2"><li class="list-group-item list-group-item-light font-weight-bold">${labelNotIncluded}</li>${notIncludedList}</ul>` : '';
+	
+	const Widget = RightSideWidget({
+		entry: website,
+		labels
+	});
 	
 	return `
 		<div class="container">
@@ -77,9 +64,7 @@ const IndexWrapper = ({website, labels}) => {
 					<div class="entry-content">${RenderContent}</div>
 				</div>
 				<div class="col-md-4">
-					<div>${RenderAmenities}</div>				
-					<div>${RenderIncluded}</div>
-					<div>${RenderNotIncluded}</div>				
+					${Widget}
 				</div>
 			</div>
 		</div>	
