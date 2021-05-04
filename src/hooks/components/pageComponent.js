@@ -1,6 +1,7 @@
 import {GalleryComponent} from './galleryComponent';
 import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
+import {RightSideWidget} from './widgets';
 const {accommodationTypes} = SharedData;
 const {pageHasForm} = Utilities;
 
@@ -39,6 +40,11 @@ export default class PageComponent {
 		let status = 200;
 		entryContent += GalleryComponent({data: imageGallery});
 		entryContent += (typeof content === 'string') ? marked(content) : '';
+		
+		const widget = RightSideWidget({
+			entry: website,
+			labels
+		});
 				
 		if(isBlog)
 		{
@@ -67,7 +73,7 @@ export default class PageComponent {
 			payload: {
 				title: pageTitle,
 				description,
-				content: pageWrapper({title, content: entryContent}),
+				content: pageWrapper({title, content: entryContent, widget}),
 				imageGallery,
 				status
 			}
@@ -75,7 +81,7 @@ export default class PageComponent {
 	}
 }
 
-const pageWrapper = ({content, title}) => {
+const pageWrapper = ({content, title, widget}) => {
 
 	return `
 	<div class="container">
@@ -86,7 +92,7 @@ const pageWrapper = ({content, title}) => {
 						${content}
 					</div>
 				</div>
-				<div class="col-md-4" style="border-left: 1px solid #ddd;"></div>
+				<div class="col-md-4" style="border-left: 1px solid #ddd;">${widget}</div>
 			</div>
 		</div>
 	`;

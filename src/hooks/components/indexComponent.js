@@ -44,7 +44,7 @@ const IndexWrapper = ({website, labels}) => {
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
 	const RenderContent = (content) ? marked(content) : '';
 	
-	const Widget = RightSideWidget({
+	const widget = RightSideWidget({
 		entry: website,
 		labels
 	});
@@ -64,7 +64,7 @@ const IndexWrapper = ({website, labels}) => {
 					<div class="entry-content">${RenderContent}</div>
 				</div>
 				<div class="col-md-4">
-					${Widget}
+					${widget}
 				</div>
 			</div>
 		</div>	
