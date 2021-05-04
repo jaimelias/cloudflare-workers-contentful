@@ -45,7 +45,7 @@ const IndexWrapper = ({website, labels}) => {
 	const RenderContent = (content) ? marked(content) : '';
 	
 	const widget = RightSideWidget({
-		entry: website,
+		entry: homepage,
 		labels
 	});
 	

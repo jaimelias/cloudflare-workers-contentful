@@ -42,7 +42,7 @@ export default class PageComponent {
 		entryContent += (typeof content === 'string') ? marked(content) : '';
 		
 		const widget = RightSideWidget({
-			entry: website,
+			entry: page,
 			labels
 		});
 				
