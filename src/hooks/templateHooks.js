@@ -1,4 +1,4 @@
-import {TopMenu, TopMenuContact} from './components/topMenuComponent';
+import {MainMenu, TopMenu} from './components/topMenuComponent';
 import {Footer} from './components/footerComponent';
 import {renderScripts} from '../utilities/renderScripts';
 import EnqueueHooks from './enqueueHooks';
@@ -73,7 +73,7 @@ export const templateHooks = ({store}) => {
 	}
 
 	render.addHooks({
-		content: TopMenu({
+		content: MainMenu({
 			langItems,
 			pages,
 			website,
@@ -84,7 +84,7 @@ export const templateHooks = ({store}) => {
 	});	
 		
 	render.addHooks({
-		content: TopMenuContact({website, labels}),
+		content: TopMenu({website, labels, langItems}),
 		order: 15,
 		location: 'body'
 	});	

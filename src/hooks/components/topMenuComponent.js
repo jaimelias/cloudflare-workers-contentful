@@ -1,49 +1,35 @@
-export const TopMenuContact = ({website, labels}) => {
+const {Media, isUrl, sortByOrderKey} = Utilities;
+
+export const TopMenu = ({website, labels, langItems}) => {
 	
 	const {telephoneNumber} = website;
 	const {labelCallUs} = labels;
+	const menuItems = getTopMenuItems({website, langItems});
+	const topMenuLi = NavbarLi({menuItems});
+	
 	let output = (telephoneNumber) ?  `
-		<div class="p-3 bg-secondary text-white text-end d-none d-lg-block d-xl-block">
+		<nav class="navbar navbar-expand navbar-dark bg-secondary">
 			<div class="container">
-				<span class="text-white">${labelCallUs} ${telephoneNumber}</span>
+					<ul class="navbar-nav mr-auto">
+						${topMenuLi}
+					</ul>
+					<span class="navbar-text">${labelCallUs} ${telephoneNumber}</span>
+				</div>
 			</div>
-		</div>
+		</nav>
 	` : '';
 	
 	return output;
 };
 
-export const TopMenu = ({website, pages, request, langItems}) => {
+export const MainMenu = ({website, pages, request, langItems}) => {
 	
 	const {hostName, homeUrl} = request;
-	const menuItems = getMenuItems({website, pages, langItems});
+	const menuItems = getMainMenuItems({website, pages, langItems});
 	const {siteName, logoType, actionButtonText, actionButtonUrl} = website;
-	const {Media, isUrl, sortByOrderKey} = Utilities;
+	
 	const RenderLogo = (logoType) ? Media({alt: siteName, maxHeight: 60, ...logoType}) : siteName;	
-	const topMenuLi = menuItems.sort(sortByOrderKey).map((row, i) => {
-		
-		const hasSubmenu = (row.hasOwnProperty('submenu')) ? true : false;
-		let liClass = (row.liClass) ? row.liClass : '';
-		let aClass = 'nav-link';
-		const attrTitle = (row.title) ? `title="${row.title}"` : '';
-		let subMenuBtn = '';
-		let Dropdown = '';
-		let RenderDropdown = '';
-
-		if(hasSubmenu)
-		{
-			liClass = `${liClass} dropdown`;
-			aClass = 'nav-link dropdown-toggle';
-			subMenuBtn = `id="${row.eventName}Dropdown" data-bs-toggle="dropdown"`;
-			Dropdown = row.submenu.map(item => {
-				return `<a class="dropdown-item" href="${item.href}">${item.text}</a>`;
-			}).join('');
-			
-			RenderDropdown = `<div class="dropdown-menu">${Dropdown}</div>`;
-		}
-
-		return `<li class="nav-item ${liClass}"><a href="${row.href}" ${attrTitle} class="${aClass}" ${subMenuBtn}>${row.text}</a>${RenderDropdown}</li>`;
-	}).join('');	
+	const topMenuLi = NavbarLi({menuItems});
 	
 	let actionUrl = () => {
 		let output = '';
@@ -85,7 +71,31 @@ export const TopMenu = ({website, pages, request, langItems}) => {
 	`;
 };
 
-const getMenuItems = ({website, pages, langItems}) => {
+const getTopMenuItems = ({website, langItems}) => {
+	let output = [];
+	const langSubmenu = [];
+	const {currentLanguage, defaultLanguage} = website;
+	
+	langItems.forEach(row => {
+		langSubmenu.push({
+			eventName: `change-lang-${row.lang}`,
+			...row,
+			text: row.lang.toUpperCase()
+		});
+	});
+		
+	output.push({
+		order: 999,
+		href: `#`,
+		text: `🌐 ${currentLanguage.toUpperCase()}`,
+		eventName: `dropdown-lang`,
+		submenu: langSubmenu.filter(i => !i.iscurrentLanguage)
+	});
+	
+	return output;
+};
+
+const getMainMenuItems = ({website, pages, langItems}) => {
 	
 	let output = [];
 	const {currentLanguage, defaultLanguage} = website;
@@ -104,21 +114,35 @@ const getMenuItems = ({website, pages, langItems}) => {
 		});
 	}
 	
-	langItems.forEach(row => {
-		langSubmenu.push({
-			eventName: `change-lang-${row.lang}`,
-			...row
-		});
-	});
-		
-	output.push({
-		order: 100,
-		href: `#`,
-		text: `🌐 ${currentLanguageName}`,
-		eventName: `dropdown-lang`,
-		submenu: langSubmenu.filter(i => !i.iscurrentLanguage)
-	});	
-	
 	return output;
-		
 };
+
+
+export const NavbarLi = ({menuItems}) => {
+	
+	return menuItems.sort(sortByOrderKey).map((row, i) => {
+		
+		const hasSubmenu = (row.hasOwnProperty('submenu')) ? true : false;
+		let liClass = (row.liClass) ? row.liClass : '';
+		let aClass = 'nav-link';
+		const attrTitle = (row.title) ? `title="${row.title}"` : '';
+		let subMenuBtn = '';
+		let Dropdown = '';
+		let RenderDropdown = '';
+
+		if(hasSubmenu)
+		{
+			liClass = `${liClass} dropdown`;
+			aClass = 'nav-link dropdown-toggle';
+			subMenuBtn = `id="${row.eventName}Dropdown" data-bs-toggle="dropdown"`;
+			Dropdown = row.submenu.map(item => {
+				return `<a class="dropdown-item" href="${item.href}">${item.text}</a>`;
+			}).join('');
+			
+			RenderDropdown = `<div class="dropdown-menu">${Dropdown}</div>`;
+		}
+
+		return `<li class="nav-item ${liClass}"><a href="${row.href}" ${attrTitle} class="${aClass}" ${subMenuBtn}>${row.text}</a>${RenderDropdown}</li>`;
+	}).join('');
+	
+}
