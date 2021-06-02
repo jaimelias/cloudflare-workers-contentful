@@ -108,7 +108,7 @@ export const Media = (obj) => {
 	}
 };
 
-export const isoNumber = ({number}) => {
+export const isoNumber = number => {
 	let isoNumber = number.match(/\d+/g);
 	isoNumber = (Array.isArray(isoNumber)) ? isoNumber.join('') : '';
 	return isoNumber;

@@ -3,7 +3,7 @@ export const copyRight = ({siteName}) => (`<div class="mt-5 mb-2 text-center"><s
 export const FooterMenu = ({telephoneNumber, instagramUsername, siteName, location, country, googleMapsUrl}) => {
 	
 	const urlEncodedsiteName = encodeURIComponent(siteName);
-	const isoTelephoneNumber= Utilities.isoNumber({number: telephoneNumber});
+	const isoTelephoneNumber= Utilities.isoNumber(telephoneNumber);
 
 	return `
 		<div class="row text-center">
@@ -18,8 +18,8 @@ export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername,
 
 	const {isoNumber} = Utilities;
 	const urlEncodedsiteName = encodeURIComponent(siteName);
-	const isoWhatsapp = isoNumber({number: whatsappNumber});
-	const isoTelephoneNumber = isoNumber({number: telephoneNumber});
+	const isoWhatsapp = isoNumber(whatsappNumber);
+	const isoTelephoneNumber = isoNumber(telephoneNumber);
 
 	let output = '';
 	

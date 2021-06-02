@@ -11,7 +11,7 @@ export const sendGridSend = async ({payload, crm, website}) => {
 	let template = emailTemplate({
 		payload,
 		htmlMessage,
-		isoWhatsapp: Utilities.isoNumber({number: whatsappNumber}),
+		isoWhatsapp: Utilities.isoNumber(whatsappNumber),
 		siteName
 	});
 	

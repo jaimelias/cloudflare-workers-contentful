@@ -2,22 +2,24 @@ const {Media, isUrl, sortByOrderKey} = Utilities;
 
 export const TopMenu = ({website, labels, langItems}) => {
 	
-	const {telephoneNumber} = website;
 	const {labelCallUs} = labels;
+	const {telephoneNumber} = website;
+	const renderTelephoneNumber = (telephoneNumber) ? `<span class="navbar-text">${labelCallUs} ${telephoneNumber}</span>` : '';
 	const menuItems = getTopMenuItems({website, langItems});
-	const topMenuLi = NavbarLi({menuItems});
+	const topMenuDropdown = NavbarDropdown({menuItems});
 	
-	let output = (telephoneNumber) ?  `
+	let output = `
 		<nav class="navbar navbar-expand navbar-dark bg-secondary">
-			<div class="container">
-					<ul class="navbar-nav mr-auto">
-						${topMenuLi}
-					</ul>
-					<span class="navbar-text">${labelCallUs} ${telephoneNumber}</span>
+			<div class="container-fluid">
+					${renderTelephoneNumber}
+					
+					<form class="d-flex">
+						${topMenuDropdown}
+					</form>
 				</div>
 			</div>
 		</nav>
-	` : '';
+	`;
 	
 	return output;
 };
@@ -56,7 +58,7 @@ export const MainMenu = ({website, pages, request, langItems}) => {
 	
 	return `
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<div class="container">
+			<div class="container-fluid">
 				<a class="navbar-brand mb-0 h1 text-uppercase" href="${homeUrl}">${RenderLogo}</a>
 				
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
@@ -95,12 +97,10 @@ const getTopMenuItems = ({website, langItems}) => {
 	return output;
 };
 
-const getMainMenuItems = ({website, pages, langItems}) => {
+const getMainMenuItems = ({website, pages}) => {
 	
 	let output = [];
 	const {currentLanguage, defaultLanguage} = website;
-	const langSubmenu = [];
-	const currentLanguageName = LangConfig.langLabels[currentLanguage].name;
 
 	if(pages)
 	{		
@@ -143,6 +143,30 @@ export const NavbarLi = ({menuItems}) => {
 		}
 
 		return `<li class="nav-item ${liClass}"><a href="${row.href}" ${attrTitle} class="${aClass}" ${subMenuBtn}>${row.text}</a>${RenderDropdown}</li>`;
+	}).join('');
+	
+}
+
+
+export const NavbarDropdown = ({menuItems}) => {
+	
+	return menuItems.sort(sortByOrderKey).map((row, i) => {
+		
+		const hasSubmenu = (row.hasOwnProperty('submenu')) ? true : false;
+		const attrTitle = (row.title) ? `title="${row.title}"` : '';
+		let Dropdown = '';
+		let RenderDropdown = '';
+
+		if(hasSubmenu)
+		{
+			Dropdown = row.submenu.map(item => {
+				return `<a class="dropdown-item" href="${item.href}">${item.text}</a>`;
+			}).join('');
+			
+			RenderDropdown = `<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">${Dropdown}</ul>`;
+		}
+
+		return `<div class="dropdown"><a style="background-color: rgba(0,0,0,0.2);" class="btn text-light dropdown-toggle" ${attrTitle} href="#" role="button" id="dropdownLanguage" data-bs-toggle="dropdown" aria-expanded="false">${row.text}</a>${RenderDropdown}</div>`;
 	}).join('');
 	
 }
