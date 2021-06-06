@@ -1,28 +1,28 @@
+const {getAllPageTypes} = Utilities;
+
 export const handleSitemap = async ({store}) => {
 	const {getState, render} = store;	
 	const {pathNameArr, method} = getState().request.data;	
 	
 	if(pathNameArr.first === pathNameArr.last && method === 'GET')
 	{
-		return render.payload(await SitemapParse(store));
+		return render.payload(SitemapParse(store));
 	}
 	
 	return render.payload({status: 400});
 };
 
-const SitemapParse = async (store) => {
+const SitemapParse = store => {
 	
 	let urls = [];
 	const langPaths = {};
 	const langList = LangConfig.langList;
-	let output = {
-		status: 404
-	};
 	const {escUrl} = Utilities;
 	const {getState} = store;
-	const {defaultLanguage, domainName, homepage} = getState().contentful.data.websites.entries[0];
+	const {data} = getState().contentful;
+	const {defaultLanguage, domainName, homepage} = data.websites.entries[0];
 	const {imageGallery} = homepage;
-	const pages = getState().contentful.data.pages.entries;
+	const allPageTypes = getAllPageTypes(data);
 		
 	langList.forEach(key => {
 		langPaths[key] = (key === defaultLanguage) ? '' : key;
@@ -61,7 +61,7 @@ const SitemapParse = async (store) => {
 		}
 	}
 	
-	pages.forEach(row => {
+	allPageTypes.forEach(row => {
 		
 		const gallery = (row.hasOwnProperty('imageGallery')) ? row.imageGallery : [];
 		

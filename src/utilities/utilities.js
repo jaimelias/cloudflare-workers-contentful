@@ -153,30 +153,59 @@ export const isUrl = str => {
 	return (str) ? regex.test(str) : false;
 }
 
-export const findPageBySlug = ({slug, pages}) => {
-	let output = false;
-	
-	if(slug && Array.isArray(pages))
+export const findBySlug = ({data, slug}) => {
+	let output = {
+		type: 'notFound',
+		data: {}
+	};
+				
+	if(slug)
 	{
-		const thisPage = pages.find(i => i.slug === slug);
-		
-		if(typeof thisPage !== 'undefined')
+		for(let k in data)
 		{
-			output = thisPage;
-		}
+			if(k !== 'websites')
+			{				
+				if(typeof data[k] === 'object')
+				{
+					if(data[k].hasOwnProperty('entries'))
+					{
+						const findData = data[k].entries.find(i => i.slug === slug) || false;
+						
+						if(findData)
+						{
+							output = {
+								type: k,
+								data: findData
+							};
+						}
+					}
+				}
+			}
+			
+		}				
+	}
+	else
+	{
+		output = {
+			type: 'index',
+			data: {}
+		};
 	}
 	
 	return output;
-};
+}
 
-export const listLangItems = ({website, pages, request}) => {
+export const listLangItems = ({store}) => {
 
-	const {defaultLanguage, currentLanguage} = website;	
-	const {slug} = request;
-	const page = findPageBySlug({slug, pages});
-	
 	let output = [];
-	
+	const {getState} = store;
+	const {data} = getState().contentful;
+	const {websites} = data;
+	const {slug} = getState().request.data;
+	const website = websites.entries[0];
+	const {defaultLanguage, currentLanguage} = website;
+	const thisPage = findBySlug({data, slug}).data;
+
 	for(const k in langLabels)
 	{		
 		const thisName = langLabels[k].name;
@@ -187,11 +216,11 @@ export const listLangItems = ({website, pages, request}) => {
 		{
 			let pageSlug = '';
 			
-			if(page.hasOwnProperty('slugs'))
+			if(thisPage.hasOwnProperty('slugs'))
 			{
-				if(typeof page.slugs[k] !== 'undefined')
+				if(typeof thisPage.slugs[k] !== 'undefined')
 				{
-					pageSlug = page.slugs[k];
+					pageSlug = thisPage.slugs[k];
 				}
 			}
 			
@@ -397,3 +426,21 @@ export const parseRequest = async (event) => {
 export const doSoftRedirect = ({hostName, url, status}) => ((status === 301 || status === 302) && (hostName !== CONTENTFUL_DOMAIN || !url.startsWith('https'))) ? true : false;
 
 export const softRedirectBody = (url) => `<!doctype html><html><head><meta http-equiv="refresh" content="2;url=${url}" /><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"></head><body><a href="${url}">${url}</a></body></html>`; 
+
+
+export const getAllPageTypes = data => {
+	let output = [];
+	
+	for(let k in data)
+	{
+		if(typeof data[k] === 'object')
+		{
+			if(data[k].hasOwnProperty('entries'))
+			{
+				output = [...output, ...data[k].entries];
+			}
+		}
+	}
+	
+	return output;
+};

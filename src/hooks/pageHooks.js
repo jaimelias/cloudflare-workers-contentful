@@ -2,6 +2,7 @@ import IndexComponent from './components/indexComponent';
 import NotFoundComponent from './components/notFoundComponent';
 import PageComponent from './components/pageComponent';
 import PostComponent from './components/postComponent';
+const {findBySlug} = Utilities;
 
 export default class PageHooks {
 	constructor({store, labels})
@@ -21,28 +22,28 @@ export default class PageHooks {
 	route(){
 		const {store} = this;
 		const {getState} = store;		
-		const request = getState().request.data;
-		const pages = getState().contentful.data.pages.entries || [];
-		const posts = getState().contentful.data.posts || {};	
-		const {slug} = request;
-		const page = pages.find(i => i.slug === slug);
-		const post = (posts.hasOwnProperty('entries')) ? posts.entries.find(i => i.slug === slug) : false;
-		
-		if(slug === '')
-		{
-			this.homePage.init();			
-		}
-		else if(typeof page  === 'object')
-		{
-			this.pageComponent.init(page);
-		}
-		else if(typeof post === 'object')
-		{
-			this.postComponent.init(post);
-		}
-		else
-		{
-			this.notFoundPage.init();
+		const {data: {slug}} = getState().request;
+		const {data} = getState().contentful;
+		const thisPage = findBySlug({data, slug});
+						
+		switch(thisPage.type){
+			case 'index':
+				this.homePage.init();
+				break;
+			case 'notFound':
+				this.notFoundPage.init();
+				break;
+			case 'pages':
+				this.pageComponent.init(thisPage.data);
+				break;
+			case 'packages':
+				this.pageComponent.init(thisPage.data);
+				break;
+			case 'packages':
+				this.postComponent.init(thisPage.data);
+				break;
+			default:
+				this.notFoundPage.init();
 		}
 	}
 }

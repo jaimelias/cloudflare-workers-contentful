@@ -36,10 +36,8 @@ export default class IndexComponent {
 
 const IndexWrapper = ({website, labels}) => {
 	
-	const {amenities, included, notIncluded, homepage} = website;	
+	const {homepage} = website;	
 	const {title, description, content, imageGallery} = homepage || '';
-	const {labelIncluded, labelNotIncluded, labelAmenities} = labels;
-
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
 	const RenderContent = (content) ? marked(content) : '';

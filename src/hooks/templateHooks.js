@@ -10,17 +10,16 @@ const {langLabels} = LangConfig;
 export const templateHooks = ({store}) => {
 
 	const {getState, render} = store;
-	const pages = getState().contentful.data.pages.entries;
-	const request = getState().request.data;
-	const {slug} = request;
-	const website = getState().contentful.data.websites.entries[0];
+	const {data} = getState().contentful;
+	const {slug} = getState().request.data;
+	const website = data.websites.entries[0];
 	const {
 		siteName,
 		currentLanguage,
 		defaultLanguage
 	} = website;
 	
-	const langItems = listLangItems({website, request, pages});
+	const langItems = listLangItems({store});
 	const labels = langLabels[currentLanguage].labels;
 		
 	new PageHooks({store, labels});
@@ -75,9 +74,7 @@ export const templateHooks = ({store}) => {
 	render.addHooks({
 		content: MainMenu({
 			langItems,
-			pages,
-			website,
-			request
+			store
 		}),
 		order: 20,
 		location: 'body'

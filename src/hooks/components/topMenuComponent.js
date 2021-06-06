@@ -1,4 +1,4 @@
-const {Media, isUrl, sortByOrderKey} = Utilities;
+const {Media, isUrl, sortByOrderKey, getAllPageTypes} = Utilities;
 
 export const TopMenu = ({website, labels, langItems}) => {
 	
@@ -24,12 +24,18 @@ export const TopMenu = ({website, labels, langItems}) => {
 	return output;
 };
 
-export const MainMenu = ({website, pages, request, langItems}) => {
-	
+export const MainMenu = ({store, langItems}) => {
+
+
+	const {getState} = store;
+	const {data} = getState().contentful;
+	const website = data.websites.entries[0];
+	const request = getState().request.data;
 	const {hostName, homeUrl} = request;
-	const menuItems = getMainMenuItems({website, pages, langItems});
+	const allPageTypes = getAllPageTypes(data);
+	const menuItems = getMainMenuItems({website, data: allPageTypes, langItems});
 	const {siteName, logoType, actionButtonText, actionButtonUrl} = website;
-	
+		
 	const RenderLogo = (logoType) ? Media({alt: siteName, maxHeight: 60, ...logoType}) : siteName;	
 	const topMenuLi = NavbarLi({menuItems});
 	
@@ -76,7 +82,7 @@ export const MainMenu = ({website, pages, request, langItems}) => {
 const getTopMenuItems = ({website, langItems}) => {
 	let output = [];
 	const langSubmenu = [];
-	const {currentLanguage, defaultLanguage} = website;
+	const {currentLanguage} = website;
 	
 	langItems.forEach(row => {
 		langSubmenu.push({
@@ -97,14 +103,14 @@ const getTopMenuItems = ({website, langItems}) => {
 	return output;
 };
 
-const getMainMenuItems = ({website, pages}) => {
+const getMainMenuItems = ({website, data}) => {
 	
 	let output = [];
 	const {currentLanguage, defaultLanguage} = website;
 
-	if(pages)
+	if(data)
 	{		
-		pages.filter(i => i.addToMenu).forEach(row => {
+		data.filter(i => i.addToMenu).forEach(row => {
 			output.push({
 				order: row.order,
 				href: (currentLanguage === defaultLanguage) ? `/${row.slug}` : `/${currentLanguage}/${row.slug}`,
