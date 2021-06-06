@@ -2,7 +2,7 @@ const {langList} = LangConfig;
 const {getFallBackLang} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
-export const validContentTypes = ['websites', 'pages', 'posts'];
+export const validContentTypes = ['websites', 'pages', 'posts', 'packages'];
 
 export const getEntries = async ({contentType, websiteId, store}) => {
 	
@@ -321,9 +321,8 @@ export const getAllEntries = async ({store}) => {
 		return getEntries({...entryArgs, 
 			contentType: 'websites'
 		})
-		.then(website => {
+		.then(async (website) => {
 
-			
 			const websiteId = website.items[0].sys.id;
 			const entries = validContentTypes
 			.filter(i => i !== 'websites')
@@ -332,32 +331,30 @@ export const getAllEntries = async ({store}) => {
 				contentType,
 				 websiteId
 			}));
-
-			return Promise.all(entries)
+			
+			return await Promise.all(entries)
 			.then(data => {
-				
-				data = [website, ...data].map(d => {
+								
+				return [website, ...data].map(async (d) => {
+					d = await d;
 					d.fetcher = 'fetch';
-					return d;
-				});
-				
-				const parsed = data.map(d => {
 					const contentType = d.items[0].sys.contentType.sys.id;
+										
 					const output = parseData({data: d, altLang, contentType, websiteId});
 					dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
+					
+
+					if(ENVIRONMENT === 'production')
+					{
+						waitUntil(CACHE.put(kvCacheKey, JSON.stringify(d), {expirationTtl: 600}));
+					}
+					else
+					{
+						waitUntil(CACHE.delete(kvCacheKey));
+					}					
+					
 					return output;
 				});
-				
-				if(ENVIRONMENT === 'production')
-				{
-					waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
-				}
-				else
-				{
-					waitUntil(CACHE.delete(kvCacheKey));
-				}
-				
-				return parsed;
 			})
 			.catch(err => store.render.payload({status: 500, body: err.message}));
 
