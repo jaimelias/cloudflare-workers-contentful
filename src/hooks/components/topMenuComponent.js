@@ -10,7 +10,7 @@ export const TopMenu = ({website, labels, langItems}) => {
 	
 	let output = `
 		<nav class="navbar navbar-expand navbar-dark bg-secondary">
-			<div class="container-fluid">
+			<div class="container">
 					${renderTelephoneNumber}
 					
 					<form class="d-flex">
@@ -58,7 +58,7 @@ export const MainMenu = ({website, pages, request, langItems}) => {
 	
 	return `
 		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<div class="container-fluid">
+			<div class="container">
 				<a class="navbar-brand mb-0 h1 text-uppercase" href="${homeUrl}">${RenderLogo}</a>
 				
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">

@@ -49,24 +49,30 @@ const IndexWrapper = ({website, labels}) => {
 		labels
 	});
 	
+	const main = (widget) ? `
+		<div class="row">
+			<div class="col-md-8">
+				<div class="entry-content entry-fixed-width">${RenderContent}</div>
+			</div>
+			<div class="col-md-4">
+				${widget}
+			</div>
+		</div>	
+	` : `<div class="entry-content entry-full-width">${RenderContent}</div>`;
+	
+	
+	
 	return `
 		<div class="container">
 			<div class="text-center">
 				<div class="mb-5">
 					${RenderGallery}
 				</div>
-				<h1 class="h2">${title}</h1>
-				${RenderDescription}
-				<hr/>
+				<h1 class="display-6 my-3">${title}</h1>
+				<div>${RenderDescription}</div>
+				<div class="my-5"><hr/></div>
 			</div>
-			<div class="row">
-				<div class="col-md-8">
-					<div class="entry-content">${RenderContent}</div>
-				</div>
-				<div class="col-md-4">
-					${widget}
-				</div>
-			</div>
+			${main}
 		</div>	
 	`;
 };

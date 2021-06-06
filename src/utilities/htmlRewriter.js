@@ -28,7 +28,7 @@ class imageRewriterClass
 					return `${imageUrl} ${row}w`
 				}).join(',') : false;
 				
-				element.setAttribute(this.attributeName, encodeURI(decodeURI(`${fileName}?cdnUrl=${assetCdnUrl}&width=${maxWidth}`)));
+				element.setAttribute('src', encodeURI(decodeURI(`${fileName}?cdnUrl=${assetCdnUrl}&width=${maxWidth}`)));
 				element.setAttribute('loading', 'lazy');
 				
 				if(srcSetItems)
