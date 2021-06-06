@@ -433,12 +433,15 @@ export const getAllPageTypes = data => {
 	
 	for(let k in data)
 	{
-		if(typeof data[k] === 'object')
+		if(k !== 'websites')
 		{
-			if(data[k].hasOwnProperty('entries'))
+			if(typeof data[k] === 'object')
 			{
-				output = [...output, ...data[k].entries];
-			}
+				if(data[k].hasOwnProperty('entries'))
+				{
+					output = [...output, ...data[k].entries];
+				}
+			}			
 		}
 	}
 	
