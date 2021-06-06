@@ -70,8 +70,8 @@ const IndexWrapper = ({website, labels}) => {
 				</div>
 				<h1 class="display-6 my-3">${title}</h1>
 				<div>${RenderDescription}</div>
-				<div class="my-5"><hr/></div>
 			</div>
+			<hr/>
 			${main}
 		</div>	
 	`;
