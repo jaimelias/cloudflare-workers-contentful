@@ -8,8 +8,8 @@ const packageGrid = ({store}) => {
 	
 	const {getState} = store;
 	const {data} = getState().contentful;
-	const packages = data.packages.entries;
-	const websites = data.websites.entries;
+	const packages = (data.packages.hasOwnProperty('entries')) ? data.packages.entries : [];
+	const websites = (data.websites.hasOwnProperty('entries')) ? data.websites.entries : [];
 	const {homeUrl} = getState().request.data;
 	const website = websites[0];
 	
@@ -109,7 +109,7 @@ const IndexWrapper = ({store, labels}) => {
 		labels
 	});
 	
-	const main = (widget) ? `
+	const main = (content) ? (widget) ? `
 		<div class="row">
 			<div class="col-md-8">
 				<div class="entry-content entry-fixed-width">${RenderContent}</div>
@@ -118,9 +118,7 @@ const IndexWrapper = ({store, labels}) => {
 				${widget}
 			</div>
 		</div>	
-	` : `<div class="entry-content entry-full-width">${RenderContent}</div>`;
-	
-	
+	` : `<div class="entry-content entry-full-width">${RenderContent}</div>` : '';
 	
 	return `
 		<div class="container">
@@ -132,9 +130,9 @@ const IndexWrapper = ({store, labels}) => {
 				<div>${RenderDescription}</div>
 			</div>
 			<hr/>
+			${main}
 			${RenderGrid}
 			${RenderBlog}
-			${main}
 		</div>	
 	`;
 };

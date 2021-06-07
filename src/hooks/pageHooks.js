@@ -39,7 +39,7 @@ export default class PageHooks {
 			case 'packages':
 				this.pageComponent.init(thisPage.data);
 				break;
-			case 'packages':
+			case 'posts':
 				this.postComponent.init(thisPage.data);
 				break;
 			default:
