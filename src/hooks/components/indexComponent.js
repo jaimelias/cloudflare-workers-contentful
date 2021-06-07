@@ -8,12 +8,11 @@ const packageGrid = ({store}) => {
 	
 	const {getState} = store;
 	const {data} = getState().contentful;
-	const packages = (typeof data.packages === 'object') ? data.packages.entries : [];
-	const websites = (typeof data.websites === 'object') ? data.websites.entries : [];
+	const packages = data.packages.entries;
+	const websites = data.websites.entries;
 	const {homeUrl} = getState().request.data;
 	const website = websites[0];
-	
-	
+
 	if(Array.isArray(packages))
 	{
 		if(packages.length > 0)

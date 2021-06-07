@@ -19,7 +19,8 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 		
 		if(response.ok)
 		{
-			return await response.json();
+			const data = await response.json();
+			return {...data, contentType};
 		}
 		else
 		{			
@@ -287,41 +288,58 @@ const mapLinkField = ({fieldArg, fields}) => fields.map(item => {
 	return item;
 });
 
+const parseKvData = data => {
+	let output = false;
+	
+	if(data)
+	{
+		try
+		{
+			if(typeof data === 'string')
+			{
+				if(data !== null && data !== '')
+				{
+					data = JSON.parse(data);
+					
+					if(Array.isArray(data))
+					{
+						if(data.length > 0)
+						{
+							output = data;
+						}
+					}
+				}
+			}
+		}
+		catch(e)
+		{
+			console.log(e);
+		}		
+	}	
+	
+	return output;
+};
+
 export const getAllEntries = async ({store}) => {
 	
 	const {getState, dispatch} = store;
 	const {waitUntil, altLang} = getState().request.data;
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
-	const kvCacheData = false;
-
-	try
-	{
-		if(typeof kvCache === 'string')
-		{
-			if(kvCache !== null && kvCache !== '')
-			{
-				kvCacheData = JSON.parse(kvCache);
-			}
-		}
-	}
-	catch(e)
-	{
-		console.log(e);
-	}
+	let kvData = parseKvData(kvCache);
 	
-	if(typeof kvCacheData === 'object' && ENVIRONMENT === 'production')
-	{
-		const data = kvCacheData.map(d => {
+	if(kvData && ENVIRONMENT === 'production')
+	{		
+		const data = kvData.map(d => {
 			d.fetcher = 'KV';
 			return d;
 		});
 				
-		const website = data.find(i => i.items[0].sys.contentType.sys.id === 'websites');
+		const website = data.find(i => i.contentType === 'websites');
 		const websiteId = website.items[0].sys.id;
 		
 		return data.map(d => {
-			const contentType = d.items[0].sys.contentType.sys.id;
+			const contentType = d.contentType;
 			const output = parseData({data: d, altLang, contentType, websiteId});
 			dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
 			return output;			
@@ -350,18 +368,20 @@ export const getAllEntries = async ({store}) => {
 			
 			return await Promise.all(entries)
 			.then(data => {
-								
-				return [website, ...data].map(async (d) => {
+				
+				data = [website, ...data];
+												
+				return data.map(async (d) => {
 					d = await d;
-					d.fetcher = 'fetch';
-					const contentType = d.items[0].sys.contentType.sys.id;
+					d.fetcher = 'fetch';		
+					const contentType = d.contentType;
 										
 					const output = parseData({data: d, altLang, contentType, websiteId});
 					dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
 
 					if(ENVIRONMENT === 'production')
 					{
-						waitUntil(CACHE.put(kvCacheKey, JSON.stringify(d), {expirationTtl: 600}));
+						waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
 					}
 					else
 					{

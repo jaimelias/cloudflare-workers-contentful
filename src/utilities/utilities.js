@@ -167,17 +167,14 @@ export const findBySlug = ({data, slug}) => {
 			{				
 				if(typeof data[k] === 'object')
 				{
-					if(data[k].hasOwnProperty('entries'))
+					const findData = data[k].entries.find(i => i.slug === slug) || false;
+					
+					if(findData)
 					{
-						const findData = data[k].entries.find(i => i.slug === slug) || false;
-						
-						if(findData)
-						{
-							output = {
-								type: k,
-								data: findData
-							};
-						}
+						output = {
+							type: k,
+							data: findData
+						};
 					}
 				}
 			}
@@ -437,10 +434,7 @@ export const getAllPageTypes = data => {
 		{
 			if(typeof data[k] === 'object')
 			{
-				if(data[k].hasOwnProperty('entries'))
-				{
-					output = [...output, ...data[k].entries];
-				}
+				output = [...output, ...data[k].entries];
 			}			
 		}
 	}

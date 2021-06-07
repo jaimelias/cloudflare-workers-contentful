@@ -3,10 +3,9 @@ const postsPerPage = 10;
 
 export const BlogIndexComponent = ({store, width}) => {
 	const {getState} = store;
-	const posts = getState().contentful.data.posts;
+	const entries = getState().contentful.data.posts.entries;
 	const request = getState().request.data;
 	const {pageNumber, homeUrl} = request;
-	const entries = (typeof posts.entries === 'object') ? posts.entries : [];
 	
 	if(Array.isArray(entries))
 	{
