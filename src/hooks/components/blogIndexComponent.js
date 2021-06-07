@@ -6,7 +6,7 @@ export const BlogIndexComponent = ({store, width}) => {
 	const posts = getState().contentful.data.posts;
 	const request = getState().request.data;
 	const {pageNumber, homeUrl} = request;
-	const {entries} = posts;
+	const entries = (typeof posts.entries === 'object') ? posts.entries : [];
 	
 	if(Array.isArray(entries))
 	{
