@@ -8,8 +8,8 @@ const packageGrid = ({store}) => {
 	
 	const {getState} = store;
 	const {data} = getState().contentful;
-	const packages = (data.packages.hasOwnProperty('entries')) ? data.packages.entries : [];
-	const websites = (data.websites.hasOwnProperty('entries')) ? data.websites.entries : [];
+	const packages = (typeof data.packages === 'object') ? data.packages.entries : [];
+	const websites = (typeof data.websites === 'object') ? data.websites.entries : [];
 	const {homeUrl} = getState().request.data;
 	const website = websites[0];
 	
