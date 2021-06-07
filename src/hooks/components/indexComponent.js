@@ -1,5 +1,60 @@
 import {GalleryComponent} from './galleryComponent';
 import {RightSideWidget} from './widgets';
+import {BlogIndexComponent} from './blogIndexComponent';
+
+const packageGrid = ({store}) => {
+	
+	let output = '';
+	
+	const {getState} = store;
+	const {data} = getState().contentful;
+	const packages = data.packages.entries;
+	const websites = data.websites.entries;
+	const {homeUrl} = getState().request.data;
+	const website = websites[0];
+	
+	
+	if(Array.isArray(packages))
+	{
+		if(packages.length > 0)
+		{
+			output = '<div class="row g-5">';
+			
+			packages.forEach(r => {
+				
+				let image = '';
+				const url = `${homeUrl}${r.slug}`;
+				
+				if(r.hasOwnProperty('imageGallery'))
+				{
+					if(r.imageGallery.length > 0)
+					{
+						image = `<a class="text-dark" href="${url}"><img alt="${r.title}" class="card-img-top" src="${r.imageGallery[0].src}?w=420" /></a>`;
+					}			
+				}
+				
+				let row = `
+					<div class="col-md-4">
+						<div class="card position-relative">
+							${image}
+							
+							<div class="card-body">
+								<p class="card-text"><a class="text-dark" href="${url}">${r.title}</a></p>
+							</div>
+							<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${r.priceFrom}</a>
+						</div>
+					</div>
+				`;
+				
+				output += row;
+			});
+			
+			output += '</div><hr/>'			
+		}
+	}
+	
+	return output;
+}
 
 export default class IndexComponent {
 
@@ -11,10 +66,12 @@ export default class IndexComponent {
 	{
 		const {labels, store} = this;
 		const {getState, render, dispatch} = store;
-		const website = getState().contentful.data.websites.entries[0];
+		const {data} = getState().contentful;
+		const {websites} = data;
+		const website = websites.entries[0];
 		const {homepage} = website;
 		const {title, description, imageGallery} = homepage || '';
-		
+						
 		render.addHooks({
 			content: JsonLd(store),
 			order: 60,
@@ -26,7 +83,7 @@ export default class IndexComponent {
 			payload: {
 				title,
 				description,
-				content: IndexWrapper({website, labels}),
+				content: IndexWrapper({store, labels}),
 				imageGallery,
 				status: 200
 			}
@@ -34,13 +91,18 @@ export default class IndexComponent {
 	}
 }
 
-const IndexWrapper = ({website, labels}) => {
+const IndexWrapper = ({store, labels}) => {
 	
-	const {homepage} = website;	
+	const {getState} = store;
+	const {data} = getState().contentful;
+	const websites = data.websites.entries;
+	const {homepage} = websites[0];
 	const {title, description, content, imageGallery} = homepage || '';
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
+	const RenderGrid =  packageGrid({store});
 	const RenderContent = (content) ? marked(content) : '';
+	const RenderBlog = BlogIndexComponent({store, width: 'full'});
 	
 	const widget = RightSideWidget({
 		entry: homepage,
@@ -70,6 +132,8 @@ const IndexWrapper = ({website, labels}) => {
 				<div>${RenderDescription}</div>
 			</div>
 			<hr/>
+			${RenderGrid}
+			${RenderBlog}
 			${main}
 		</div>	
 	`;

@@ -3,18 +3,7 @@ import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
 import {RightSideWidget} from './widgets';
 const {accommodationTypes} = SharedData;
-const {pageHasForm} = Utilities;
-
-const pageIsBlog = ({slug, website}) => {
-	
-	if(typeof website.blogPage === 'object')
-	{
-		if(slug === website.blogPage.slug)
-		{
-			return true;
-		}
-	}			
-};
+const {pageHasForm, pageIsBlog} = Utilities;
 
 export default class PageComponent {
 
@@ -52,7 +41,7 @@ export default class PageComponent {
 			
 			if(posts.total > 0)
 			{
-				entryContent += BlogIndexComponent({store});
+				entryContent += '<hr/>' + BlogIndexComponent({store, width: 'fixed'});
 			}
 			else
 			{

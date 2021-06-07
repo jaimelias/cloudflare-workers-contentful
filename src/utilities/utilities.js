@@ -447,3 +447,14 @@ export const getAllPageTypes = data => {
 	
 	return output;
 };
+
+export const pageIsBlog = ({slug, website}) => {
+	
+	if(typeof website.blogPage === 'object')
+	{
+		if(slug === website.blogPage.slug)
+		{
+			return true;
+		}
+	}			
+};
