@@ -293,10 +293,26 @@ export const getAllEntries = async ({store}) => {
 	const {waitUntil, altLang} = getState().request.data;
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
-	
-	if(kvCache && ENVIRONMENT === 'production')
+	const kvCacheData = false;
+
+	try
 	{
-		const data = JSON.parse(kvCache).map(d => {
+		if(typeof kvCache === 'string')
+		{
+			if(kvCache !== null && kvCache !== '')
+			{
+				kvCacheData = JSON.parse(kvCache);
+			}
+		}
+	}
+	catch(e)
+	{
+		console.log(e);
+	}
+	
+	if(typeof kvCacheData === 'object' && ENVIRONMENT === 'production')
+	{
+		const data = kvCacheData.map(d => {
 			d.fetcher = 'KV';
 			return d;
 		});
@@ -342,7 +358,6 @@ export const getAllEntries = async ({store}) => {
 										
 					const output = parseData({data: d, altLang, contentType, websiteId});
 					dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
-					
 
 					if(ENVIRONMENT === 'production')
 					{
@@ -351,7 +366,7 @@ export const getAllEntries = async ({store}) => {
 					else
 					{
 						waitUntil(CACHE.delete(kvCacheKey));
-					}					
+					}
 					
 					return output;
 				});
