@@ -15,7 +15,7 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 	
 	let output = '';
 	
-	let attrClassRow = ' class="row" ';
+	let attrClassRow = ' class="row form-row" ';
 	let classCol = 'col-md';
 	let classMB = 'mb-3';
 	const isAccommodationForm = (accommodationTypes.includes(type)) ? true: false;

@@ -6,7 +6,7 @@ export const bootstrapScripts = {
 		order: 100,
 		inline: [{
 			location: 'after',
-			content: `body,html{height:100vh}.container{max-width:1200px}#footer a:not(.btn){color:#444}.entry-content{min-height: 200px}.entry-content img{max-width:100%;height:auto}.hidden{display:none}.chat-component{z-index:9999}hr{margin: 3rem 0}.entry-content h1, .entry-content h2, .entry-content h3, .entry-content h4, .entry-content table, .entry-content iframe, .row{margin-bottom: 2rem!important}`
+			content: `body,html{height:100vh}.container{max-width:1200px}#footer a:not(.btn){color:#444}.entry-content{min-height: 200px}.entry-content img{max-width:100%;height:auto}.hidden{display:none}.chat-component{z-index:9999}hr{margin: 3rem 0}.entry-content h1, .entry-content h2, .entry-content h3, .entry-content h4, .entry-content table, .entry-content iframe, .row:not(.form-row){margin-bottom: 2rem!important}`
 		}]
 	},
 	bootstrapScriptsJs: {
