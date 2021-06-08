@@ -1,4 +1,3 @@
-
 const {validUrlCharacters, isUrl} = Utilities;
 
 export default class Firewall {
@@ -8,7 +7,7 @@ export default class Firewall {
 	init(request){
 		const {method, url} = request;
 
-		if(!['GET', 'POST'].includes(method))
+		if(!['GET', 'POST', 'DELETE'].includes(method))
 		{
 			return {status: 405};
 		}

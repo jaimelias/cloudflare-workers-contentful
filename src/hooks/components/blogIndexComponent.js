@@ -81,9 +81,7 @@ const stylePost = ({post, homeUrl, showFeatured, total}) => {
 		if(featured && showFeatured)
 		{
 			const renderContent = (typeof shortContent === 'string') ? marked(shortContent) : '';
-			
-			console.log({image});
-			
+						
 			if(total === 1)
 			{
 				template = `

@@ -6,6 +6,7 @@ import {handleHtml} from './src/handlers/handleHtml';
 import {ReduxStore} from './src/redux/configureStore';
 import RenderOutput from './src/utilities/render';
 import Firewall from './src/utilities/firewall';
+import {purgeKv} from './src/utilities/purge';
 
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event));
@@ -20,13 +21,19 @@ const handleRequest = async (event) => {
 	const configureStore = ReduxStore({zone: first});
 	const render = new RenderOutput({store: configureStore, event, apiBody});
 	const store = {...configureStore, render};
-	const firewall = new Firewall(store).init(request);	
+	const firewall = new Firewall(store).init(request);
+	const purge = await purgeKv({event});
 	const responseInCache = await render.renderCache();
-		
+	
 	if(firewall.status !== 200)
 	{	
 		return render.payload(firewall);
 	}
+
+	if(purge.status === 200 || purge.status === 202)
+	{
+		return render.payload(purge);
+	}	
 	
 	if(responseInCache)
 	{
@@ -35,14 +42,14 @@ const handleRequest = async (event) => {
 
 	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data}});
 	
-	return await connectContentful({store});
+	return await connectContentful({event, store});
 };
 
 const connectContentful = async ({store}) => Contentful.getAllEntries({store})
 .then(() =>  {
-
+	
 	const {getState, render} = store;
-	const {status, statusText} = getState().contentful;
+	const {status} = getState().contentful;
 	
 	if(status === 200)
 	{
