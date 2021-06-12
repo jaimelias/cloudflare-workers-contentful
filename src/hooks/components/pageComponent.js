@@ -74,7 +74,7 @@ const pageWrapper = ({content, title, widget}) => {
 
 	return `
 	<div class="container">
-		<h1 class="entry-title">${title}</h1>
+		<h1 class="entry-title display-5 mb-4">${title}</h1>
 			<div class="row">
 				<div class="col-md-8">
 					<div class="entry-content" >

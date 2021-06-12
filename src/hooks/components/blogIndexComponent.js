@@ -18,24 +18,27 @@ const IndexComponent = ({paginatedEntries, homeUrl, width}) => {
 	
 	let output = '';
 	const {data, total} = paginatedEntries;
+	let args = {homeUrl, total};
+	
+	
 
 	if(total > 0)
 	{
 		if(width === 'fixed')
 		{
-			output += data.map(p => stylePost({post: p, homeUrl, showFeatured: true, total})).join('');
-			output += data.map(p => stylePost({post: p, homeUrl, showFeatured: false, total})).join('');
+			output += data.map(p => stylePost({...args, post: p, showFeatured: true})).join('');
+			output += data.map(p => stylePost({...args, post: p, showFeatured: false})).join('');
 		}
 		else
 		{
 			if(total === 1)
 			{
-				output += data.map(p => stylePost({post: p, homeUrl, showFeatured: true, total})).join('');
+				output += data.map(p => stylePost({...args, post: p, showFeatured: true})).join('');
 			}
 			else
 			{
-				const featured = data.map(p => stylePost({post: p, homeUrl, showFeatured: true, total})).join('');
-				const notFeatured = data.map(p => stylePost({post: p, homeUrl, showFeatured: false, total})).join('');
+				const featured = data.map(p => stylePost({...args, post: p, showFeatured: true})).join('');
+				const notFeatured = data.map(p => stylePost({...args, post: p, showFeatured: false})).join('');
 				
 				output += `
 					
@@ -48,7 +51,7 @@ const IndexComponent = ({paginatedEntries, homeUrl, width}) => {
 						</div>
 					</div>
 				`;
-			}			
+			}
 		}
 	}
 	
@@ -67,6 +70,8 @@ const stylePost = ({post, homeUrl, showFeatured, total}) => {
 	
 	let image = '';
 	const renderDescription = (description) ? `<p>${description}</p>` : '';
+	
+	
 	
 	if(Array.isArray(imageGallery))
 	{
@@ -118,6 +123,10 @@ const stylePost = ({post, homeUrl, showFeatured, total}) => {
 				<hr/>
 			`
 		}		
+	}
+	else
+	{
+		
 	}
 	
 	return template;

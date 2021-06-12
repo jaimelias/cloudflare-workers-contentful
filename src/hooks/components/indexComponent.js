@@ -125,7 +125,7 @@ const IndexWrapper = ({store, labels}) => {
 				<div class="mb-5">
 					${RenderGallery}
 				</div>
-				<h1 class="display-6 my-3">${title}</h1>
+				<h1 class="display-5 my-3">${title}</h1>
 				<div>${RenderDescription}</div>
 			</div>
 			<hr/>

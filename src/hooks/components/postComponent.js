@@ -14,7 +14,7 @@ export default class PostComponent {
 		
 		let entryContent = '';
 		entryContent += GalleryComponent({data: imageGallery});
-		entryContent = (typeof content === 'string') ? marked(content) : '';
+		entryContent += (typeof content === 'string') ? marked(content) : '';
 
 		render.addHooks({
 			content: JsonLd({post, store}),
@@ -43,13 +43,12 @@ export default class PostComponent {
 const postWrapper = ({content, title, date}) => {
 
 	let meta = '';
-
 	meta += (date) ? `<div class="mb-2 text-muted fw-light"><small>${date}</small></div>` : '';
 
 	return `
 	<div class="container">
 		${meta}
-		<h1 class="entry-title">${title}</h1>
+		<h1 class="entry-title display-5 mb-4">${title}</h1>
 			<div class="row">
 				<div class="col-md-8">
 					<div class="entry-content" >
