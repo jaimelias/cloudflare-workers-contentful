@@ -4,7 +4,7 @@ const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.l
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
 export const validContentTypes = ['websites', 'pages', 'posts', 'packages'];
 
-export const getEntries = async ({contentType, websiteId, store}) => {
+export const getEntries = async ({contentType, websiteId, store, defaultLanguage}) => {
 	
 	
 	const KV = await args();
@@ -20,7 +20,8 @@ export const getEntries = async ({contentType, websiteId, store}) => {
 		if(response.ok)
 		{
 			const data = await response.json();
-			return {...data, contentType};
+			
+			return {...data, contentType, defaultLanguage};
 		}
 		else
 		{			
@@ -157,7 +158,7 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 	if(typeof data === 'object')
 	{
 		if(data.sys.type === 'Array')
-		{
+		{		
 			const items = data.items || [];
 			const includes = data.includes || {};
 			const assets = includes.Asset || [];
@@ -170,36 +171,15 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 							
 			items.forEach(entry => {
 				let fields = entry.fields;
-				let defaultLanguage =  '';
 				const {id, updatedAt, createdAt} = entry.sys;
+				const defaultLanguage = (fields.hasOwnProperty('defaultLanguage')) ? Object.values(fields.defaultLanguage)[0] : data.defaultLanguage;
+				const currentLanguage = altLang || defaultLanguage;
 
 				let entryOutput = {
 					id,
 					updatedAt,
 					createdAt
 				};
-				
-				if(fields.hasOwnProperty('defaultLanguage'))
-				{
-					defaultLanguage = Object.values(fields.defaultLanguage)[0];
-				}
-				if(fields.hasOwnProperty('websites'))
-				{
-					for(let w in fields.websites)
-					{
-						fields.websites[w].forEach(r => {
-
-							const findDefLang = entries.find(i => i.sys.id === r.sys.id);
-							
-							if(findDefLang)
-							{
-								defaultLanguage = getFallBackLang(findDefLang.fields.defaultLanguage);
-							}	
-						});
-					}
-				}
-
-				const currentLanguage = altLang || defaultLanguage;
 				
 				for(let key in fields)
 				{
@@ -353,17 +333,22 @@ export const getAllEntries = async ({store}) => {
 		};
 		
 		return getEntries({...entryArgs, 
-			contentType: 'websites'
+			contentType: 'websites',
+			defaultLanguage: undefined
 		})
 		.then(async (website) => {
 
-			const websiteId = website.items[0].sys.id;
+			const websiteItem = website.items[0];
+			const websiteId = websiteItem.sys.id;
+			const defaultLanguage = getFallBackLang(websiteItem.fields.defaultLanguage);
+						
 			const entries = validContentTypes
 			.filter(i => i !== 'websites')
 			.map(contentType => getEntries({
 				...entryArgs, 
 				contentType,
-				 websiteId
+				 websiteId,
+				 defaultLanguage
 			}));
 			
 			return await Promise.all(entries)
