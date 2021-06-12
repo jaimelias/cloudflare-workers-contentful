@@ -172,15 +172,10 @@ const parseData = ({data, altLang, contentType, websiteId}) => {
 			items.forEach(entry => {
 				let fields = entry.fields;
 				const {id, updatedAt, createdAt} = entry.sys;
+				let entryOutput = {id, updatedAt, createdAt};
 				const defaultLanguage = (fields.hasOwnProperty('defaultLanguage')) ? Object.values(fields.defaultLanguage)[0] : data.defaultLanguage;
 				const currentLanguage = altLang || defaultLanguage;
 
-				let entryOutput = {
-					id,
-					updatedAt,
-					createdAt
-				};
-				
 				for(let key in fields)
 				{
 					if(key !== 'websites')
