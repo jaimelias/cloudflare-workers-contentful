@@ -1,5 +1,6 @@
 import {sendGridSend} from '../utilities/crm';
 const {formFields} = SharedData;
+const {findBySlug} = Utilities;
 
 export const handleApi = async ({store}) =>
 {
@@ -20,12 +21,12 @@ const handleFormRequest = async ({store}) => {
 		status: 500
 	};
 	
+	let invalids = [];
 	const {langList} = LangConfig;
 	const {getState} = store;
-	const payload = getState().request.data.apiBody;
-	let invalids = [];
-	
-	console.log({payload});
+	const {apiBody: payload} = getState().request.data;
+	const {data} = getState().contentful;
+	let thisPage = undefined;
 
 	for(let key in formFields)
 	{			
@@ -89,13 +90,22 @@ const handleFormRequest = async ({store}) => {
 					invalids.push(key);
 				}
 			}
+			if(key === 'slug')
+			{
+				thisPage = findBySlug({data, slug: payload[key]}).data;
+
+				if(typeof thisPage === 'undefined')
+				{
+					invalids.push(key);
+				}
+			}
 		}
 	}
 	
 	if(invalids.length === 0)
 	{
 		
-		const website = getState().contentful.data.websites.entries[0];
+		const website = data.websites.entries[0];
 		const crm = website.crm;
 		
 		if(crm)
@@ -110,7 +120,8 @@ const handleFormRequest = async ({store}) => {
 			output = await sendGridSend({
 				payload: outputPayload,
 				crm,
-				website
+				website,
+				page: thisPage
 			});				
 		}
 	}

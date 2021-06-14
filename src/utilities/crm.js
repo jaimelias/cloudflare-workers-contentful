@@ -1,4 +1,4 @@
-export const sendGridSend = async ({payload, crm, website}) => {
+export const sendGridSend = async ({payload, crm, website, page}) => {
 
 	let output = {
 		status: 500
@@ -7,6 +7,9 @@ export const sendGridSend = async ({payload, crm, website}) => {
 	const {whatsappNumber, siteName} = website;
 	const {email, cc, subject, message, name} = crm;
 	const htmlMessage = (typeof message === 'string') ? marked(message) : '';
+
+	delete payload.slug;
+	payload.pageTitle = page.title;
 		
 	let template = emailTemplate({
 		payload,

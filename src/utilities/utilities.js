@@ -156,7 +156,7 @@ export const isUrl = str => {
 export const findBySlug = ({data, slug}) => {
 	let output = {
 		type: 'notFound',
-		data: {}
+		data: undefined
 	};
 				
 	if(slug)

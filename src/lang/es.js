@@ -17,6 +17,7 @@ export const labelMessage = 'Mensaje';
 export const formSuccess = '¡Solicitud enviada exitosamente!';
 export const labelHello = 'Hola';
 export const labelOriginalData = 'Esta fue tu solicitud:';
+export const labelPageTitle = 'Página'
 export const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 export const templateHookWords = {
 	MMMM: months,
