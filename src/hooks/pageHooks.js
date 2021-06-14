@@ -7,43 +7,35 @@ const {findBySlug} = Utilities;
 export default class PageHooks {
 	constructor({store, labels})
 	{
-		this.store = store,
-		this.labels = labels;
-		this.init();
+		this.args = {store, labels};
 		this.route();
 	}
-	init(){
-		const {store, labels} = this;
-		this.homePage = new IndexComponent({store, labels});
-		this.notFoundPage = new NotFoundComponent({store, labels});
-		this.pageComponent = new PageComponent({store, labels});
-		this.postComponent = new PostComponent({store, labels});
-	}
 	route(){
-		const {store} = this;
-		const {getState} = store;		
-		const {data: {slug}} = getState().request;
+		const {args} = this;
+		const {store, labels} = args;
+		const {getState} = store;
+		const {slug} = getState().request.data;
 		const {data} = getState().contentful;
 		const thisPage = findBySlug({data, slug});
-						
+		
 		switch(thisPage.type){
 			case 'index':
-				this.homePage.init();
+				new IndexComponent(args).init();
 				break;
 			case 'notFound':
-				this.notFoundPage.init();
+				new NotFoundComponent(args).init();
 				break;
 			case 'pages':
-				this.pageComponent.init(thisPage.data);
+				new PageComponent(args).init(thisPage);
 				break;
 			case 'packages':
-				this.pageComponent.init(thisPage.data);
+				new PageComponent(args).init(thisPage);
 				break;
 			case 'posts':
-				this.postComponent.init(thisPage.data);
+				new PostComponent(args).init(thisPage);
 				break;
 			default:
-				this.notFoundPage.init();
+				new NotFoundComponent(args).init();
 		}
 	}
 }

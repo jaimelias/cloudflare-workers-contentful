@@ -6,8 +6,9 @@ export default class PostComponent {
 		this.store = store;
 		this.labels = labels;
 	}
-	init(post)
+	init(thisPage)
 	{
+		const {data: post, type} = thisPage;
 		const {store} = this;
 		const {dispatch, render} = store;
 		const {imageGallery, title, content, description, currentLanguage, updatedAt} = post;

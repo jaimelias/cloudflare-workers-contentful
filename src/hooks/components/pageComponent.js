@@ -9,10 +9,19 @@ export default class PageComponent {
 	constructor({store, labels}){
 		this.store = store;
 		this.labels = labels;
+		this.width = 'fixed';
 	}
-	init(page)
+	setWidth(width)
 	{
-		
+		this.width = (width === 'full' || width === 'fixed') ? width : this.width;
+	}
+	getWidth()
+	{
+		return this.width;
+	}
+	init(thisPage)
+	{
+		const {data: page, type: pageType} = thisPage;
 		const {labels, store} = this;
 		const {getState, dispatch} = store;
 		const request = getState().request.data;
@@ -41,7 +50,7 @@ export default class PageComponent {
 			
 			if(posts.total > 0)
 			{
-				entryContent += '<hr/>' + BlogIndexComponent({store, width: 'fixed'});
+				entryContent += '<hr/>' + BlogIndexComponent({store, width: this.width});
 			}
 			else
 			{
@@ -61,7 +70,7 @@ export default class PageComponent {
 			payload: {
 				title: pageTitle,
 				description,
-				content: pageWrapper({title, content: entryContent, widget}),
+				content: mainWrapper({type: pageType, title, content: entryContent, widget, width: this.width}),
 				imageGallery,
 				status
 			}
@@ -69,9 +78,11 @@ export default class PageComponent {
 	}
 }
 
-const pageWrapper = ({content, title, widget}) => {
+const mainWrapper = ({type, content, title, widget, width}) => {
 
-	return `
+	console.log('recycle mainWrapper in pageComponent.js');
+
+	return (width === 'fixed') ? `
 	<div class="container">
 		<h1 class="entry-title display-5 mb-4">${title}</h1>
 			<div class="row">
@@ -83,5 +94,5 @@ const pageWrapper = ({content, title, widget}) => {
 				<div class="col-md-4" style="border-left: 1px solid #ddd;">${widget}</div>
 			</div>
 		</div>
-	`;
+	` : `<div class="entry-content entry-full-width">${content}</div>`;
 };
