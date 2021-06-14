@@ -1,5 +1,10 @@
-export const RequestForm = ({type, labels, currentLanguage, accommodationTypes}) => {
-		
+const {accommodationTypes} = SharedData;
+const {findBySlug} = Utilities;
+
+export const RequestForm = ({labels, data, request}) => {
+	
+	let output = '';
+
 	const {	
 		labelStartDate, 
 		labelEndDate, 
@@ -12,9 +17,10 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 		labelMessage,
 		formSuccess
 	} = labels;
-	
-	let output = '';
-	
+
+	const {currentLanguage, type} = data.websites.entries[0];
+	const thisPage = findBySlug({data, slug: request.slug}).data;
+	const {slug} = thisPage;
 	let attrClassRow = ' class="row form-row" ';
 	let classCol = 'col-md';
 	let classMB = 'mb-3';
@@ -58,10 +64,9 @@ export const RequestForm = ({type, labels, currentLanguage, accommodationTypes})
 	` : '';
 
 	output = `
-<hr/>
 <form id="request-form" class="needs-validation" novalidate>
 	<div class="hidden"><input name="language" id="language" value="${currentLanguage}"/></div>
-	
+	<input type="hidden" name="slug" value="${slug}" />
 	${accommodationFields}
 	
 	<div ${attrClassRow}>

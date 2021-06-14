@@ -2,7 +2,6 @@ import {GalleryComponent} from './galleryComponent';
 import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
 import {RightSideWidget} from './widgets';
-const {accommodationTypes} = SharedData;
 const {pageHasForm, pageIsBlog} = Utilities;
 
 export default class PageComponent {
@@ -17,12 +16,13 @@ export default class PageComponent {
 		const {labels, store} = this;
 		const {getState, dispatch} = store;
 		const request = getState().request.data;
-		const website = getState().contentful.data.websites.entries[0];
-		const posts = getState().contentful.data.posts;
+		const {data} = getState().contentful;
+		const website = data.websites.entries[0];
+		const posts = data.posts;
 		const hasForm = pageHasForm({website, request});
 		const {labelPageNumber, labelNoPosts} = labels;
-		const {slug, pageNumber, homeUrl} = request;
-		const {content, description, title, imageGallery, currentLanguage} = page;
+		const {slug, pageNumber} = request;
+		const {content, description, title, imageGallery} = page;
 		const isBlog = pageIsBlog({slug, website});
 		let entryContent = '';
 		let pageTitle = title;
@@ -51,10 +51,9 @@ export default class PageComponent {
 		}
 
 		entryContent += (hasForm) ? RequestForm({
-			type: website.type,
+			data,
 			labels,
-			accommodationTypes,
-			currentLanguage
+			request
 		}) : '';
 
 		dispatch({

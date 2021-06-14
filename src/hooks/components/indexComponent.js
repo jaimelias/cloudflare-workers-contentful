@@ -94,8 +94,7 @@ const IndexWrapper = ({store, labels}) => {
 	
 	const {getState} = store;
 	const {data} = getState().contentful;
-	const websites = data.websites.entries;
-	const {homepage} = websites[0];
+	const {homepage} = data.websites.entries[0];
 	const {title, description, content, imageGallery} = homepage || '';
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
@@ -103,11 +102,11 @@ const IndexWrapper = ({store, labels}) => {
 	const RenderContent = (content) ? marked(content) : '';
 	const RenderBlog = BlogIndexComponent({store, width: 'full'});
 	
-	const widget = RightSideWidget({
+	let widget = RightSideWidget({
 		entry: homepage,
 		labels
 	});
-	
+
 	const main = (content) ? (widget) ? `
 		<div class="row">
 			<div class="col-md-8">

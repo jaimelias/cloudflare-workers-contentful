@@ -45,5 +45,10 @@ export const formFields = {
 		required: true,
 		minLength: 6,
 		maxLength: 1000
+	},
+	slug: {
+		required: true,
+		minLength: 1,
+		maxLength: 50
 	}
 };

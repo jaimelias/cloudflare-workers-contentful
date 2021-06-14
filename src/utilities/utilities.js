@@ -185,7 +185,7 @@ export const findBySlug = ({data, slug}) => {
 	{
 		output = {
 			type: 'index',
-			data: {}
+			data: data.websites.entries[0].homepage
 		};
 	}
 	
