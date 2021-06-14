@@ -1,11 +1,9 @@
 const {paginateEntries} = Utilities;
 const postsPerPage = 10;
 
-export const BlogIndexComponent = ({store, width}) => {
-	const {getState} = store;
-	const entries = getState().contentful.data.posts.entries;
-	const request = getState().request.data;
-	const {pageNumber, homeUrl} = request;
+export const BlogIndexComponent = ({posts, width, pageNumber, homeUrl}) => {
+	
+	const entries = posts.entries;
 	
 	if(Array.isArray(entries))
 	{

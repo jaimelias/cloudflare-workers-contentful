@@ -19,80 +19,99 @@ export default class PageComponent {
 	{
 		return this.width;
 	}
-	init(thisPage)
+	init(thisEntry)
 	{
-		const {data: page, type: pageType} = thisPage;
+		const {entry, entryType} = thisEntry;
 		const {labels, store} = this;
 		const {getState, dispatch} = store;
 		const request = getState().request.data;
 		const {data} = getState().contentful;
-		const website = data.websites.entries[0];
-		const posts = data.posts;
-		const hasForm = pageHasForm({website, request});
-		const {labelPageNumber, labelNoPosts} = labels;
-		const {slug, pageNumber} = request;
-		const {content, description, title, imageGallery} = page;
-		const isBlog = pageIsBlog({slug, website});
-		let entryContent = '';
-		let pageTitle = title;
-		let status = 200;
-		entryContent += GalleryComponent({data: imageGallery});
-		entryContent += (typeof content === 'string') ? marked(content) : '';
-		
-		const widget = RightSideWidget({
-			entry: page,
-			labels
-		});
-				
-		if(isBlog)
-		{
-			pageTitle = (pageNumber > 1) ? `${pageTitle} | ${labelPageNumber} ${pageNumber}` : pageTitle;
-			
-			if(posts.total > 0)
-			{
-				entryContent += '<hr/>' + BlogIndexComponent({store, width: this.width});
-			}
-			else
-			{
-				status = 404;
-				entryContent += `<hr/><div class="text-muted">${labelNoPosts}.</div>`;
-			}
-		}
-
-		entryContent += (hasForm) ? RequestForm({
-			data,
-			labels,
-			request
-		}) : '';
+		const {description, imageGallery} = entry;
 
 		dispatch({
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
-				title: pageTitle,
+				title: getTitle({request, thisEntry, data, labels}),
 				description,
-				content: mainWrapper({type: pageType, title, content: entryContent, widget, width: this.width}),
+				content: wrapperComponent({request, labels, data, thisEntry, width: this.width}),
 				imageGallery,
-				status
+				status: 200
 			}
 		});
 	}
 }
 
-const mainWrapper = ({type, content, title, widget, width}) => {
+const getTitle = ({request, thisEntry, data, labels}) => {
 
-	console.log('recycle mainWrapper in pageComponent.js');
+	const {entry} = thisEntry;
+	let {title} = entry;
+	const {slug, pageNumber} = request;
+	const website = data.websites.entries[0];
+	const isBlog = pageIsBlog({slug, website});
+	const {labelPageNumber} = labels;
+	
+	if(isBlog)
+	{
+		return (pageNumber > 1) ? `${title} | ${labelPageNumber} ${pageNumber}` : title;
+	}
+	
+	return title;
+};
+
+const entryContentComponent = ({thisEntry, labels, request, data, width}) => {
+
+	let entryContent = '';
+	const {entry} = thisEntry;
+	const {content, imageGallery} = entry;
+	const {slug, pageNumber, homeUrl} = request;
+	const {posts, websites} = data;
+	const website = websites.entries[0];
+	const hasForm = pageHasForm({website, request});
+	const isBlog = pageIsBlog({slug, website});
+	const {labelNoPosts} = labels;
+
+	entryContent += GalleryComponent({data: imageGallery});
+	entryContent += (typeof content === 'string') ? marked(content) : '';
+
+	if(isBlog)
+	{		
+		if(posts.total > 0)
+		{
+			entryContent += '<hr/>' + BlogIndexComponent({posts, width, pageNumber, homeUrl});
+		}
+		else
+		{
+			entryContent += `<hr/><div class="text-muted">${labelNoPosts}.</div>`;
+		}
+	}
+
+	entryContent += (hasForm) ? RequestForm({
+		data,
+		labels,
+		request
+	}) : '';
+
+	return entryContent;
+};
+
+const wrapperComponent = ({request, labels, data, thisEntry, width}) => {
+	
+	const {entry} = thisEntry;
+	const {title} = entry;
+	let entryContent = entryContentComponent({thisEntry, labels, request, data, width});
+	const widget = RightSideWidget({entry, labels});
 
 	return (width === 'fixed') ? `
 	<div class="container">
 		<h1 class="entry-title display-5 mb-4">${title}</h1>
-			<div class="row">
+			<div class="row g-5">
 				<div class="col-md-8">
 					<div class="entry-content" >
-						${content}
+						${entryContent}
 					</div>
 				</div>
-				<div class="col-md-4" style="border-left: 1px solid #ddd;">${widget}</div>
+				<div class="col-md-4">${widget}</div>
 			</div>
 		</div>
-	` : `<div class="entry-content entry-full-width">${content}</div>`;
+	` : `<div class="entry-content entry-full-width">${entryContent}</div>`;
 };

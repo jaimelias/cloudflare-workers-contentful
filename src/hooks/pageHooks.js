@@ -16,9 +16,9 @@ export default class PageHooks {
 		const {getState} = store;
 		const {slug} = getState().request.data;
 		const {data} = getState().contentful;
-		const thisPage = findBySlug({data, slug});
+		const thisEntry = findBySlug({data, slug});
 		
-		switch(thisPage.type){
+		switch(thisEntry.entryType){
 			case 'index':
 				new IndexComponent(args).init();
 				break;
@@ -26,13 +26,13 @@ export default class PageHooks {
 				new NotFoundComponent(args).init();
 				break;
 			case 'pages':
-				new PageComponent(args).init(thisPage);
+				new PageComponent(args).init(thisEntry);
 				break;
 			case 'packages':
-				new PageComponent(args).init(thisPage);
+				new PageComponent(args).init(thisEntry);
 				break;
 			case 'posts':
-				new PostComponent(args).init(thisPage);
+				new PostComponent(args).init(thisEntry);
 				break;
 			default:
 				new NotFoundComponent(args).init();

@@ -26,7 +26,7 @@ const handleFormRequest = async ({store}) => {
 	const {getState} = store;
 	const {apiBody: payload} = getState().request.data;
 	const {data} = getState().contentful;
-	let thisPage = undefined;
+	let entry = undefined;
 
 	for(let key in formFields)
 	{			
@@ -92,9 +92,9 @@ const handleFormRequest = async ({store}) => {
 			}
 			if(key === 'slug')
 			{
-				thisPage = findBySlug({data, slug: payload[key]}).data;
+				entry = findBySlug({data, slug: payload[key]}).entry;
 
-				if(typeof thisPage === 'undefined')
+				if(typeof entry === 'undefined')
 				{
 					invalids.push(key);
 				}
@@ -121,7 +121,7 @@ const handleFormRequest = async ({store}) => {
 				payload: outputPayload,
 				crm,
 				website,
-				page: thisPage
+				entry
 			});				
 		}
 	}

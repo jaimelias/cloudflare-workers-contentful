@@ -19,8 +19,8 @@ export const RequestForm = ({labels, data, request}) => {
 	} = labels;
 
 	const {currentLanguage, type} = data.websites.entries[0];
-	const thisPage = findBySlug({data, slug: request.slug}).data;
-	const {slug} = thisPage;
+	const {entry} = findBySlug({data, slug: request.slug});
+	const {slug} = entry;
 	let attrClassRow = ' class="row form-row" ';
 	let classCol = 'col-md';
 	let classMB = 'mb-3';

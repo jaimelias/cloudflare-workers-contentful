@@ -6,19 +6,19 @@ export default class PostComponent {
 		this.store = store;
 		this.labels = labels;
 	}
-	init(thisPage)
+	init(thisEntry)
 	{
-		const {data: post, type} = thisPage;
+		const {entry, entryType} = thisEntry;
 		const {store} = this;
 		const {dispatch, render} = store;
-		const {imageGallery, title, content, description, currentLanguage, updatedAt} = post;
+		const {imageGallery, title, content, description, currentLanguage, updatedAt} = entry;
 		
 		let entryContent = '';
 		entryContent += GalleryComponent({data: imageGallery});
 		entryContent += (typeof content === 'string') ? marked(content) : '';
 
 		render.addHooks({
-			content: JsonLd({post, store}),
+			content: JsonLd({post: entry, store}),
 			order: 60,
 			location: 'head'
 		});	

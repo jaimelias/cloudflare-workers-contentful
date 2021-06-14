@@ -93,14 +93,17 @@ export default class IndexComponent {
 const IndexWrapper = ({store, labels}) => {
 	
 	const {getState} = store;
+	const request = getState().request.data;
+	const {pageNumber, homeUrl} = request;
 	const {data} = getState().contentful;
-	const {homepage} = data.websites.entries[0];
+	const {posts, websites} = data;
+	const {homepage} = websites.entries[0];
 	const {title, description, content, imageGallery} = homepage || '';
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
 	const RenderGrid =  packageGrid({store});
 	const RenderContent = (content) ? marked(content) : '';
-	const RenderBlog = BlogIndexComponent({store, width: 'full'});
+	const RenderBlog = BlogIndexComponent({posts, width: 'full', pageNumber, homeUrl});
 	
 	let widget = RightSideWidget({
 		entry: homepage,

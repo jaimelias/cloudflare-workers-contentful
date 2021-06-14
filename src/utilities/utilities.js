@@ -155,8 +155,8 @@ export const isUrl = str => {
 
 export const findBySlug = ({data, slug}) => {
 	let output = {
-		type: 'notFound',
-		data: undefined
+		entryType: 'notFound',
+		entry: undefined
 	};
 				
 	if(slug)
@@ -172,8 +172,8 @@ export const findBySlug = ({data, slug}) => {
 					if(findData)
 					{
 						output = {
-							type: k,
-							data: findData
+							entryType: k,
+							entry: findData
 						};
 					}
 				}
@@ -184,8 +184,8 @@ export const findBySlug = ({data, slug}) => {
 	else
 	{
 		output = {
-			type: 'index',
-			data: data.websites.entries[0].homepage
+			entryType: 'index',
+			entry: data.websites.entries[0].homepage
 		};
 	}
 	
@@ -201,7 +201,7 @@ export const listLangItems = ({store}) => {
 	const {slug} = getState().request.data;
 	const website = websites.entries[0];
 	const {defaultLanguage, currentLanguage} = website;
-	const thisPage = findBySlug({data, slug}).data;
+	const {entry} = findBySlug({data, slug});
 
 	for(const k in langLabels)
 	{		
@@ -213,11 +213,11 @@ export const listLangItems = ({store}) => {
 		{
 			let pageSlug = '';
 			
-			if(thisPage.hasOwnProperty('slugs'))
+			if(entry.hasOwnProperty('slugs'))
 			{
-				if(typeof thisPage.slugs[k] !== 'undefined')
+				if(typeof entry.slugs[k] !== 'undefined')
 				{
-					pageSlug = thisPage.slugs[k];
+					pageSlug = entry.slugs[k];
 				}
 			}
 			
