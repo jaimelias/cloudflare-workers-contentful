@@ -45,7 +45,7 @@ class tableRewriterClass {
 	element(element){
 		
 		element.setAttribute('class', 'table table-bordered table-striped');
-		element.before('<div class="table-responsive mb-4">', { html: true });
+		element.before('<div class="table-responsive">', { html: true });
 		element.after('</div>', { html: true });
 	};
 };
