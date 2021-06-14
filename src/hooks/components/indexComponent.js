@@ -2,15 +2,12 @@ import {GalleryComponent} from './galleryComponent';
 import {RightSideWidget} from './widgets';
 import {BlogIndexComponent} from './blogIndexComponent';
 
-const packageGrid = ({store}) => {
+const packageGrid = ({request, data}) => {
 	
 	let output = '';
-	
-	const {getState} = store;
-	const {data} = getState().contentful;
+	const {homeUrl} = request;
 	const packages = data.packages.entries;
 	const websites = data.websites.entries;
-	const {homeUrl} = getState().request.data;
 	const website = websites[0];
 
 	if(Array.isArray(packages))
@@ -28,7 +25,11 @@ const packageGrid = ({store}) => {
 				{
 					if(r.imageGallery.length > 0)
 					{
-						image = `<a class="text-dark" href="${url}"><img alt="${r.title}" class="card-img-top" src="${r.imageGallery[0].src}?w=420" /></a>`;
+						const maxWidth = 420;
+						const {width, height, src} = r.imageGallery[0];
+						const autoHeight = Math.round((height / width) * maxWidth);
+												
+						image = `<a class="text-dark" href="${url}"><img alt="${r.title}" class="card-img-top" src="${src}?w=${maxWidth}" width="${maxWidth}" height="${autoHeight}" /></a>`;
 					}			
 				}
 				
@@ -101,7 +102,7 @@ const IndexWrapper = ({store, labels}) => {
 	const {title, description, content, imageGallery} = homepage || '';
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
-	const RenderGrid =  packageGrid({store});
+	const RenderGrid =  packageGrid({request, data});
 	const RenderContent = (content) ? marked(content) : '';
 	const RenderBlog = BlogIndexComponent({posts, width: 'full', pageNumber, homeUrl});
 	

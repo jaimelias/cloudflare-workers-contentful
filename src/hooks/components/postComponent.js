@@ -1,39 +1,35 @@
-import {GalleryComponent} from './galleryComponent';
+import {WrapperComponent} from './templateParts';
+
 
 export default class PostComponent {
 
 	constructor({store, labels}){
 		this.store = store;
 		this.labels = labels;
+		this.width = 'fixed';
 	}
 	init(thisEntry)
 	{
-		const {entry, entryType} = thisEntry;
-		const {store} = this;
-		const {dispatch, render} = store;
-		const {imageGallery, title, content, description, currentLanguage, updatedAt} = entry;
-		
-		let entryContent = '';
-		entryContent += GalleryComponent({data: imageGallery});
-		entryContent += (typeof content === 'string') ? marked(content) : '';
+		const {entry} = thisEntry;
+		const {store, labels} = this;
+		const {dispatch, render, getState} = store;
+		const request = getState().request.data;
+		const {data} = getState().contentful;
+		const {imageGallery, title, description} = entry;
 
 		render.addHooks({
-			content: JsonLd({post: entry, store}),
+			content: JsonLdComponent({post: entry, store}),
 			order: 60,
 			location: 'head'
 		});	
 
-		const date = Utilities.formatDate({
-			date: updatedAt,
-			lang: currentLanguage
-		});
 
 		dispatch({
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
 				title,
 				description,
-				content: postWrapper({title, content: entryContent, date}),
+				content: WrapperComponent({request, labels, data, thisEntry, width: this.width}),
 				imageGallery,
 				status: 200
 			}
@@ -41,28 +37,7 @@ export default class PostComponent {
 	}
 }
 
-const postWrapper = ({content, title, date}) => {
-
-	let meta = '';
-	meta += (date) ? `<div class="mb-2 text-muted fw-light"><small>${date}</small></div>` : '';
-
-	return `
-	<div class="container">
-		${meta}
-		<h1 class="entry-title display-5 mb-4">${title}</h1>
-			<div class="row">
-				<div class="col-md-8">
-					<div class="entry-content" >
-						${content ? content : ''}
-					</div>
-				</div>
-				<div class="col-md-4" style="border-left: 1px solid #ddd;"></div>
-			</div>
-		</div>
-	`;
-};
-
-const JsonLd = ({post, store}) => {
+const JsonLdComponent = ({post}) => {
 
 	const {imageGallery, title, description, currentLanguage, updatedAt, createdAt} = post;
 
