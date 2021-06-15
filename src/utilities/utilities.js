@@ -452,3 +452,61 @@ export const pageIsBlog = ({slug, website}) => {
 		}
 	}			
 };
+
+export const objToCssRules = obj => {
+	
+	let cssRules = '';
+	
+	for(let k in obj)
+	{
+		if(k !== 'name')
+		{	
+			let value = obj[k];
+			let selector = `.${k}`;
+			let rules = (value.startsWith('#')) ? value : `#${value}`;
+			let hex = (value.startsWith('#')) ? value.substring(1) : value;
+			let rgb = hexToRgb(hex);
+						
+			if(k.includes('Button'))
+			{
+				if(rgb && k.endsWith('BackgroundColor'))
+				{
+					let rgbaString = rgb.join(' ') + ' / ' + '50%';
+					cssRules += `.btn${selector}:focus{box-shadow: 0 0 0 0.25rem rgb(${rgbaString});}`;
+				}
+				
+				selector += `.btn, .${k}.btn:hover`;
+			}			
+			
+			if(k.endsWith('BackgroundColor'))
+			{				
+				cssRules += `${selector}{background-color: ${rules}}`;
+			}
+			else if(k.endsWith('TextColor'))
+			{
+				cssRules += `${selector}{color: ${rules}}`;
+			}
+		}
+	}
+	
+	return cssRules;
+}
+
+export const hexToRgb = hex => {
+	
+	let arr = hex.match(/.{1,2}/g);
+	
+	if(Array.isArray(arr))
+	{
+		if(arr.length === 3)
+		{
+			return [
+				parseInt(arr[0], 16),
+				parseInt(arr[1], 16),
+				parseInt(arr[2], 16)
+			];			
+		}
+	}
+	
+	return '';
+};

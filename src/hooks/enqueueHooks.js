@@ -18,11 +18,12 @@ export default class EnqueueHooks
 		const {getState} = store;
 		const website = getState().contentful.data.websites.entries[0];
 		const request = getState().request.data;
-		const {type, currentLanguage, crm, facebookPixel, googleAnalytics} = website;
+		const {type, currentLanguage, crm, facebookPixel, googleAnalytics, theme} = website;
 		const hasForm = pageHasForm({website, request});
-		this.enqueue({scripts: bootstrapScripts});
+		this.enqueue({scripts: bootstrapScripts(theme)});
 		this.enqueue({scripts: trackingScripts({facebookPixel, googleAnalytics})});
 		
+
 		if(hasForm)
 		{
 			if(typeof crm === 'object')
@@ -44,3 +45,4 @@ export default class EnqueueHooks
 		this.store.dispatch({type: ActionTypes.ENQUEUE_SCRIPT, payload});
 	}
 }
+

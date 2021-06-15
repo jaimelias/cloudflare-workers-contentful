@@ -7,9 +7,10 @@ export const TopMenu = ({website, labels, langItems}) => {
 	const renderTelephoneNumber = (telephoneNumber) ? `<span class="navbar-text">${labelCallUs} ${telephoneNumber}</span>` : '';
 	const menuItems = getTopMenuItems({website, langItems});
 	const topMenuDropdown = NavbarDropdown({menuItems});
-	
+	const theme = website.theme || {};
+		
 	let output = `
-		<nav class="navbar navbar-expand navbar-dark bg-secondary">
+		<nav class="navbar navbar-expand ${theme.topBarTextColor ? "topBarTextColor" : "navbar-dark"} ${theme.topBarBackgroundColor ? "topBarBackgroundColor" : "bg-secondary"}">
 			<div class="container">
 					${renderTelephoneNumber}
 					
@@ -35,7 +36,7 @@ export const MainMenu = ({store, langItems}) => {
 	const allPageTypes = getAllPageTypes(data);
 	const menuItems = getMainMenuItems({website, data: allPageTypes, langItems});
 	const {siteName, logoType, actionButtonText, actionButtonUrl} = website;
-		
+	const theme = website.theme || {};
 	const RenderLogo = (logoType) ? Media({alt: siteName, maxHeight: 60, ...logoType}) : siteName;	
 	const topMenuLi = NavbarLi({menuItems});
 	
@@ -59,11 +60,13 @@ export const MainMenu = ({store, langItems}) => {
 	};
 	
 	const RendermenuItems = `<ul class="navbar-nav me-auto mb-2 mb-lg-0">${topMenuLi}</ul>`;
-	const RenderTopMenuForm = (actionUrl()) ? `<form class="d-flex"><a href="${actionUrl()}" class="btn btn-info text-light">${actionButtonText}</a></form>` : '';	
-	
-	
+	const RenderTopMenuForm = (actionUrl()) ? `
+		<form class="d-flex">
+		<a href="${actionUrl()}" class="btn ${theme.actionButtonBackgroundColor ? "actionButtonBackgroundColor" : "bt-info"} ${theme.actionButtonTextColor ? "actionButtonTextColor" : "text-light"}">${actionButtonText}</a>
+	</form>` : '';	
+		
 	return `
-		<nav class="navbar navbar-expand-lg navbar-light bg-light">
+		<nav class="navbar navbar-expand-lg navbar-${theme.topMenuTone || 'light'} ${theme.topMenuBackgroundColor ? "topMenuBackgroundColor" : "bg-light"}">
 			<div class="container">
 				<a class="navbar-brand mb-0 h1 text-uppercase" href="${homeUrl}">${RenderLogo}</a>
 				
