@@ -15,8 +15,8 @@ const packageGrid = ({request, data}) => {
 		if(packages.length > 0)
 		{
 			const count = packages.length;
-			const operator = (count >= 3) ? 3 : 2;
-			const md = (operator === 3) ? '4' : '6';
+			const operator = (count >= 4) ? 4 : (count >= 3) ? 3 : 2;
+			const md = (operator === 4) ? '3' : (operator === 3) ? '4' : '6';
 			const rowStart = '<div class="row g-5">';
 			output = rowStart;
 			
@@ -35,13 +35,12 @@ const packageGrid = ({request, data}) => {
 				{
 					if(r.imageGallery.length > 0)
 					{
-						const maxWidth = 640;
+						const maxWidth = 768;
 						const {width, height, src} = r.imageGallery[0];
 						const maxHeight = Math.round((height / width) * maxWidth);
 						const media = Utilities.Media({
 							...r.imageGallery[0],
 							maxHeight,
-							width: maxWidth,
 							className: 'card-img-top img-fluid'
 						});	
 						image = `<a class="text-dark" href="${url}">${media}</a>`;

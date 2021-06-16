@@ -19,10 +19,10 @@ class imageRewriterClass
 		{
 			if(file[0] === assetCdnUrl)
 			{
-				const maxWidth = 730;
+				const maxWidth = 768;
 				let fileName = new URL('https://' + file.join('/')).pathname;
 				fileName = `/images${fileName}`;
-				const srcSetRanges = [320, 640, 960, 1280, 2560].filter(i => i <= maxWidth);
+				const srcSetRanges = [576, 768, 992, 1200, 1400].filter(i => i <= maxWidth);
 				const srcSetItems = (srcSetRanges.length > 0) ? srcSetRanges.map(row => {
 					const imageUrl = encodeURI(decodeURI(`${fileName}?cdnUrl=${assetCdnUrl}&width=${row}`));
 					return `${imageUrl} ${row}w`

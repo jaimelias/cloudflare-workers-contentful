@@ -84,18 +84,20 @@ export const Media = (obj) => {
 				
 				let params = new URLSearchParams;
 
-				if(width > 730)
+				params.set('width', width);
+
+				if(width > 1200)
 				{
-					params.set('width', 730);
+					params.set('width', 1200);
 				}
-				if(width > 1110)
+				if(width > 1400)
 				{
-					params.set('width', 1110);
+					params.set('width', 1400);
 				}
 				
 				let srcAttr = `src="${imageUrl}?${params.toString()}"`;
 				
-				const srcSetRanges = [320, 640, 960, 1280, 2560].filter(i => i <= width);
+				const srcSetRanges = [576, 768, 992, 1200, 1400].filter(i => i <= width);
 				const srcSetItems = (srcSetRanges.length > 0) ? srcSetRanges.map(row => {
 					params.set('width', row);
 					return `${imageUrl}?${params.toString()} ${row}w`
