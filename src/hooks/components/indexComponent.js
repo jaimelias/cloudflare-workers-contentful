@@ -35,7 +35,7 @@ const packageGrid = ({request, data}) => {
 				{
 					if(r.imageGallery.length > 0)
 					{
-						const maxWidth = 420;
+						const maxWidth = 640;
 						const {width, height, src} = r.imageGallery[0];
 						const maxHeight = Math.round((height / width) * maxWidth);
 						const media = Utilities.Media({
