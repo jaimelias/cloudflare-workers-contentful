@@ -62,7 +62,7 @@ export const MainMenu = ({store, langItems}) => {
 	const RendermenuItems = `<ul class="navbar-nav me-auto mb-2 mb-lg-0">${topMenuLi}</ul>`;
 	const RenderTopMenuForm = (actionUrl()) ? `
 		<form class="d-flex">
-		<a href="${actionUrl()}" class="btn ${theme.actionButtonBackgroundColor ? "actionButtonBackgroundColor" : "bt-info"} ${theme.actionButtonTextColor ? "actionButtonTextColor" : "text-light"}">${actionButtonText}</a>
+		<a href="${actionUrl()}" class="btn ${theme.actionButtonBackgroundColor ? "actionButtonBackgroundColor" : "btn-info"} ${theme.actionButtonTextColor ? "actionButtonTextColor" : "text-light"}">${actionButtonText}</a>
 	</form>` : '';	
 		
 	return `
