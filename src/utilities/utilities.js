@@ -213,15 +213,18 @@ export const listLangItems = ({store}) => {
 		{
 			let pageSlug = '';
 			
-			if(entry.hasOwnProperty('slugs'))
+			if(typeof entry === 'object')
 			{
-				if(typeof entry.slugs[k] !== 'undefined')
+				if(entry.hasOwnProperty('slugs'))
 				{
-					pageSlug = entry.slugs[k];
+					if(typeof entry.slugs[k] !== 'undefined')
+					{
+						pageSlug = entry.slugs[k];
+					}
 				}
+				
+				thisUrl = (thisUrl && pageSlug) ? `${thisUrl}/${pageSlug}` : pageSlug;				
 			}
-			
-			thisUrl = (thisUrl && pageSlug) ? `${thisUrl}/${pageSlug}` : pageSlug;			
 		}
 		
 		let items = {
