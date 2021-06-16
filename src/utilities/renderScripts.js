@@ -137,7 +137,7 @@ const Link = ({pathName, file, remote, concat}) => {
 		file.forEach(r => {
 			fileName.push(r.file);
 			r.inline.forEach(i => inline.push({
-				script: `<style type="text/css">${i.content}</style>`, 
+				script: `<style>${i.content}</style>`, 
 				location: i.location
 			}));			
 		});
@@ -145,7 +145,7 @@ const Link = ({pathName, file, remote, concat}) => {
 	else
 	{
 		file.inline.forEach(i => inline.push({
-			script: `<style type="text/css">${i.content}</style>`, 
+			script: `<style>${i.content}</style>`, 
 			location: i.location
 		}));
 	}

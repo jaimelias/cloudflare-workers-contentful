@@ -169,7 +169,7 @@ export const NavbarDropdown = ({menuItems}) => {
 		if(hasSubmenu)
 		{
 			Dropdown = row.submenu.map(item => {
-				return `<a class="dropdown-item" href="${item.href}">${item.text}</a>`;
+				return `<li><a class="dropdown-item" href="${item.href}">${item.text}</a></li>`;
 			}).join('');
 			
 			RenderDropdown = `<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownLanguage">${Dropdown}</ul>`;
