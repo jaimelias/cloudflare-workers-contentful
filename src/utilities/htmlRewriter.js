@@ -1,6 +1,6 @@
 export const htmlRewriter = store => new HTMLRewriter()
 .on('a', new aRewriterClass(store))
-.on('img', new imageRewriterClass())
+.on('.entry-content img', new imageRewriterClass())
 .on('table', new tableRewriterClass())
 .on('table > tbody > tr > td > a', new tableLinkToButtonClass());
 

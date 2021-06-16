@@ -14,12 +14,22 @@ const packageGrid = ({request, data}) => {
 	{
 		if(packages.length > 0)
 		{
-			output = '<div class="row g-5">';
+			const count = packages.length;
+			const operator = (count >= 3) ? 3 : 2;
+			const md = (operator === 3) ? '4' : '6';
+			const rowStart = '<div class="row g-5">';
+			output = rowStart;
 			
-			packages.forEach(r => {
+			packages.forEach((r, i) => {
 				
 				let image = '';
 				const url = `${homeUrl}${r.slug}`;
+				const index = (i + 1);
+				const addNewRow = ((index % operator) === 0) ? true : false;
+				const colStart = `<div class="col-md-${md}">`;
+				const rowEnd = `</div></div>`;
+				const rowRestart = `${rowEnd}${rowStart}`;
+				const rowBreak = (count === index) ? rowEnd : (addNewRow) ? rowRestart : '</div>';
 				
 				if(r.hasOwnProperty('imageGallery'))
 				{
@@ -27,29 +37,33 @@ const packageGrid = ({request, data}) => {
 					{
 						const maxWidth = 420;
 						const {width, height, src} = r.imageGallery[0];
-						const autoHeight = Math.round((height / width) * maxWidth);
-												
-						image = `<a class="text-dark" href="${url}"><img alt="${r.title}" class="card-img-top" src="${src}?w=${maxWidth}" width="${maxWidth}" height="${autoHeight}" /></a>`;
+						const maxHeight = Math.round((height / width) * maxWidth);
+						const media = Utilities.Media({
+							...r.imageGallery[0],
+							maxHeight,
+							width: maxWidth,
+							className: 'card-img-top img-fluid'
+						});	
+						image = `<a class="text-dark" href="${url}">${media}</a>`;
 					}			
 				}
 				
 				let row = `
-					<div class="col-md-4">
+					${colStart}
 						<div class="card position-relative">
-							${image}
-							
-							<div class="card-body">
-								<p class="card-text"><a class="text-dark" href="${url}">${r.title}</a></p>
-							</div>
-							<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${r.priceFrom}</a>
+						${image}
+						<div class="card-body">
+						<p class="card-text"><a class="text-dark" href="${url}">${r.title}</a></p>
 						</div>
-					</div>
+						<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${r.priceFrom}</a>
+						</div>
+					${rowBreak}
 				`;
-				
+								
 				output += row;
 			});
 			
-			output += '</div><hr/>'			
+			output += '<hr/>'			
 		}
 	}
 	
