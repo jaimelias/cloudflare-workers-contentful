@@ -467,29 +467,33 @@ export const objToCssRules = obj => {
 		if(k !== 'name')
 		{	
 			let value = obj[k];
-			let selector = `.${k}`;
-			let rules = (value.startsWith('#')) ? value : `#${value}`;
-			let hex = (value.startsWith('#')) ? value.substring(1) : value;
-			let rgb = hexToRgb(hex);
-						
-			if(k.includes('Button'))
-			{
-				if(rgb && k.endsWith('BackgroundColor'))
-				{
-					let rgbaString = rgb.join(' ') + ' / ' + '50%';
-					cssRules += `.btn${selector}:focus{box-shadow: 0 0 0 0.25rem rgb(${rgbaString});}`;
-				}
-				
-				selector += `.btn, .${k}.btn:hover`;
-			}			
 			
-			if(k.endsWith('BackgroundColor'))
-			{				
-				cssRules += `${selector}{background-color: ${rules}}`;
-			}
-			else if(k.endsWith('TextColor'))
+			if(value)
 			{
-				cssRules += `${selector}{color: ${rules}}`;
+				let selector = `.${k}`;
+				let rules = (value.startsWith('#')) ? value : `#${value}`;
+				let hex = (value.startsWith('#')) ? value.substring(1) : value;
+				let rgb = hexToRgb(hex);
+							
+				if(k.includes('Button'))
+				{
+					if(rgb && k.endsWith('BackgroundColor'))
+					{
+						let rgbaString = rgb.join(' ') + ' / ' + '50%';
+						cssRules += `.btn${selector}:focus{box-shadow: 0 0 0 0.25rem rgb(${rgbaString});}`;
+					}
+					
+					selector += `.btn, .${k}.btn:hover`;
+				}			
+				
+				if(k.endsWith('BackgroundColor'))
+				{				
+					cssRules += `${selector}{background-color: ${rules}}`;
+				}
+				else if(k.endsWith('TextColor'))
+				{
+					cssRules += `${selector}{color: ${rules}}`;
+				}				
 			}
 		}
 	}
