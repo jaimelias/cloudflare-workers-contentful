@@ -466,7 +466,7 @@ export const objToCssRules = obj => {
 	{
 		if(k !== 'name')
 		{	
-			let value = obj[k];
+			const value = (typeof obj[k] === 'string') ? obj[k] : '';
 			
 			if(value)
 			{
