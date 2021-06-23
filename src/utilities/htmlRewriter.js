@@ -44,7 +44,7 @@ class imageRewriterClass
 
 class iframeRewriterClass {
 	element(element){
-		element.before(`<div class="ratio ratio-16x9">`, { html: true });
+		element.before(`<div class="ratio ratio-16x9 mb-4">`, { html: true });
 		element.after('</div>', { html: true });
 	};	
 }
