@@ -1,8 +1,9 @@
 export const htmlRewriter = store => new HTMLRewriter()
 .on('a', new aRewriterClass(store))
 .on('.entry-content img', new imageRewriterClass())
-.on('table', new tableRewriterClass())
-.on('table > tbody > tr > td > a', new tableLinkToButtonClass());
+.on('.entry-content table', new tableRewriterClass())
+.on('.entry-content table > tbody > tr > td > a', new tableLinkToButtonClass())
+.on('.entry-content iframe', new iframeRewriterClass());
 
 class imageRewriterClass
 {
@@ -40,6 +41,13 @@ class imageRewriterClass
     }
   }
 };
+
+class iframeRewriterClass {
+	element(element){
+		element.before(`<div class="ratio ratio-16x9">`, { html: true });
+		element.after('</div>', { html: true });
+	};	
+}
 
 class tableRewriterClass {
 	element(element){
