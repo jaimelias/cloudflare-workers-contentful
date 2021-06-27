@@ -22,12 +22,13 @@ export default class PageComponent {
 		const {getState, dispatch} = store;
 		const request = getState().request.data;
 		const {data} = getState().contentful;
-		const {description, imageGallery} = entry;
+		const {description, imageGallery, longTitle} = entry;
 
 		dispatch({
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
 				title: getTitle({request, thisEntry, data, labels}),
+				longTitle,
 				description,
 				content: WrapperComponent({request, labels, data, thisEntry, width: this.width}),
 				imageGallery,

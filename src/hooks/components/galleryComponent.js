@@ -2,7 +2,7 @@ export const GalleryComponent = ({data}) => {
 	
 	let output = '';
 	
-	if(data)
+	if(Array.isArray(data))
 	{
 		if(data.length === 1)
 		{

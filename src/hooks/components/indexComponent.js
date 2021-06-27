@@ -47,14 +47,16 @@ const packageGrid = ({request, data}) => {
 					}			
 				}
 				
+				let badge = (r.priceFrom) ? `<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${r.priceFrom}</a>` : '';
+				
 				let row = `
 					${colStart}
 						<div class="card position-relative">
-						${image}
-						<div class="card-body">
-						<p class="card-text"><a class="text-dark" href="${url}">${r.title}</a></p>
-						</div>
-						<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${r.priceFrom}</a>
+							${image}
+							<div class="card-body">
+							<p class="card-text"><a class="text-dark" href="${url}">${r.title}</a></p>
+							</div>
+							${badge}
 						</div>
 					${rowBreak}
 				`;
@@ -83,7 +85,7 @@ export default class IndexComponent {
 		const {websites} = data;
 		const website = websites.entries[0];
 		const {homepage} = website;
-		const {title, description, imageGallery} = homepage || '';
+		const {title, description, imageGallery, longTitle} = homepage;
 						
 		render.addHooks({
 			content: JsonLd(store),
@@ -95,6 +97,7 @@ export default class IndexComponent {
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
 				title,
+				longTitle,
 				description,
 				content: IndexWrapper({store, labels}),
 				imageGallery,

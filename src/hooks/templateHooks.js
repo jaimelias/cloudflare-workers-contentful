@@ -25,9 +25,15 @@ export const templateHooks = ({store}) => {
 	new PageHooks({store, labels});
 	new EnqueueHooks({store, labels});
 	
-	const {title, description, content, status} = getState().template;
+	const {title, longTitle, description, content, status} = getState().template;
 	
-	const renderTitle = (slug) ? `${title} | ${siteName}` : `${siteName} | ${title}`;
+	const siteTitle = (typeof longTitle === 'string') 
+		? (longTitle.length > title.length) 
+		? longTitle 
+		: title 
+		: title;
+	
+	const renderTitle = (slug) ? `${siteTitle} | ${siteName}` : `${siteName} | ${siteTitle}`;
 	
 	render.addHooks({
 		content: `<title>${renderTitle}</title>`,

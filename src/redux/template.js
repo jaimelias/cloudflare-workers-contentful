@@ -1,5 +1,6 @@
 export const template = (state = {
 	title: '',
+	longTitle: '',
 	description: '',
 	content: '',
 	imageGallery: [],
