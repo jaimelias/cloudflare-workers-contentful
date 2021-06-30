@@ -9,27 +9,32 @@ export const formatDate = ({date, lang}) => {
 
 export const pageHasForm = ({data, request}) => {
 	
-	let output = false;
-	const website = data.websites.entries[0];
-	const {actionButtonText, actionButtonUrl} = website;
-	const {hostName, slug} = request;
-	
-	if(actionButtonText && actionButtonUrl)
+	const {slug} = request;
+	const {contactPage} = data.websites.entries[0];
+	const {entry, entryType} = findBySlug({data, slug});
+
+	if(typeof entry === 'object')
 	{
-		if(isUrl(actionButtonUrl))
+		if(entryType === 'packages')
 		{
-			const actionUrl = new URL(actionButtonUrl);
-			const actionUrlHostName = actionUrl.hostname;
-			const actionUrlPathName = actionUrl.pathname.split('/').filter(i => i).filter(i =>  !langList.includes(i)).join('/');
-			
-			if((hostName === actionUrlHostName || CONTENTFUL_DOMAIN === actionUrlHostName) && actionUrlPathName === slug)
+			return true;
+		}
+		else if(entryType === 'pages')
+		{
+			if(typeof contactPage === 'object')
 			{
-				output = true;
+				if(contactPage.hasOwnProperty('slug'))
+				{
+					if(slug === contactPage.slug)
+					{
+						return true;
+					}					
+				}
 			}
 		}
 	}
-	
-	return output;
+
+	return false;
 };
 
 export const Favicon = ({website}) => {

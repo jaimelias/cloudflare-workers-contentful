@@ -27,7 +27,6 @@ export const TopMenu = ({website, labels, langItems}) => {
 
 export const MainMenu = ({store, langItems}) => {
 
-
 	const {getState} = store;
 	const {data} = getState().contentful;
 	const website = data.websites.entries[0];
@@ -35,35 +34,36 @@ export const MainMenu = ({store, langItems}) => {
 	const {hostName, homeUrl} = request;
 	const allPageTypes = getAllPageTypes(data);
 	const menuItems = getMainMenuItems({website, data: allPageTypes, langItems});
-	const {siteName, logoType, actionButtonText, actionButtonUrl} = website;
+	const {siteName, logoType, currentLanguage, defaultLanguage, contactPage} = website;
 	const theme = website.theme || {};
 	const RenderLogo = (logoType) ? Media({alt: siteName, maxHeight: 60, ...logoType}) : siteName;	
 	const topMenuLi = NavbarLi({menuItems});
 	
-	let actionUrl = () => {
-		let output = '';
+	let RenderTopMenuForm = () => {
 		
-		if(actionButtonUrl && actionButtonText)
+		if(typeof contactPage === 'object')
 		{
-			if(isUrl(actionButtonUrl))
+			if(contactPage.hasOwnProperty('slug'))
 			{
-				let url = new URL(actionButtonUrl);
-				output = ((url.hostname === hostName) || url.hostname === CONTENTFUL_DOMAIN) ? `${url.pathname}` : actionButtonUrl;
-			}
-			else
-			{
-				output = actionButtonUrl;
+				const {slug, shortTitle, title} = contactPage;
+				
+				const actionText = (shortTitle) ? shortTitle : title;
+				
+				const actionUrl = (currentLanguage === defaultLanguage) 
+				? slug 
+				: `${currentLanguage}/${slug}`;
+				
+				return `
+					<form class="d-flex">
+					<a href="/${actionUrl}" class="btn ${theme.actionButtonBackgroundColor ? "actionButtonBackgroundColor" : "btn-info"} ${theme.actionButtonTextColor ? "actionButtonTextColor" : "text-light"}">${actionText}</a>
+				</form>`;				
 			}
 		}
-
-		return output;
+		
+		return '';
 	};
 	
 	const RendermenuItems = `<ul class="navbar-nav me-auto mb-2 mb-lg-0">${topMenuLi}</ul>`;
-	const RenderTopMenuForm = (actionUrl()) ? `
-		<form class="d-flex">
-		<a href="${actionUrl()}" class="btn ${theme.actionButtonBackgroundColor ? "actionButtonBackgroundColor" : "btn-info"} ${theme.actionButtonTextColor ? "actionButtonTextColor" : "text-light"}">${actionButtonText}</a>
-	</form>` : '';	
 		
 	return `
 		<nav class="navbar navbar-expand-lg navbar-${theme.topMenuTone || 'light'} ${theme.topMenuBackgroundColor ? "topMenuBackgroundColor" : "bg-light"}">
@@ -75,7 +75,7 @@ export const MainMenu = ({store, langItems}) => {
 				</button>
 				<div class="collapse navbar-collapse" id="navbarSupportedContent">
 					${RendermenuItems}
-					${RenderTopMenuForm}
+					${RenderTopMenuForm()}
 				</div>
 			</div>
 		</nav>	
