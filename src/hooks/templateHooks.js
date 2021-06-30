@@ -4,7 +4,7 @@ import {renderScripts} from '../utilities/renderScripts';
 import EnqueueHooks from './enqueueHooks';
 import PageHooks from './pageHooks';
 
-const {Favicon, listLangItems, pageHasForm} = Utilities;
+const {Favicon, listLangItems} = Utilities;
 const {langLabels} = LangConfig;
 
 export const templateHooks = ({store}) => {

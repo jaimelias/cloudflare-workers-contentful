@@ -7,9 +7,10 @@ export const formatDate = ({date, lang}) => {
 	return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
-export const pageHasForm = ({website, request}) => {
+export const pageHasForm = ({data, request}) => {
 	
 	let output = false;
+	const website = data.websites.entries[0];
 	const {actionButtonText, actionButtonUrl} = website;
 	const {hostName, slug} = request;
 	

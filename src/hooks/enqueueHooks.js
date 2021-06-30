@@ -16,10 +16,11 @@ export default class EnqueueHooks
 	{
 		const {labels, store} = this;
 		const {getState} = store;
-		const website = getState().contentful.data.websites.entries[0];
+		const {data} = getState().contentful;
+		const website = data.websites.entries[0];
 		const request = getState().request.data;
 		const {type, currentLanguage, crm, facebookPixel, googleAnalytics, theme} = website;
-		const hasForm = pageHasForm({website, request});
+		const hasForm = pageHasForm({data, request});
 		this.enqueue({scripts: bootstrapScripts(theme)});
 		this.enqueue({scripts: trackingScripts({facebookPixel, googleAnalytics})});
 		
