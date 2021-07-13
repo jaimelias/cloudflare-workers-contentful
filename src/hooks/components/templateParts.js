@@ -35,13 +35,13 @@ export const EntryContentComponent = ({thisEntry, labels, request, data, width})
 	const {slug, pageNumber, homeUrl} = request;
 	const {posts, websites} = data;
 	const website = websites.entries[0];
-	const hasForm = pageHasForm({data, request});
+	const hasForm = pageHasForm({website, slug, entryType});
 	const isBlog = pageIsBlog({slug, website});
-	const date = Utilities.formatDate({date: updatedAt, lang: currentLanguage});
+	const date = (entryType === 'posts') ? Utilities.formatDate({date: updatedAt, lang: currentLanguage}) : '';
 	const {labelNoPosts} = labels;
-
+	
 	entryContent += GalleryComponent({data: imageGallery});
-	entryContent += (entryType === 'posts') ? `<div class="mb-4 text-muted fw-light"><small>${date}</small></div>` : '';
+	entryContent += (date) ? `<div class="mb-4 text-muted fw-light"><small>${date}</small></div>` : '';
 	entryContent += (typeof content === 'string') ? marked(content) : '';
 
 	if(isBlog)
@@ -59,7 +59,8 @@ export const EntryContentComponent = ({thisEntry, labels, request, data, width})
 	entryContent += (hasForm) ? RequestForm({
 		data,
 		labels,
-		request
+		request,
+		entryType
 	}) : '';
 
 	return entryContent;

@@ -19,11 +19,16 @@ export const templateHooks = ({store}) => {
 		defaultLanguage
 	} = website;
 	
-	const langItems = listLangItems({store});
+	
 	const labels = langLabels[currentLanguage].labels;
 		
 	new PageHooks({store, labels});
-	new EnqueueHooks({store, labels});
+	
+	const {entryType} = getState().template;
+	
+	const langItems = listLangItems({store, entryType});
+	
+	new EnqueueHooks({store, labels, entryType});
 	
 	const {title, longTitle, description, content, status} = getState().template;
 	

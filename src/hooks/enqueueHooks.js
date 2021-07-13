@@ -7,20 +7,21 @@ const {pageHasForm} = Utilities;
 
 export default class EnqueueHooks
 {
-	constructor({store, labels}){
+	constructor({store, labels, entryType}){
 		this.store = store;
 		this.labels = labels;
+		this.entryType = entryType;
 		this.init();
 	}
 	init()
 	{
-		const {labels, store} = this;
+		const {labels, store, entryType} = this;
 		const {getState} = store;
 		const {data} = getState().contentful;
 		const website = data.websites.entries[0];
-		const request = getState().request.data;
+		const {data: request, data: {slug}} = getState().request;
 		const {type, currentLanguage, crm, facebookPixel, googleAnalytics, theme} = website;
-		const hasForm = pageHasForm({data, request});
+		const hasForm = pageHasForm({website, slug, entryType});
 		this.enqueue({scripts: bootstrapScripts(theme)});
 		this.enqueue({scripts: trackingScripts({facebookPixel, googleAnalytics})});
 		

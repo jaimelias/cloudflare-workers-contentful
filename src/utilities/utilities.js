@@ -1,4 +1,5 @@
 const {langLabels, langList} = LangConfig;
+const {validEntryTypes} = SharedData;
 
 export const formatDate = ({date, lang}) => {
 	const d = new Date(date);
@@ -7,29 +8,24 @@ export const formatDate = ({date, lang}) => {
 	return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
-export const pageHasForm = ({data, request}) => {
+export const pageHasForm = ({website, slug, entryType}) => {
 	
-	const {slug} = request;
-	const {contactPage} = data.websites.entries[0];
-	const {entry, entryType} = findBySlug({data, slug});
-
-	if(typeof entry === 'object')
+	const {contactPage} = website;
+			
+	if(entryType === 'packages')
 	{
-		if(entryType === 'packages')
+		return true;
+	}
+	else if(entryType === 'pages')
+	{
+		if(typeof contactPage === 'object')
 		{
-			return true;
-		}
-		else if(entryType === 'pages')
-		{
-			if(typeof contactPage === 'object')
+			if(contactPage.hasOwnProperty('slug'))
 			{
-				if(contactPage.hasOwnProperty('slug'))
+				if(slug === contactPage.slug)
 				{
-					if(slug === contactPage.slug)
-					{
-						return true;
-					}					
-				}
+					return true;
+				}					
 			}
 		}
 	}
@@ -161,38 +157,54 @@ export const isUrl = str => {
 	return (str) ? regex.test(str) : false;
 }
 
-export const findBySlug = ({data, slug}) => {
+export const findBySlug = ({data, slug, entryType}) => {
 	let output = {
 		entryType: 'notFound',
 		entry: undefined
 	};
+	
+	let findData = undefined;
 				
 	if(slug)
 	{
-		for(let k in data)
+		if(entryType)
 		{
-			if(k !== 'websites')
-			{				
-				if(typeof data[k] === 'object')
-				{
-					const findData = data[k].entries.find(i => i.slug === slug) || false;
-					
-					if(findData)
-					{
-						output = {
-							entryType: k,
-							entry: findData
-						};
-					}
-				}
+			findData = data[entryType].entries.find(i => i.slug === slug);
+			 
+			if(typeof findData === 'object')
+			{
+				output = {
+					entryType,
+					entry: findData
+				};				
 			}
-			
-		}				
+		}
+		else
+		{
+			for(let k in data)
+			{
+				if(k !== 'websites')
+				{				
+					if(typeof data[k] === 'object')
+					{
+						findData = data[k].entries.find(i => i.slug === slug);
+						
+						if(typeof findData === 'object')
+						{
+							output = {
+								entryType: k,
+								entry: findData
+							};
+						}
+					}
+				}	
+			}			
+		}
 	}
 	else
 	{
 		output = {
-			entryType: 'index',
+			entryType: 'pages',
 			entry: data.websites.entries[0].homepage
 		};
 	}
@@ -200,7 +212,7 @@ export const findBySlug = ({data, slug}) => {
 	return output;
 }
 
-export const listLangItems = ({store}) => {
+export const listLangItems = ({store, entryType}) => {
 
 	let output = [];
 	const {getState} = store;
@@ -209,7 +221,7 @@ export const listLangItems = ({store}) => {
 	const {slug} = getState().request.data;
 	const website = websites.entries[0];
 	const {defaultLanguage, currentLanguage} = website;
-	const {entry} = findBySlug({data, slug});
+	const {entry} = findBySlug({data, slug, entryType});
 
 	for(const k in langLabels)
 	{		
@@ -525,3 +537,5 @@ export const hexToRgb = hex => {
 	
 	return '';
 };
+
+export const isEntryType = str => (str) ? validEntryTypes.includes(str) : false;

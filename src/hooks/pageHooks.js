@@ -18,25 +18,30 @@ export default class PageHooks {
 		const {slug} = getState().request.data;
 		const {data} = getState().contentful;
 		const thisEntry = findBySlug({data, slug});
+		const {entryType} = thisEntry;
 		
-		switch(thisEntry.entryType){
-			case 'index':
-				new IndexComponent(args).init();
-				break;
-			case 'notFound':
-				new NotFoundComponent(args).init();
-				break;
-			case 'pages':
+		if(entryType === 'pages')
+		{
+			if(slug)
+			{
 				new PageComponent(args).init(thisEntry);
-				break;
-			case 'packages':
-				new PackageComponent(args).init(thisEntry);
-				break;
-			case 'posts':
-				new PostComponent(args).init(thisEntry);
-				break;
-			default:
-				new NotFoundComponent(args).init();
+			}
+			else
+			{
+				new IndexComponent(args).init();
+			}
+		}
+		else if(entryType === 'packages')
+		{
+			new PackageComponent(args).init(thisEntry);
+		}
+		else if(entryType === 'posts')
+		{
+			new PostComponent(args).init(thisEntry);
+		}
+		else
+		{
+			new NotFoundComponent(args).init();
 		}
 	}
 }

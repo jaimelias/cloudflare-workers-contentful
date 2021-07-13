@@ -1,3 +1,4 @@
+export const validEntryTypes = ['websites', 'pages', 'posts', 'packages'];
 export const accommodationTypes = ['Accommodation', 'Hotel', 'Resort'];
 
 export const formFields = {
@@ -50,5 +51,9 @@ export const formFields = {
 		required: true,
 		minLength: 1,
 		maxLength: 50
+	},
+	entryType: {
+		required: true,
+		validator: 'isEntryType'
 	}
 };

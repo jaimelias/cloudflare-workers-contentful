@@ -33,6 +33,7 @@ export default class IndexComponent {
 				description,
 				content: IndexWrapper({store, labels}),
 				imageGallery,
+				entryType: 'pages',
 				status: 200
 			}
 		});

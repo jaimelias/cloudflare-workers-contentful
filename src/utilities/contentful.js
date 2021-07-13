@@ -1,8 +1,8 @@
+const {validEntryTypes} = SharedData;
 const {langList} = LangConfig;
 const {getFallBackLang} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
-export const validContentTypes = ['websites', 'pages', 'posts', 'packages'];
 
 export const getEntries = async ({contentType, websiteId, store, defaultLanguage}) => {
 	
@@ -337,7 +337,7 @@ export const getAllEntries = async ({store}) => {
 			const websiteId = websiteItem.sys.id;
 			const defaultLanguage = getFallBackLang(websiteItem.fields.defaultLanguage);
 						
-			const entries = validContentTypes
+			const entries = validEntryTypes
 			.filter(i => i !== 'websites')
 			.map(contentType => getEntries({
 				...entryArgs, 

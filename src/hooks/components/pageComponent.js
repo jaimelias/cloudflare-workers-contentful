@@ -32,6 +32,7 @@ export default class PageComponent {
 				description,
 				content: WrapperComponent({request, labels, data, thisEntry, width: this.width}),
 				imageGallery,
+				entryType: 'pages',
 				status: 200
 			}
 		});

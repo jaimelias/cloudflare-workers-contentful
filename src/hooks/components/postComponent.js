@@ -32,6 +32,7 @@ export default class PostComponent {
 				description,
 				content: WrapperComponent({request, labels, data, thisEntry, width: this.width}),
 				imageGallery,
+				entryType: 'posts',
 				status: 200
 			}
 		});

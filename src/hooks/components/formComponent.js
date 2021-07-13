@@ -1,7 +1,7 @@
 const {accommodationTypes} = SharedData;
 const {findBySlug} = Utilities;
 
-export const RequestForm = ({labels, data, request}) => {
+export const RequestForm = ({labels, data, request, entryType}) => {
 	
 	let output = '';
 
@@ -19,7 +19,7 @@ export const RequestForm = ({labels, data, request}) => {
 	} = labels;
 
 	const {currentLanguage, type} = data.websites.entries[0];
-	const {entry} = findBySlug({data, slug: request.slug});
+	const {entry} = findBySlug({data, slug: request.slug, entryType});
 	const {slug} = entry;
 	let attrClassRow = ' class="row form-row" ';
 	let classCol = 'col-md';
@@ -67,6 +67,7 @@ export const RequestForm = ({labels, data, request}) => {
 <form id="request-form" class="needs-validation" novalidate>
 	<div class="hidden"><input name="language" id="language" value="${currentLanguage}"/></div>
 	<input type="hidden" name="slug" value="${slug}" />
+	<input type="hidden" name="entryType" value="${entryType}" />
 	${accommodationFields}
 	
 	<div ${attrClassRow}>

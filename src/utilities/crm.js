@@ -13,6 +13,8 @@ export const handleContactFormRequest = async ({store}) => {
 	const {apiBody: payload} = getState().request.data;
 	const {data} = getState().contentful;
 	let entry = undefined;
+	
+	console.log({payload});
 
 	for(let key in formFields)
 	{			
@@ -62,6 +64,8 @@ export const handleContactFormRequest = async ({store}) => {
 				{
 					validator = Utilities[validator];
 					
+					console.log({validator});
+					
 					if(!validator(payload[key]))
 					{
 						invalids.push(key);
@@ -76,9 +80,10 @@ export const handleContactFormRequest = async ({store}) => {
 					invalids.push(key);
 				}
 			}
-			if(key === 'slug')
+			if(key === 'slug' && payload.hasOwnProperty('entryType'))
 			{
-				entry = findBySlug({data, slug: payload[key]}).entry;
+				const {entryType} = payload;
+				entry = findBySlug({data, slug: payload[key], entryType}).entry;
 
 				if(typeof entry === 'undefined')
 				{

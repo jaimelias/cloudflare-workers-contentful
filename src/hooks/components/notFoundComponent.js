@@ -15,6 +15,7 @@ export default class NotFoundComponent {
 			payload: {
 				title: notFoundTitle,
 				content: NotFoundWrapper({title: notFoundTitle, content: ''}),
+				entryType: 'notFound',
 				status: 404
 			}
 		});
