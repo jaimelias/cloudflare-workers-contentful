@@ -116,8 +116,8 @@ export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectI
 			
 	if(isUrl(redirectCountryCodesUrl))
 	{
-		const ip = headers.get('CF-Connecting-IP');
-		const country = headers.get('cf-ipcountry');
+		const ip = headers.get('CF-Connecting-IP') || '';
+		const country = headers.get('cf-ipcountry') || '';
 		
 		if(Array.isArray(redirectCountryCodes) && ip && country)
 		{

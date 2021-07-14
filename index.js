@@ -15,7 +15,7 @@ addEventListener('fetch', event => {
 const handleRequest = async (event) => {
 
 	const {request} = event;
-	const {parseRequest} = Utilities;
+	const {parseRequest, getBypassCacheIps} = Utilities;
 	const data = await parseRequest(event);
 	const {pathNameArr: {first}, apiBody} = data;
 	const configureStore = ReduxStore({zone: first});

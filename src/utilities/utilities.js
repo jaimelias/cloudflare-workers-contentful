@@ -539,3 +539,5 @@ export const hexToRgb = hex => {
 };
 
 export const isEntryType = str => (str) ? validEntryTypes.includes(str) : false;
+
+export const getBypassCacheIps = (typeof BYPASS_CACHE_IPS === 'string') ? (BYPASS_CACHE_IPS.length > 0) ? BYPASS_CACHE_IPS.split(',').map(i => i.trim()) : [] : [];

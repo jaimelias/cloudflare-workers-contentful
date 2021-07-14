@@ -1,5 +1,5 @@
 import {htmlRewriter} from './htmlRewriter';
-const {contentTypeIsHtml, secureHeaders, sortByOrderKey, softRedirectBody, doSoftRedirect} = Utilities;
+const {contentTypeIsHtml, secureHeaders, sortByOrderKey, softRedirectBody, doSoftRedirect, getBypassCacheIps} = Utilities;
 
 export default class RenderOutput {
 	constructor({store, event, apiBody})
@@ -49,13 +49,19 @@ export default class RenderOutput {
 	{
 		const {request, request: {url, headers}} = this.event;
 		const countryCode = headers.get('cf-ipcountry') || '';
+		const ip = headers.get('CF-Connecting-IP') || '';
 		let cacheUrl = new URL(url);
 		cacheUrl.hash = countryCode;		
 		this.cacheKey = new Request(cacheUrl.toString(), request);
+		this.isBypassedByIp = (ip && getBypassCacheIps.length > 0) 
+			? (getBypassCacheIps.includes(ip)) 
+			? true 
+			: false 
+			: false;
 	}
 	renderCache(){
 				
-		if(ENVIRONMENT === 'production' && this.apiBody === false)
+		if(ENVIRONMENT === 'production' && this.apiBody === false && this.isBypassedByIp === false)
 		{
 			return this.cache.match(this.cacheKey).then(response => response);	
 		}
@@ -164,7 +170,7 @@ export default class RenderOutput {
 				response = newResponse;	
 			}
 			
-			if(ENVIRONMENT === 'production' && status === 200 && this.apiBody === false)
+			if(ENVIRONMENT === 'production' && status === 200 && this.apiBody === false && this.isBypassedByIp === false)
 			{
 				this.event.waitUntil(this.cache.put(this.cacheKey, response.clone()));
 			}
