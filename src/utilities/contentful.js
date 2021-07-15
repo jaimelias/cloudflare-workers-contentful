@@ -1,6 +1,6 @@
 const {validEntryTypes} = SharedData;
 const {langList} = LangConfig;
-const {getFallBackLang} = Utilities;
+const {getFallBackLang, getBypassCacheIps} = Utilities;
 const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
 const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
 
@@ -298,12 +298,21 @@ const parseKvData = data => {
 export const getAllEntries = async ({store}) => {
 	
 	const {getState, dispatch} = store;
-	const {waitUntil, altLang} = getState().request.data;
+	const {waitUntil, altLang, headers} = getState().request.data;
+	const ip = headers.get('CF-Connecting-IP') || '';
+	const isBypassedByIp = (ip && getBypassCacheIps.length > 0) 
+		? (getBypassCacheIps.includes(ip)) 
+		? true 
+		: false 
+		: false;	
+	
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
 	let kvData = parseKvData(kvCache);
 	
-	if(kvData && ENVIRONMENT === 'production')
+	
+	
+	if(kvData && ENVIRONMENT === 'production' && isBypassedByIp === false)
 	{		
 		const data = kvData.map(d => {
 			d.fetcher = 'KV';
@@ -359,7 +368,7 @@ export const getAllEntries = async ({store}) => {
 					const output = parseData({data: d, altLang, contentType, websiteId});
 					dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
 
-					if(ENVIRONMENT === 'production')
+					if(ENVIRONMENT === 'production' && isBypassedByIp === false)
 					{
 						waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
 					}
