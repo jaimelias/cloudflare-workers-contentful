@@ -2,7 +2,7 @@ import {GalleryComponent} from './galleryComponent';
 import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
 import {RightSideWidget} from './widgets';
-
+const {startingAt} = Bookings;
 const {pageIsBlog, pageHasForm} = Utilities;
 
 export const WrapperComponent = ({request, labels, data, thisEntry, width}) => {
@@ -103,8 +103,9 @@ export const packageGrid = ({request, data}) => {
 			
 			packages.forEach((r, i) => {
 				
+				const {slug, imageGallery, priceFrom, title, bookings} = r;
 				let image = '';
-				const url = `${homeUrl}${r.slug}`;
+				const url = `${homeUrl}${slug}`;
 				const index = (i + 1);
 				const addNewRow = ((index % operator) === 0) ? true : false;
 				const colStart = `<div class="col-md-${md}">`;
@@ -112,15 +113,15 @@ export const packageGrid = ({request, data}) => {
 				const rowRestart = `${rowEnd}${rowStart}`;
 				const rowBreak = (count === index) ? rowEnd : (addNewRow) ? rowRestart : '</div>';
 				
-				if(r.hasOwnProperty('imageGallery'))
+				if(Array.isArray(imageGallery))
 				{
-					if(r.imageGallery.length > 0)
+					if(imageGallery.length > 0)
 					{
 						const maxWidth = 768;
-						const {width, height, src} = r.imageGallery[0];
+						const {width, height, src} = imageGallery[0];
 						const maxHeight = Math.round((height / width) * maxWidth);
 						const media = Utilities.Media({
-							...r.imageGallery[0],
+							...imageGallery[0],
 							maxHeight,
 							className: 'card-img-top img-fluid'
 						});	
@@ -128,14 +129,16 @@ export const packageGrid = ({request, data}) => {
 					}			
 				}
 				
-				let badge = (r.priceFrom) ? `<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${r.priceFrom}</a>` : '';
+				startingAt(bookings);
+				
+				let badge = (priceFrom) ? `<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${priceFrom}</a>` : '';
 				
 				let row = `
 					${colStart}
 						<div class="card position-relative">
 							${image}
 							<div class="card-body">
-							<p class="card-text"><a class="text-dark" href="${url}">${r.title}</a></p>
+							<p class="card-text"><a class="text-dark" href="${url}">${title}</a></p>
 							</div>
 							${badge}
 						</div>

@@ -14,6 +14,7 @@ module.exports = {
 			LangConfig: path.resolve(__dirname, './src/lang/langConfig'),
 			ActionTypes: path.resolve(__dirname, './src/redux/actionTypes'),
 			SharedData: path.resolve(__dirname, './src/utilities/sharedData'),
+			Bookings: path.resolve(__dirname, './src/utilities/bookings'),
 		}),
 	]
 }

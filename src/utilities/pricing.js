@@ -1,1 +1,0 @@
-const startingAt = ({entryType, slug, data}) => {};
