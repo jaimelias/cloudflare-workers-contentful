@@ -386,14 +386,3 @@ export const getAllEntries = async ({store}) => {
 		.catch(err => store.render.payload({status: 500, body: err.message}));		
 	}
 };
-
-export const pageIsBlog = ({slug, website}) => {
-	
-	if(typeof website.blogPage === 'object')
-	{
-		if(slug === website.blogPage.slug)
-		{
-			return true;
-		}
-	}			
-};

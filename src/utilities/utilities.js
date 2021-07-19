@@ -1,10 +1,10 @@
 const {langLabels, langList} = LangConfig;
 const {validEntryTypes} = SharedData;
 
-export const formatDate = ({date, lang}) => {
+export const formatToReadableDate = ({date, lang}) => {
+	//returns MonthName DD, YYYY
 	const d = new Date(date);
 	const months = langLabels[lang].labels.months;
-		
 	return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 };
 
@@ -541,3 +541,26 @@ export const hexToRgb = hex => {
 export const isEntryType = str => (str) ? validEntryTypes.includes(str) : false;
 
 export const getBypassCacheIps = (typeof BYPASS_CACHE_IPS === 'string') ? (BYPASS_CACHE_IPS.length > 0) ? BYPASS_CACHE_IPS.split(',').map(i => i.trim()) : [] : [];
+
+
+export const isValidDateStr = str => {
+	//returns YYYY-MM-DD
+	const regEx = /^\d{4}-\d{2}-\d{2}$/;
+	if(!str.match(regEx)) return false;  
+	let d = new Date(str);
+	const dNum = d.getTime();
+	if(!dNum && dNum !== 0) return false;
+	return d.toISOString().slice(0,10) === str;
+};
+
+export const formatDateStr = date => {
+    const d = new Date(date);
+	const year = d.getFullYear();
+	let month = (d.getMonth() + 1).toString();
+	let day = d.getDate().toString();
+	
+	month = (month.length < 2) ? '0' + month : month;
+	day = (day.length < 2) ? '0' + day : day;
+
+    return [year, month, day].join('-');
+}

@@ -1,53 +1,122 @@
-const {isNumber} = Utilities;
+const {isNumber, isValidDateStr, formatDateStr} = Utilities;
+const variableDurationUnits = ['days', 'nights'];
 
-export const startingAt = bookings => {
-	let prices = {};
+const parseBookingArgs = ({bookings, request}) => {
+	const {variablePricesEnabled, variablePricesLast, durationUnit, duration} = bookings;
+	const {method, searchParams, apiBody: payload} = request;
+	let startDate = new Date();
+	let endDate = new Date();
+	
+	const isVariableDurationUnit = (variablePricesEnabled) 
+		? variableDurationUnits.includes(durationUnit)
+		: false;
+				
+	if(method === 'GET')
+	{
+		if(searchParams.has('startDate') && searchParams.has('endDate'))
+		{
+			startDate = (isValidDateStr(searchParams.get('startDate'))) 
+				? new Date(searchParams.get('startDate'))
+				: startDate;
+			
+			endDate = (isValidDateStr(searchParams.get('endDate'))) 
+				? new Date(searchParams.get('endDate'))
+				: startDate;
+		}
+	}
+	else if(method === 'POST')
+	{
+		if(typeof payload === 'object')
+		{
+			startDate = (isValidDateStr(payload.startDate)) 
+				? new Date(payload.startDate)
+				: startDate;
+			
+			endDate = (isValidDateStr(payload.endDate)) 
+				? new Date(payload.endDate)
+				: startDate;			
+		}
+	}
+	
+	startDate = formatDateStr(startDate.setHours(0));
+	endDate = formatDateStr(endDate.setHours(0));
+	
+	let variablePriceDuration = (isVariableDurationUnit) 
+		? (variablePricesLast) 
+		? duration
+		: (duration - 1)
+		: 0;	
+
+	console.log('editing bookings.js:parseBookingArgs');
+	console.log({startDate, endDate, variablePriceDuration});
+
+	return {...bookings, startDate, endDate, isVariableDurationUnit, variablePriceDuration};
+};
+
+export const startingAt = ({bookings, request}) => {
 	
 	if(isValidBookingConfig(bookings))
 	{
-		const {duration, seasons, variablePriceEnabled, variablePriceLast} = bookings;
+		bookings = parseBookingArgs({bookings, request});
 		
-		const prices = getPricesAsObj({seasons, duration, variablePriceEnabled, variablePriceLast});
-		
-		
-		console.log({prices, duration, location: 'utilities/bookings.js'});
+		const prices = parseAllPrices(bookings);
 	}
-	
-	
-	
+
 	return 0;
 };
 
-const getPricesAsObj = ({seasons, duration, variablePriceEnabled, variablePriceLast}) => {
-	let prices = {};
+const parseAllPrices = bookings => {
 	
-	for(let k in seasons)
+	//This function sums fixed + (variable * variablePriceDuration) of each price type of each season
+	
+	const {seasons, variablePriceDuration, variablePricesEnabled} = bookings;
+	
+	let output = {};
+	
+	for(let s in seasons)
 	{
-		//fix bug, must be changed to an object to concat later the sum
-		prices[k] = 0;
-
-		seasons[k].fixedPrices.forEach(r => {
-			
-			if(isNumber(prices[k]) && isNumber(r.pax1))
-			{
-				prices[k] = prices[k] + r.pax1;
-			}
-		});
-
-		seasons[k].variablePrices.forEach(r => {
-			
-			if(isNumber(prices[k]) && isNumber(r.pax1))
-			{
-				duration = (variablePriceLast) ? duration : (duration - 1);
+		const {fixedPrices, variablePrices, dates} = seasons[s];
+		output[s] = {dates, prices: {}};
+		
+		if(Array.isArray(fixedPrices))
+		{
+			fixedPrices.forEach((price, i) => {
 				
-				console.log({base: prices[k], variable: r.pax1, duration});
+				for(let p in price)
+				{
+					if(typeof output[s].prices[p] === 'undefined')
+					{
+						output[s].prices[p] = [...Array(fixedPrices.length)].map(r => 0);
+					}
+					
+					output[s].prices[p][i] = isNumber(price[p]) ? price[p] : 0;
+				}
+			});			
+		}
+
+		if(Array.isArray(variablePrices) && variablePricesEnabled)
+		{
+			variablePrices.forEach((price, i) => {
 				
-				prices[k] = prices[k] + (r.pax1 * duration);
-			}
-		});
+				for(let p in price)
+				{
+					if(isNumber(price[p]))
+					{
+						
+						if(typeof output[s].prices[p] === 'undefined')
+						{
+							output[s].prices[p] = [...Array(variablePrices.length)].map(r => 0);
+						}
+						
+						output[s].prices[p][i] += price[p] * variablePriceDuration;
+					}
+				}
+			});
+		}
+		
 	}
 
-	return prices;
+	return output;
 };
 
 const isValidBookingConfig = bookings => {

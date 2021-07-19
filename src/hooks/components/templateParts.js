@@ -37,7 +37,7 @@ export const EntryContentComponent = ({thisEntry, labels, request, data, width})
 	const website = websites.entries[0];
 	const hasForm = pageHasForm({website, slug, entryType});
 	const isBlog = pageIsBlog({slug, website});
-	const date = (entryType === 'posts') ? Utilities.formatDate({date: updatedAt, lang: currentLanguage}) : '';
+	const date = (entryType === 'posts') ? Utilities.formatToReadableDate({date: updatedAt, lang: currentLanguage}) : '';
 	const {labelNoPosts} = labels;
 	
 	entryContent += GalleryComponent({data: imageGallery});
@@ -129,7 +129,7 @@ export const packageGrid = ({request, data}) => {
 					}			
 				}
 				
-				startingAt(bookings);
+				startingAt({bookings, request});
 				
 				let badge = (priceFrom) ? `<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${priceFrom}</a>` : '';
 				

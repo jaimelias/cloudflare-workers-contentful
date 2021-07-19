@@ -59,9 +59,9 @@ const IndexComponent = ({paginatedEntries, homeUrl, width}) => {
 const stylePost = ({post, homeUrl, showFeatured, total}) => {
 	
 	let template = '';
-	const {formatDate} = Utilities;
+	const {formatToReadableDate} = Utilities;
 	const {title, description, createdAt, currentLanguage, slug, shortContent, featured, imageGallery} = post;
-	const date = formatDate({
+	const date = formatToReadableDate({
 		date: createdAt,
 		lang: currentLanguage
 	});
