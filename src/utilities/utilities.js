@@ -210,7 +210,7 @@ export const findBySlug = ({data, slug, entryType}) => {
 	}
 	
 	return output;
-}
+};
 
 export const listLangItems = ({store, entryType}) => {
 
@@ -396,7 +396,7 @@ const getApiBody = async ({pathNameArr, request}) => {
 	}	
 	
 	return false;
-}
+};
 
 const getAltLang = ({pathNameArr, apiBody}) => {
 	
@@ -411,7 +411,7 @@ const getAltLang = ({pathNameArr, apiBody}) => {
 	}
 	
 	return output;
-}
+};
 
 export const parseRequest = async (event) => {
 	
@@ -517,7 +517,7 @@ export const objToCssRules = obj => {
 	}
 	
 	return cssRules;
-}
+};
 
 export const hexToRgb = hex => {
 	
@@ -554,7 +554,7 @@ export const isValidDateStr = str => {
 };
 
 export const formatDateStr = date => {
-    const d = new Date(date);
+    let d = new Date(date);
 	const year = d.getFullYear();
 	let month = (d.getMonth() + 1).toString();
 	let day = d.getDate().toString();
@@ -563,4 +563,6 @@ export const formatDateStr = date => {
 	day = (day.length < 2) ? '0' + day : day;
 
     return [year, month, day].join('-');
-}
+};
+
+export const differenceBetweenDates = ({startDate, endDate}) => Math.ceil(Math.abs(startDate - endDate) / (1000 * 60 * 60 * 24));

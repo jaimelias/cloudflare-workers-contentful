@@ -1,75 +1,121 @@
-const {isNumber, isValidDateStr, formatDateStr} = Utilities;
+const {isNumber, isValidDateStr, formatDateStr, differenceBetweenDates} = Utilities;
 const variableDurationUnits = ['days', 'nights'];
 
 const parseBookingArgs = ({bookings, request}) => {
-	const {variablePricesEnabled, variablePricesLast, durationUnit, duration} = bookings;
+		
 	const {method, searchParams, apiBody: payload} = request;
+	const {variablePricesEnabled, variablePricesLast, durationUnit, maxDuration} = bookings;
+	let {duration} = bookings;
+	let requestHasDateParams = false;
+	let status = 200;
 	let startDate = new Date();
 	let endDate = new Date();
-	
-	const isVariableDurationUnit = (variablePricesEnabled) 
+	let occupancyDuration = duration;
+	startDate.setHours(0);
+	endDate.setHours(0);
+
+	const isVariableDurationUnit = (variablePricesEnabled)
 		? variableDurationUnits.includes(durationUnit)
 		: false;
-				
-	if(method === 'GET')
+	
+	if(isVariableDurationUnit)
 	{
-		if(searchParams.has('startDate') && searchParams.has('endDate'))
+		occupancyDuration = (variablePricesLast) ? duration : duration - 1;
+		endDate.setDate(endDate.getDate() + occupancyDuration);
+		
+		if(method === 'GET')
 		{
-			startDate = (isValidDateStr(searchParams.get('startDate'))) 
-				? new Date(searchParams.get('startDate'))
-				: startDate;
-			
-			endDate = (isValidDateStr(searchParams.get('endDate'))) 
-				? new Date(searchParams.get('endDate'))
-				: startDate;
+			if(searchParams.has('startDate') && searchParams.has('endDate'))
+			{
+				if(isValidDateStr(searchParams.get('startDate')) && isValidDateStr(searchParams.get('endDate')))
+				{
+					startDate = new Date(searchParams.get('startDate'));
+					endDate = new Date(searchParams.get('endDate'));					
+					
+					if(startDate <= endDate)
+					{
+						requestHasDateParams = true;					
+					}
+					else
+					{
+						status = 400;
+						statusText = 'illogical date param';					
+					}
+				}
+			}
 		}
-	}
-	else if(method === 'POST')
-	{
-		if(typeof payload === 'object')
+		else if(method === 'POST')
 		{
-			startDate = (isValidDateStr(payload.startDate)) 
-				? new Date(payload.startDate)
-				: startDate;
-			
-			endDate = (isValidDateStr(payload.endDate)) 
-				? new Date(payload.endDate)
-				: startDate;			
+			if(typeof payload === 'object')
+			{
+				if(payload.hasOwnProperty('startDate') && payload.hasOwnProperty('endDate'))
+				{
+					if(isValidDateStr(payload.startDate) && isValidDateStr(payload.endDate))
+					{
+						startDate = new Date(payload.startDate);
+						endDate = new Date(payload.endDate);						
+						
+						if(startDate <= endDate)
+						{
+							requestHasDateParams = true;
+						}
+						else
+						{
+							status = 400;
+							statusText = 'illogical date param';				
+						}
+						
+					}
+					else
+					{
+						status = 400;
+						statusText = 'invalid date param';
+					}
+				}
+			}
 		}
+		
+		if(requestHasDateParams)
+		{	
+			duration = differenceBetweenDates({startDate, endDate}) + 1;
+			occupancyDuration = (variablePricesLast) ? duration : duration - 1;
+			console.log({startDate, endDate, duration, occupancyDuration});
+		}
+		
+		//startDate = formatDateStr(startDate);
+		//endDate = formatDateStr(endDate);
 	}
 	
-	startDate = formatDateStr(startDate.setHours(0));
-	endDate = formatDateStr(endDate.setHours(0));
+	if(duration > maxDuration)
+	{
+		status = 400;
+		statusText: 'invalid duration param';
+	}
 	
-	let variablePriceDuration = (isVariableDurationUnit) 
-		? (variablePricesLast) 
-		? duration
-		: (duration - 1)
-		: 0;	
-
-	console.log('editing bookings.js:parseBookingArgs');
-	console.log({startDate, endDate, variablePriceDuration});
-
-	return {...bookings, startDate, endDate, isVariableDurationUnit, variablePriceDuration};
+	return (status === 200) 
+	? {...bookings, startDate, endDate, isVariableDurationUnit, duration, status, requestHasDateParams}
+	: {status, statusText};
 };
 
 export const startingAt = ({bookings, request}) => {
 	
-	if(isValidBookingConfig(bookings))
+	const validateConfig = isValidBookingConfig(bookings);
+	
+	if(validateConfig.status === 200)
 	{
 		bookings = parseBookingArgs({bookings, request});
 		
 		const prices = parseAllPrices(bookings);
 	}
 
-	return 0;
+	return validateConfig;
 };
 
 const parseAllPrices = bookings => {
 	
-	//This function sums fixed + (variable * variablePriceDuration) of each price type of each season
+	//This function sums fixed + (variable * duration) of each price type of each season
 	
-	const {seasons, variablePriceDuration, variablePricesEnabled} = bookings;
+	const {seasons, duration, variablePricesEnabled} = bookings;
 	
 	let output = {};
 	
@@ -108,7 +154,7 @@ const parseAllPrices = bookings => {
 							output[s].prices[p] = [...Array(variablePrices.length)].map(r => 0);
 						}
 						
-						output[s].prices[p][i] += price[p] * variablePriceDuration;
+						output[s].prices[p][i] += price[p] * duration;
 					}
 				}
 			});
@@ -121,15 +167,20 @@ const parseAllPrices = bookings => {
 
 const isValidBookingConfig = bookings => {
 	
+	let output = {
+		status: 500,
+		statusText: 'invalid package configuration'
+	}
+	
 	if(typeof bookings === 'object')
 	{
-		const {enabled, maxParticipantsPerBooking, duration} = bookings;
+		const {enabled, maxParticipantsPerBooking, duration, maxDuration} = bookings;
 		
-		if(enabled && maxParticipantsPerBooking && duration)
+		if(enabled && maxParticipantsPerBooking && duration && maxDuration >= duration)
 		{
-			return true;
+			output = {status: 200}
 		}
 	}
 	
-	return false;
+	return output;
 }
