@@ -61,7 +61,7 @@ export default class RenderOutput {
 	}
 	renderCache(){
 				
-		if(ENVIRONMENT === 'production' && this.apiBody === false && this.isBypassedByIp === false)
+		if(this.isCachedResponse())
 		{
 			return this.cache.match(this.cacheKey).then(response => response);	
 		}
@@ -135,6 +135,16 @@ export default class RenderOutput {
 		
 		return this.response();
 	}
+	isCachedResponse(){
+		if(ENVIRONMENT === 'production' && this.apiBody === false && this.isBypassedByIp === false)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
 	response()
 	{
 		const {getState} = this.store;
@@ -145,41 +155,47 @@ export default class RenderOutput {
 		
 		if(status === 301 || status === 302)
 		{
-			response = Response.redirect(body, status);
+			return Response.redirect(body, status);
 		}
 		else
 		{
-			
 			let responseHeaders = {
 				...headers, 
 				...secureHeaders,
 				'Data-Fetcher': fetcher
 			};
 				
-			const newResponse = new Response(body, {
+			let newResponse = new Response(body, {
 				status,
 				headers: responseHeaders
 			});
 			
 			if(isHtml)
 			{
-				response = htmlRewriter(this.store).transform(newResponse);
-			}
-			else
-			{
-				response = newResponse;	
+				newResponse = htmlRewriter(this.store).transform(newResponse);
 			}
 			
-			if(ENVIRONMENT === 'production' && status === 200 && this.apiBody === false && this.isBypassedByIp === false)
+			if(status === 200 && this.isCachedResponse())
 			{
-				this.event.waitUntil(this.cache.put(this.cacheKey, response.clone()));
+				if(isHtml)
+				{
+					newResponse.headers.append('Env-Mode', 'visitor');
+				}
+				
+				this.event.waitUntil(this.cache.put(this.cacheKey, newResponse.clone()));
 			}
 			else
 			{
+				if(isHtml)
+				{
+					newResponse.headers.set('Cache-Control', 's-maxage=10');
+					newResponse.headers.append('Env-Mode', 'developer');
+				}
+				
 				this.event.waitUntil(this.cache.delete(this.cacheKey));
 			}
+			
+			return newResponse;
 		}
-
-		return response;
 	}
 }
