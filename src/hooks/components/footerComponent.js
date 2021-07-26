@@ -1,17 +1,62 @@
+const {isUrl} = Utilities;
+
 export const copyRight = ({siteName}) => (`<div class="mt-5 mb-2 text-center"><span class="text-muted ">${siteName}</span></div>`);
 
-export const FooterMenu = ({telephoneNumber, instagramUsername, siteName, location, country, googleMapsUrl}) => {
+export const FooterMenu = ({telephoneNumber, instagramUsername, location, googleMapsUrl}) => {
+	let output = [];
 	
-	const urlEncodedsiteName = encodeURIComponent(siteName);
-	const isoTelephoneNumber= Utilities.isoNumber(telephoneNumber);
+	if(typeof location === 'object')
+	{
+		let addressArr = [];
+		
+		const {name: locationName, stateProvince, country} = location;
 
-	return `
-		<div class="row text-center">
-			<div class="col-md-4 py-2"><a href="${googleMapsUrl}" target="_blank" rel="nofollow">${location}, ${country}</a></div>
-			<div class="col-md-4 py-2"><a target="_blank" rel="nofollow" href="https://instagram.com/${instagramUsername}"><span>@${instagramUsername}</span></a></div>
-			<div class="col-md-4 py-2"><a href="tel:${isoTelephoneNumber}"><span>Tel.</span> <span>${telephoneNumber}</span></a></div>
-		</div>
-	`;
+		if(typeof locationName === 'string')
+		{
+			addressArr.push(location.name);
+		}
+		if(typeof stateProvince === 'string')
+		{
+			addressArr.push(stateProvince);
+		}
+
+		if(typeof country === 'object')
+		{
+			const {code: countryCode} = country || '';
+
+			if(countryCode)
+			{
+				addressArr.push(countryCode);
+			}
+		}
+
+		if(addressArr.length > 0)
+		{
+			const addressStr = addressArr.join(', ');
+
+			if(isUrl(googleMapsUrl)){
+				output.push(`<div class="col-md py-2"><a href="${googleMapsUrl}" target="_blank" rel="nofollow">${addressStr}</a></div>`);
+			}
+			else{
+				output.push(addressStr);
+			}
+		}
+
+		if(instagramUsername)
+		{
+			output.push(`<div class="col-md py-2"><a target="_blank" rel="nofollow" href="https://instagram.com/${instagramUsername}"><span>@${instagramUsername}</span></a></div>`);
+		}
+
+		if(telephoneNumber)
+		{
+			const isoTelephoneNumber= Utilities.isoNumber(telephoneNumber);
+			output.push(`<div class="col-md py-2"><a href="tel:${isoTelephoneNumber}"><span>Tel.</span> <span>${telephoneNumber}</span></a></div>`);
+		}
+	}
+
+	return (output.length > 0) 
+		? `<div class="row text-center">${output.join('')}</div>`
+		: '';
 };
 
 export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername, telephoneNumber}) => {
@@ -58,7 +103,7 @@ export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername,
 
 export const Footer = ({website}) => {
 	
-	const {siteName, whatsappNumber, telephoneNumber, email, instagramUsername, facebookMessengerUsername, location, country, googleMapsUrl} = website;
+	const {siteName, whatsappNumber, telephoneNumber, email, instagramUsername, facebookMessengerUsername, location, googleMapsUrl} = website;
 	
 	const RenderCopyRight = copyRight({
 		siteName
@@ -70,7 +115,6 @@ export const Footer = ({website}) => {
 		instagramUsername,
 		siteName,
 		location,
-		country,
 		googleMapsUrl
 	});
 	const RenderChatButton = ChatButton({

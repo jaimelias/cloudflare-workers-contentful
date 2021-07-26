@@ -80,23 +80,70 @@ const args = async () => {
 	};
 };
 
-const linkEntry = ({id, entries, defaultLanguage, currentLanguage}) => {
+const isLocalized = obj => {
+	let output = false;
 	
-	const entry = entries.find(i => i.sys.id === id);
-	const output = {};
-	
-	if(entry)
+	if(Object.keys(obj).length <= langList.length)
 	{
-		let fields = entry.fields;
-		
-		for(let f in fields)
-		{
-			let thisField = fields[f][currentLanguage] || fields[f][defaultLanguage] || getFallBackLang(fields[f]);
-			output[f] = thisField;
-		}
+		langList.forEach(l => {
+			if(typeof obj[l] !== 'undefined')
+			{
+				output = true;
+			}
+		});		
 	}
 	
 	return output;
+};
+
+const flatFields = ({fields, currentLanguage, defaultLanguage}) => {
+	const output = {};
+	
+	if(typeof fields === 'object')
+	{		
+		for(let f in fields)
+		{
+			if(isLocalized(fields[f]))
+			{
+				let thisField = fields[f][currentLanguage] 
+					|| fields[f][defaultLanguage] 
+					|| getFallBackLang(fields[f]);
+				
+				//simplifies flats objects with similar keys: parent{child}
+				if(thisField.hasOwnProperty(f))
+				{
+					thisField = thisField[f];
+				}			
+
+				//recursive flat
+				if(typeof thisField === 'object')
+				{
+					for(let k in thisField)
+					{
+						if(typeof thisField[k] === 'object')
+						{
+							if(isLocalized(thisField[k]))
+							{								
+								thisField[k] = thisField[k][currentLanguage] || thisField[k][defaultLanguage] || getFallBackLang(thisField[k]);
+							}							
+						}
+					}
+				}
+
+				output[f] = thisField;				
+			}
+		}			
+	}
+
+	return output;
+};
+
+const linkEntry = ({id, entries, defaultLanguage, currentLanguage}) => {
+	
+	const entry = entries.find(i => i.sys.id === id);
+	return (typeof entry === 'object') 
+		? flatFields({fields: entry.fields, currentLanguage, defaultLanguage})
+		: {};
 };
 
 const linkField = ({field, assets, entries, currentLanguage, defaultLanguage}) =>{

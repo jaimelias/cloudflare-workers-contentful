@@ -2,6 +2,7 @@ import {GalleryComponent} from './galleryComponent';
 import {RightSideWidget} from './widgets';
 import {BlogIndexComponent} from './blogIndexComponent';
 import {packageGrid} from './templateParts';
+const { getFallBackLang } = Utilities;
 
 export default class IndexComponent {
 
@@ -88,13 +89,14 @@ const IndexWrapper = ({store, labels}) => {
 	`;
 };
 
-const JsonLd = (store) => {
+const JsonLd = store => {
 	
-	let output = '';
 	const {getState} = store;
 	const website = getState().contentful.data.websites.entries[0];
 	const {homepage: {title}} = website || '';
-	const {siteName, countryCode, location, stateProvince, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
+	const {siteName, location, streetAddress, telephoneNumber, imageGallery, priceRange, type, coordinates} = website;
+	const {country, stateProvince, name: locationName} = location || '';
+	
 
 	let ld = {
 		'@content': 'https://schema.org',
@@ -131,14 +133,17 @@ const JsonLd = (store) => {
 		'@type': 'PostalAddress'
 	};
 	
-	if(countryCode){
-		address.addressCountry = countryCode;
-		showAddress = true;
+	if(typeof country === 'object'){
+		if(country.hasOwnProperty('code'))
+		{
+			address.addressCountry = country.code;
+			showAddress = true;
+		}
 	}
 	
-	if(location)
+	if(locationName)
 	{
-		address.addressLocality = location;
+		address.addressLocality = locationName;
 		showAddress = true;
 	}
 	
