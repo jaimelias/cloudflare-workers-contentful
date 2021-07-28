@@ -49,11 +49,11 @@ export const Favicon = ({website}) => {
 };
 
 
-export const escUrl = (str) => {
+export const escUrl = str => {
 	return encodeURI(decodeURI(str).replace(/[&]/g, i => '&amp;'));	
 };
 
-export const Media = (obj) => {
+export const Media = obj => {
 	if(obj)
 	{
 		if(obj.hasOwnProperty('fileName') && obj.hasOwnProperty('type'))
@@ -64,7 +64,7 @@ export const Media = (obj) => {
 				let width = obj.width;
 				let height = obj.height;
 				let alt = obj.title;
-				let imageUrl = encodeURI(decodeURI((`/images/${obj.fileName}`)));
+				let imageUrl = encodeURI(decodeURI((`/images${obj.fileName}`)));
 				let lazyLoading = '';
 				
 				if(obj.maxHeight)
@@ -131,7 +131,7 @@ export const sortByOrderKey = (a, b) => {
 	return 0;		
 };
 
-export const slugRegex = (value) => {
+export const slugRegex = value => {
 	const regex = /^[\w]+(?:-[\w]+)*$/igm;		
 	return (value) ? regex.test(value) : true;
 };
@@ -169,14 +169,20 @@ export const findBySlug = ({data, slug, entryType}) => {
 	{
 		if(entryType)
 		{
-			findData = data[entryType].entries.find(i => i.slug === slug);
-			 
-			if(typeof findData === 'object')
+			if(data.hasOwnProperty(entryType))
 			{
-				output = {
-					entryType,
-					entry: findData
-				};				
+				if(data[entryType].hasOwnProperty('entries'))
+				{
+					findData = data[entryType].entries.find(i => i.slug === slug);
+					 
+					if(typeof findData === 'object')
+					{
+						output = {
+							entryType,
+							entry: findData
+						};				
+					}				
+				}				
 			}
 		}
 		else
@@ -187,14 +193,20 @@ export const findBySlug = ({data, slug, entryType}) => {
 				{				
 					if(typeof data[k] === 'object')
 					{
-						findData = data[k].entries.find(i => i.slug === slug);
-						
-						if(typeof findData === 'object')
+						if(data.hasOwnProperty(k))
 						{
-							output = {
-								entryType: k,
-								entry: findData
-							};
+							if(data[k].hasOwnProperty('entries'))
+							{
+								findData = data[k].entries.find(i => i.slug === slug);
+								
+								if(typeof findData === 'object')
+								{
+									output = {
+										entryType: k,
+										entry: findData
+									};
+								}							
+							}							
 						}
 					}
 				}	

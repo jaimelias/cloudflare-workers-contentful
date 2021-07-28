@@ -11,7 +11,7 @@ export const handleImages = async ({store}) => {
 		{
 			return render.payload(await getImageByName({store}));
 		}
-		else if(pathNameArr.full.length === 2)
+		else if(pathNameArr.full.length >= 2)
 		{
 			return render.payload(await getImageById({store}));
 		}
@@ -48,9 +48,10 @@ const getImageByName = async ({store}) =>  {
 
 const getImageById = async ({store}) => {
 	
-	if(store.getState().request.data.pathNameArr.full.length === 2)
+	if(store.getState().request.data.pathNameArr.full.length >= 2)
 	{
 		const image = findImageAsset({store});
+		
 		
 		if(image)
 		{
@@ -140,12 +141,17 @@ const findImageAsset = ({store}) => {
 		let title = getFallBackLang(fields.title);
 		let file = getFallBackLang(fields.file);
 		
-		if(decodeURI(file.fileName) === decodeURI(pathNameArr.last))
+		let reqImgPath = pathNameArr.full.filter((r, i) => i);
+		reqImgPath = '/' + reqImgPath.join('/');
+
+		const fileName = new URL(`http:${file.url}`).pathname;
+				
+		if(reqImgPath === fileName)
 		{									
 			image = {
-				fileName: file.fileName,
+				fileName,
 				src: file.url,
-				title: title,
+				title,
 				width: file.details.image.width,
 				height: file.details.image.height,
 				type: file.contentType

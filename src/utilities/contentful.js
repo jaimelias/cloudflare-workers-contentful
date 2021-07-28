@@ -175,14 +175,16 @@ const linkAsset = ({id, assets, currentLanguage, defaultLanguage}) => {
 		const fields = image.fields;
 		let title = fields.title;
 		let file = fields.file;
-		
+				
 		title = title[currentLanguage] || title[defaultLanguage] || getFallBackLang(title);
 		file = file[currentLanguage] || file[defaultLanguage] || getFallBackLang(file);
 				
+		const fileName = new URL(`http:${file.url}`).pathname;
+					
 		return {
-			fileName: encodeURIComponent(decodeURIComponent(file.fileName)),
+			fileName,
 			src: file.url,
-			title: title,
+			title,
 			width: file.details.image.width,
 			height: file.details.image.height,
 			type: file.contentType
