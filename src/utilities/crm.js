@@ -137,6 +137,7 @@ const sendGridSend = async ({payload, crm, website, entry}) => {
 	const htmlMessage = (typeof message === 'string') ? marked(message) : '';
 
 	delete payload.slug;
+	delete payload.entryType;
 	payload.pageTitle = entry.title;
 		
 	let template = emailTemplate({

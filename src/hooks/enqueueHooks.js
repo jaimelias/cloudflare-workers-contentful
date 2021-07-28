@@ -25,7 +25,6 @@ export default class EnqueueHooks
 		this.enqueue({scripts: bootstrapScripts(theme)});
 		this.enqueue({scripts: trackingScripts({facebookPixel, googleAnalytics})});
 		
-
 		if(hasForm)
 		{
 			if(typeof crm === 'object')

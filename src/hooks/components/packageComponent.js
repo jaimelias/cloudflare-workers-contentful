@@ -32,6 +32,7 @@ export default class PackageComponent {
 				description,
 				content: WrapperComponent({request, labels, data, thisEntry, width: this.width}),
 				imageGallery,
+				entryType: 'packages',
 				status: 200
 			}
 		});
