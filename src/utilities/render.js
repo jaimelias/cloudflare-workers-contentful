@@ -188,7 +188,7 @@ export default class RenderOutput {
 			{
 				if(isHtml)
 				{
-					newResponse.headers.set('Cache-Control', 's-maxage=10');
+					newResponse.headers.set('Cache-Control', 'no-store');
 					newResponse.headers.append('Env-Mode', 'developer');
 				}
 				
