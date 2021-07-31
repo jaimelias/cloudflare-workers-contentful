@@ -1,19 +1,25 @@
 const {validEntryTypes} = SharedData;
 const {langList} = LangConfig;
 const {getFallBackLang, getBypassCacheIps} = Utilities;
-const isLinkTypeEntry = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
-const isLinkTypeAsset = (arr) => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
+const isLinkTypeEntry = arr => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Entry';
+const isLinkTypeAsset = arr => arr.sys && arr.sys.type === 'Link' && arr.sys.linkType === 'Asset';
+
+const contentfulArgs = ({
+	url: 'https://cdn.contentful.com',
+	envId: CONTENTFUL_ENV_ID || 'master',
+	spaceId: CONTENTFUL_SPACE_ID || '',
+	token: CONTENTFUL_ACCESS_TOKEN || ''
+});
 
 export const getEntries = async ({contentType, websiteId, store, defaultLanguage}) => {
 	
-	
-	const KV = await args();
-	const init = await getInit({contentType});
 	const {dispatch, getState} = store;
-	
-	if(KV && init)
+	const {ip} = getState().request.data;	
+	const init = getFetchArgs({contentType, ip});
+
+	if(init)
 	{	
-		const endpoint = getEndPoint({contentType, KV, websiteId});
+		const endpoint = getEndPoint({contentType, contentfulArgs, websiteId});
 		const response = await fetch(new URL(endpoint).href, init);
 		const {status, statusText} = response;
 		
@@ -33,8 +39,8 @@ export const getEntries = async ({contentType, websiteId, store, defaultLanguage
 	return {status: 500};
 };
 
-const getEndPoint = ({contentType, KV, websiteId}) => {
-	const {url, envId, spaceId, token} = KV;
+const getEndPoint = ({contentType, contentfulArgs, websiteId}) => {
+	const {url, envId, spaceId, token} = contentfulArgs;
 	
 	let endpoint = `${url}/spaces/${spaceId}/environments/${envId}/entries?access_token=${token}&content_type=${contentType}&include=3&locale=*`;
 	
@@ -50,33 +56,26 @@ const getEndPoint = ({contentType, KV, websiteId}) => {
 	return endpoint;
 };
 
-const getInit = async ({contentType}) => {
+const getFetchArgs = ({contentType, ip}) => {
 
+	const isBypassedByIp = (ip && getBypassCacheIps.length > 0) 
+		? (getBypassCacheIps.includes(ip))
+		? true
+		: false
+		:false;
+		
+	const shouldBeCached = (ENVIRONMENT === 'production' && isBypassedByIp === false);
+	
 	return {
 		cf: {
 			cacheTtlByresponseStatus: {
-				'200-299': 60, 
+				'200-299': (shouldBeCached) ? 60 : -1, 
 				'404': -1, 
 				'500-599': -1 
 			},
-			cacheEverything: true,
+			cacheEverything: (shouldBeCached) ? true : false,
 			cacheKey: `${CONTENTFUL_DOMAIN}/${contentType}`
 		}
-	};
-};
-
-const args = async () => {
-
-	const url = 'https://cdn.contentful.com';
-	const envId = 'master';
-	const spaceId = await CONTENTFUL.get('space_id');
-	const token = await CONTENTFUL.get('access_token');
-
-	return {
-		url,
-		envId,
-		spaceId,
-		token
 	};
 };
 
@@ -344,10 +343,10 @@ const parseKvData = data => {
 	return output;
 };
 
-export const getAllEntries = async ({store}) => {
+export const getAllEntries = async (store) => {
 	
 	const {getState, dispatch} = store;
-	const {waitUntil, altLang, headers} = getState().request.data;
+	const {event, altLang, headers} = getState().request.data;
 	const ip = headers.get('CF-Connecting-IP') || '';
 	const isBypassedByIp = (ip && getBypassCacheIps.length > 0) 
 		? (getBypassCacheIps.includes(ip)) 
@@ -419,11 +418,11 @@ export const getAllEntries = async ({store}) => {
 
 					if(ENVIRONMENT === 'production' && isBypassedByIp === false)
 					{
-						waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
+						event.waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
 					}
 					else
 					{
-						waitUntil(CACHE.delete(kvCacheKey));
+						event.waitUntil(CACHE.delete(kvCacheKey));
 					}
 					
 					return output;

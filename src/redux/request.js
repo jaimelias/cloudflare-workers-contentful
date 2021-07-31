@@ -1,16 +1,15 @@
 export const request = (state = {
-	request: {},
 	data: {}
 }, action) => {
 	
 	const {type, payload} = action;
-	
+
     switch (type) {
         case ActionTypes.REQUEST_SUCCESS:
+			const {data} = payload;
             return {
-				...state, 
-				request: payload.request,
-				data: payload.data
+				...state,
+				data
 			};
         default:
             return state;

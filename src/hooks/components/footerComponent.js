@@ -1,6 +1,6 @@
-const {isUrl} = Utilities;
+const {isUrl, isoNumber} = Utilities;
 
-export const copyRight = ({siteName}) => (`<div class="mt-5 mb-2 text-center"><span class="text-muted ">${siteName}</span></div>`);
+export const copyRight = siteName => `<div class="mt-5 mb-2 text-center"><span class="text-muted ">${siteName}</span></div>`;
 
 export const FooterMenu = ({telephoneNumber, instagramUsername, location, googleMapsUrl}) => {
 	let output = [];
@@ -49,7 +49,7 @@ export const FooterMenu = ({telephoneNumber, instagramUsername, location, google
 
 		if(telephoneNumber)
 		{
-			const isoTelephoneNumber= Utilities.isoNumber(telephoneNumber);
+			const isoTelephoneNumber= isoNumber(telephoneNumber);
 			output.push(`<div class="col-md py-2"><a href="tel:${isoTelephoneNumber}"><span>Tel.</span> <span>${telephoneNumber}</span></a></div>`);
 		}
 	}
@@ -59,16 +59,15 @@ export const FooterMenu = ({telephoneNumber, instagramUsername, location, google
 		: '';
 };
 
-export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername, telephoneNumber}) => {
+export const ChatButton = ({whatsappNumber, siteName, telephoneNumber}) => {
 
-	const {isoNumber} = Utilities;
 	const urlEncodedsiteName = encodeURIComponent(siteName);
 	const isoWhatsapp = isoNumber(whatsappNumber);
 	const isoTelephoneNumber = isoNumber(telephoneNumber);
 
 	let output = '';
 	
-	if(whatsappNumber || facebookMessengerUsername || telephoneNumber)
+	if(whatsappNumber || telephoneNumber)
 	{
 		let dropdownItems = '';
 		
@@ -76,12 +75,7 @@ export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername,
 		{
 			dropdownItems += `<a class="dropdown-item" target="_blank" href="https://wa.me/${isoWhatsapp}?text=${urlEncodedsiteName}">Whatsapp</a>`;
 		}
-		
-		if(facebookMessengerUsername)
-		{
-			dropdownItems += `<a class="dropdown-item" target="_blank" href="https://m.me/${facebookMessengerUsername}">Messenger</a>`;
-		}
-		
+
 		if(telephoneNumber)
 		{
 			dropdownItems += `<a class="dropdown-item" href="tel:+${isoTelephoneNumber}">📞 ${telephoneNumber}</a>`;
@@ -101,13 +95,11 @@ export const ChatButton = ({whatsappNumber, siteName, facebookMessengerUsername,
 	return output;
 };
 
-export const Footer = ({website}) => {
+export const Footer = website => {
 	
-	const {siteName, whatsappNumber, telephoneNumber, email, instagramUsername, facebookMessengerUsername, location, googleMapsUrl} = website;
+	const {siteName, whatsappNumber, telephoneNumber, email, instagramUsername, location, googleMapsUrl} = website;
 	
-	const RenderCopyRight = copyRight({
-		siteName
-	});
+	const RenderCopyRight = copyRight(siteName);
 	const RenderFooterMenu = FooterMenu({
 		whatsappNumber,
 		telephoneNumber, 
@@ -120,7 +112,6 @@ export const Footer = ({website}) => {
 	const RenderChatButton = ChatButton({
 		whatsappNumber,
 		siteName,
-		facebookMessengerUsername,
 		telephoneNumber
 	});
 	

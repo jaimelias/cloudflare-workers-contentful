@@ -1,6 +1,6 @@
 const {getFallBackLang, imageFileRegex} = Utilities;
 
-export const handleImages = async ({store}) => {
+export const handleImages = async (store) => {
 	
 	const {getState, render} = store;
 	const {pathName, searchParams, method, pathNameArr} = getState().request.data;

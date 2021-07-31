@@ -7,6 +7,7 @@ import {ReduxStore} from './src/redux/configureStore';
 import RenderOutput from './src/utilities/render';
 import Firewall from './src/utilities/firewall';
 import {purgeKv} from './src/utilities/purge';
+const {parseRequest, isContentTypeInStore} = Utilities;
 
 addEventListener('fetch', event => {
     event.respondWith(handleRequest(event));
@@ -15,14 +16,13 @@ addEventListener('fetch', event => {
 const handleRequest = async (event) => {
 
 	const {request} = event;
-	const {parseRequest} = Utilities;
-	const data = await parseRequest(event);
-	const {pathNameArr: {first}, apiBody} = data;
+	const requestData = await parseRequest(event);
+	const {pathNameArr: {first}, apiBody, ip} = requestData;
 	const configureStore = ReduxStore({zone: first});
-	const render = new RenderOutput({store: configureStore, event, apiBody});
+	const render = new RenderOutput({store: configureStore, requestData});
 	const store = {...configureStore, render};
 	const firewall = new Firewall(store).init(request);
-	const purge = await purgeKv({event});
+	const purge = await purgeKv(event);
 	const responseInCache = await render.renderCache();
 	
 	if(firewall.status !== 200)
@@ -40,12 +40,12 @@ const handleRequest = async (event) => {
 		return responseInCache;
 	}
 
-	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {request, data}});
+	store.dispatch({type: ActionTypes.REQUEST_SUCCESS, payload: {data: requestData}});
 	
-	return await connectContentful({event, store});
+	return await connectContentful(store);
 };
 
-const connectContentful = async ({store}) => Contentful.getAllEntries({store})
+const connectContentful = async (store) => Contentful.getAllEntries(store)
 .then(() =>  {
 	
 	const {getState, render} = store;
@@ -53,7 +53,7 @@ const connectContentful = async ({store}) => Contentful.getAllEntries({store})
 	
 	if(status === 200)
 	{
-		return firewallRules({store});
+		return firewallRules(store);
 	}
 	else
 	{
@@ -61,7 +61,7 @@ const connectContentful = async ({store}) => Contentful.getAllEntries({store})
 	}
 });
 
-const firewallRules = async ({store}) => {
+const firewallRules = async (store) => {
 
 	const firewall = new Firewall(store).rules();
 
@@ -70,30 +70,32 @@ const firewallRules = async ({store}) => {
 		return store.render.payload(firewall);
 	}
 
-	return router({store});
+	return router(store);
 };
 
-const router = async ({store}) => {
+const router = async (store) => {
 	
 	const {getState, render} = store;
+	const {pathNameArr} = getState().request.data;
+	const {websites} = getState().contentful.data;
+	const websitesInStore = isContentTypeInStore(websites);
 
-	if(getState().request.hasOwnProperty('data'))
+	if(websitesInStore)
 	{
-		switch(getState().request.data.pathNameArr.first)
+		switch(pathNameArr.first)
 		{
 			case 'images':
-				return await handleImages({store});	
+				return await handleImages(store);	
 			case 'static':
-				return await handleStaticFiles({store});
+				return await handleStaticFiles(store);
 			case 'sitemap.xml':
-				return await handleSitemap({store});
+				return await handleSitemap(store);
 			case 'api':
-				return await handleApi({store});
+				return await handleApi(store);
 			default:
-				return await handleHtml({store});
+				return await handleHtml(store);
 		}
 	}
 
-	return render.payload({status: 500});	
-
+	return render.payload({status: 500});
 }

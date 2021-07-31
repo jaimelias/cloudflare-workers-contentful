@@ -1,6 +1,6 @@
 const {getAllPageTypes} = Utilities;
 
-export const handleSitemap = async ({store}) => {
+export const handleSitemap = async (store) => {
 	const {getState, render} = store;	
 	const {pathNameArr, method} = getState().request.data;	
 	

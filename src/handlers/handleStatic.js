@@ -1,4 +1,4 @@
-export const handleStaticFiles = async ({store}) => {
+export const handleStaticFiles = async (store) => {
 	
 	const {getState, render} = store;
 	const {method, pathNameArr} = getState().request.data;

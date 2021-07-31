@@ -321,7 +321,7 @@ export const pathNameToArr = pathName => {
 	return output;
 };
 
-export const contentTypeIsHtml = ({headers}) => {
+export const contentTypeIsHtml = headers => {
 	let output = false;
 	
 	if(headers)
@@ -427,20 +427,21 @@ const getAltLang = ({pathNameArr, apiBody}) => {
 
 export const parseRequest = async (event) => {
 	
-	const {waitUntil, request, request: {url: requestUrl}} = event;
+	const {request, request: {url: requestUrl, headers}} = event;
 	const url = new URL(encodeURI(decodeURI(requestUrl)));
 	const {pathname: pathName, searchParams, hostname: hostName} = url;	
 	const pathNameArr = pathNameToArr(pathName);
 	let apiBody = await getApiBody({pathNameArr, request: request.clone()});
 	let altLang = getAltLang({pathNameArr, apiBody});
-	
+	const ip = headers.get('CF-Connecting-IP') || '';
+	const country = headers.get('cf-ipcountry') || '';
 	const hasPagination = (pathNameArr.beforeLast === 'p' && isNumber(pathNameArr.last)) ? true : false;
 	const pageNumber = hasPagination ? parseInt(pathNameArr.last) : 1;
 	const slug = getSlug({pathNameArr, hasPagination});
 	const homeUrl = (langList.includes(pathNameArr.first)) ? `/${pathNameArr.first}/` : '/';
 
 	return {
-		waitUntil,
+		event,
 		...request,
 		apiBody,
 		homeUrl,
@@ -451,7 +452,9 @@ export const parseRequest = async (event) => {
 		pathNameArr,
 		slug,
 		altLang,
-		pageNumber
+		pageNumber,
+		ip,
+		country
 	};	
 };
 
@@ -578,3 +581,18 @@ export const formatDateStr = date => {
 };
 
 export const differenceBetweenDates = ({startDate, endDate}) => Math.ceil(Math.abs(startDate - endDate) / (1000 * 60 * 60 * 24));
+
+
+export const isContentTypeInStore = data => {
+	return (typeof data === 'object')
+		? (data.hasOwnProperty('entries'))
+		? (Array.isArray(data.entries))
+		? (data.entries.length > 0)
+		? (typeof data.entries[0] === 'object')
+		? true
+		: false
+		:false
+		:false
+		:false
+		:false;
+};

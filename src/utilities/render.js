@@ -2,11 +2,10 @@ import {htmlRewriter} from './htmlRewriter';
 const {contentTypeIsHtml, secureHeaders, sortByOrderKey, softRedirectBody, doSoftRedirect, getBypassCacheIps} = Utilities;
 
 export default class RenderOutput {
-	constructor({store, event, apiBody})
+	constructor({store, requestData})
 	{
 		this.store = store;
-		this.event = event;
-		this.apiBody = apiBody;
+		this.requestData = requestData;
 		this.cache = caches.default;
 		this.setCacheKey();
 		this.renderCache();
@@ -47,11 +46,12 @@ export default class RenderOutput {
 	}
 	setCacheKey()
 	{
-		const {request, request: {url, headers}} = this.event;
-		const countryCode = headers.get('cf-ipcountry') || '';
-		const ip = headers.get('CF-Connecting-IP') || '';
-		let cacheUrl = new URL(url);
-		cacheUrl.hash = countryCode;		
+		
+		const {ip, event, headers, country} = this.requestData;
+		const {request} = event;
+		
+		let cacheUrl = new URL(request.url);
+		cacheUrl.hash = country;		
 		this.cacheKey = new Request(cacheUrl.toString(), request);
 		this.isBypassedByIp = (ip && getBypassCacheIps.length > 0) 
 			? (getBypassCacheIps.includes(ip)) 
@@ -60,14 +60,16 @@ export default class RenderOutput {
 			: false;
 	}
 	renderCache(){
-				
+		
+		const {event} = this.requestData;
+		
 		if(this.isCachedResponse())
 		{
 			return this.cache.match(this.cacheKey).then(response => response);	
 		}
 		else
 		{
-			this.event.waitUntil(this.cache.delete(this.cacheKey));
+			event.waitUntil(this.cache.delete(this.cacheKey));
 		}
 	}
 	payload(payload)
@@ -136,7 +138,10 @@ export default class RenderOutput {
 		return this.response();
 	}
 	isCachedResponse(){
-		if(ENVIRONMENT === 'production' && this.apiBody === false && this.isBypassedByIp === false)
+		
+		const {apiBody} = this.requestData;
+		
+		if(ENVIRONMENT === 'production' && apiBody === false && this.isBypassedByIp === false)
 		{
 			return true;
 		}
@@ -150,7 +155,8 @@ export default class RenderOutput {
 		const {getState} = this.store;
 		const {fetcher} = getState().contentful;
 		const {body, status, headers} = getState().response;
-		const isHtml = contentTypeIsHtml({headers});
+		const {event} = this.requestData;
+		const isHtml = contentTypeIsHtml(headers);
 		let response = '';
 		
 		if(status === 301 || status === 302)
@@ -182,7 +188,7 @@ export default class RenderOutput {
 					newResponse.headers.append('Env-Mode', 'visitor');
 				}
 				
-				this.event.waitUntil(this.cache.put(this.cacheKey, newResponse.clone()));
+				event.waitUntil(this.cache.put(this.cacheKey, newResponse.clone()));
 			}
 			else
 			{
@@ -192,7 +198,7 @@ export default class RenderOutput {
 					newResponse.headers.append('Env-Mode', 'developer');
 				}
 				
-				this.event.waitUntil(this.cache.delete(this.cacheKey));
+				event.waitUntil(this.cache.delete(this.cacheKey));
 			}
 			
 			return newResponse;

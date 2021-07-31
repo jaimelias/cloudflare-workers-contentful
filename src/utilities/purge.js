@@ -1,4 +1,4 @@
-export const purgeKv = async ({event}) => {
+export const purgeKv = async (event) => {
 	
 	const {method, headers} = event.request;
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;

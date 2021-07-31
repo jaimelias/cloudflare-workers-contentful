@@ -141,7 +141,7 @@ export const templateHooks = ({store}) => {
 	});
 
 	render.addHooks({
-		content: Footer({website}),
+		content: Footer(website),
 		order: 50,
 		location: 'footer'
 	});

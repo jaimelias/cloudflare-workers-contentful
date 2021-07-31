@@ -1,6 +1,6 @@
 import {templateHooks} from '../hooks/templateHooks';
 
-export const handleHtml = async ({store}) => {
+export const handleHtml = async (store) => {
 	const {getState, render} = store;
 	
 	const {method, pathNameArr} = getState().request.data;

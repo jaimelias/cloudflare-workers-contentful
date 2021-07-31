@@ -21,7 +21,7 @@ export default class Firewall {
 	rules()
 	{
 		const {getState} = this.store;
-		const {headers, hostName, pathName, url} = getState().request.data;
+		const {headers, hostName, pathName, url, ip, country} = getState().request.data;
 		const {siteUrl, firewall} = getState().contentful.data.websites.entries[0];
 		const referer = headers.get('Referer') || '';
 	
@@ -30,7 +30,8 @@ export default class Firewall {
 			const {redirectCountryCodes, redirectCountryCodesUrl, bypassCountryRedirectIp, batchRedirect} = firewall;
 			
 			const redirectByCountryOk = isRedirectByCountryOk({
-				headers,
+				country,
+				ip,
 				hostName, 
 				bypassCountryRedirectIp, 
 				redirectCountryCodes,
@@ -110,15 +111,12 @@ const getBatchRedirectUrl = ({pathName, batchRedirect, siteUrl}) => {
 };
 
 
-export const isRedirectByCountryOk = ({headers, hostName, bypassCountryRedirectIp, redirectCountryCodes, redirectCountryCodesUrl}) => {
+export const isRedirectByCountryOk = ({ip, country, hostName, bypassCountryRedirectIp, redirectCountryCodes, redirectCountryCodesUrl}) => {
 	
 	let output = false;
 			
 	if(isUrl(redirectCountryCodesUrl))
 	{
-		const ip = headers.get('CF-Connecting-IP') || '';
-		const country = headers.get('cf-ipcountry') || '';
-		
 		if(Array.isArray(redirectCountryCodes) && ip && country)
 		{
 			const bypassByIp = bypassCountryRedirectIp || [];

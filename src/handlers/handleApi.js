@@ -1,6 +1,6 @@
 import {handleContactFormRequest} from '../utilities/crm';
 
-export const handleApi = async ({store}) =>
+export const handleApi = async (store) =>
 {
 	const {getState, render} = store;
 	const {method, pathNameArr, apiBody} = getState().request.data;
