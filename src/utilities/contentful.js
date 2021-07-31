@@ -69,7 +69,7 @@ const getFetchArgs = ({contentType, ip}) => {
 	return {
 		cf: {
 			cacheTtlByresponseStatus: {
-				'200-299': (shouldBeCached) ? 60 : -1, 
+				'200-299': (shouldBeCached) ? 600 : 10, 
 				'404': -1, 
 				'500-599': -1 
 			},
