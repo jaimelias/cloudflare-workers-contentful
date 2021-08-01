@@ -5,13 +5,13 @@ export const handleStaticFiles = async (store) => {
 	
 	if(pathNameArr.first !== pathNameArr.last && method === 'GET')
 	{
-		return render.payload(await parseStaticFiles({store}));
+		return render.payload(await parseStaticFiles(store));
 	}
 	
 	return render.payload({status: 403});
 };
 
-const parseStaticFiles = async ({store}) => {
+const parseStaticFiles = async (store) => {
 	
 	const {getState} = store;
 	const {searchParams, hostName, pathNameArr} = getState().request.data;
@@ -25,7 +25,9 @@ const parseStaticFiles = async ({store}) => {
 		
 		if(Array.isArray(filesSplit))
 		{
-			const mimeType = (filesSplit.every(i => getExtension(i) === getExtension(filesSplit[0]))) ? getExtension(filesSplit[0]) : false;
+			const mimeType = (filesSplit.every(i => getExtension(i) === getExtension(filesSplit[0]))) 
+				? getExtension(filesSplit[0]) 
+				: false;
 
 			if(mimeType)
 			{
@@ -33,7 +35,7 @@ const parseStaticFiles = async ({store}) => {
 					return await STATIC.get(row);
 				});
 				
-				let concat = await Promise.all(promises);
+				const concat = await Promise.all(promises);
 								
 				if(Array.isArray(concat))
 				{
@@ -82,7 +84,7 @@ const parseStaticFiles = async ({store}) => {
 	}
 };
 
-const getExtension = (file) => {
+const getExtension = file => {
 	
 	let mimeType = false;
 	const types = {

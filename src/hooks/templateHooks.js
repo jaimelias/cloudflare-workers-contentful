@@ -7,7 +7,7 @@ import PageHooks from './pageHooks';
 const {Favicon, listLangItems} = Utilities;
 const {langLabels} = LangConfig;
 
-export const templateHooks = ({store}) => {
+export const templateHooks = store => {
 
 	const {getState, render} = store;
 	const {data} = getState().contentful;
@@ -16,7 +16,8 @@ export const templateHooks = ({store}) => {
 	const {
 		siteName,
 		currentLanguage,
-		defaultLanguage
+		defaultLanguage,
+		favicon
 	} = website;
 	
 	
@@ -104,7 +105,7 @@ export const templateHooks = ({store}) => {
 	});
 
 	render.addHooks({
-		content: Favicon({website}),
+		content: Favicon(favicon),
 		order: 10,
 		location: 'head'
 	});

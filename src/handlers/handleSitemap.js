@@ -1,4 +1,5 @@
-const {getAllPageTypes} = Utilities;
+const {getAllPageTypes, escUrl} = Utilities;
+const {langList} = LangConfig;
 
 export const handleSitemap = async (store) => {
 	const {getState, render} = store;	
@@ -16,8 +17,6 @@ const SitemapParse = store => {
 	
 	let urls = [];
 	const langPaths = {};
-	const langList = LangConfig.langList;
-	const {escUrl} = Utilities;
 	const {getState} = store;
 	const {data} = getState().contentful;
 	const {defaultLanguage, domainName, homepage} = data.websites.entries[0];
@@ -97,7 +96,7 @@ const SitemapParse = store => {
 	{
 		return {
 			status: 200,
-			body: SitemapRender({urls}),
+			body: SitemapRender(urls),
 			headers: {
 				'content-type': 'application/xml',
 				'Cache-Control': `s-maxage=60`
@@ -108,7 +107,7 @@ const SitemapParse = store => {
 	return {status: 500};
 };
 
-const SitemapRender = ({urls}) => {
+const SitemapRender = urls => {
 		
 	const urlSet = urls.map(row => {
 		let item = [`\n\t\t<loc>${row.loc}</loc>`];
@@ -125,7 +124,7 @@ const SitemapRender = ({urls}) => {
 		return `\n\t<url>${item}\n\t</url>`;
 	}).join('');
 		
-	return SiteMapLayout({content: urlSet});
+	return SiteMapLayout(urlSet);
 };
 
-const SiteMapLayout = ({content}) => (`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${content}\n</urlset>`);
+const SiteMapLayout = urlSet => (`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">${urlSet}\n</urlset>`);

@@ -9,18 +9,18 @@ export const handleImages = async (store) => {
 	{
 		if(searchParams.has('cdnUrl'))
 		{
-			return render.payload(await getImageByName({store}));
+			return render.payload(await getImageByName(store));
 		}
 		else if(pathNameArr.full.length >= 2)
 		{
-			return render.payload(await getImageById({store}));
+			return render.payload(await getImageById(store));
 		}
 	}
 	
 	return render.payload({status: 403});
 };
 
-const getImageByName = async ({store}) =>  {
+const getImageByName = async (store) =>  {
 	
 	
 	const {searchParams, pathNameArr} = store.getState().request.data;
@@ -46,11 +46,13 @@ const getImageByName = async ({store}) =>  {
 	return {status: 404};
 };
 
-const getImageById = async ({store}) => {
+const getImageById = async (store) => {
 	
-	if(store.getState().request.data.pathNameArr.full.length >= 2)
+	const {pathNameArr} = store.getState().request.data;
+	
+	if(pathNameArr.full.length >= 2)
 	{
-		const image = findImageAsset({store});
+		const image = findImageAsset(store);
 		
 		
 		if(image)
@@ -107,7 +109,7 @@ const RenderImage = async ({imageUrl, store}) => {
 	}
 	else
 	{
-		const {status, statusText, headers} = response;
+		const {status, statusText} = response;
 
 		if(status === 403)
 		{
@@ -130,14 +132,15 @@ const RenderImage = async ({imageUrl, store}) => {
 };
 
 
-const findImageAsset = ({store}) => {
+const findImageAsset = store => {
 	
 	let image = '';
 	const {getState} = store;
 	const {pathNameArr} = getState().request.data;
+	const {assets} = getState().contentful;
 
-	getState().contentful.assets.forEach(a => {					
-		const fields = a.fields;
+	assets.forEach(a => {					
+		const {fields} = a;
 		let title = getFallBackLang(fields.title);
 		let file = getFallBackLang(fields.file);
 		
@@ -147,7 +150,7 @@ const findImageAsset = ({store}) => {
 		const fileName = new URL(`http:${file.url}`).pathname;
 				
 		if(reqImgPath === fileName)
-		{									
+		{						
 			image = {
 				fileName,
 				src: file.url,

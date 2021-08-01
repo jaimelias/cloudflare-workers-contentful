@@ -183,21 +183,10 @@ export default class RenderOutput {
 			
 			if(status === 200 && this.isCachedResponse())
 			{
-				if(isHtml)
-				{
-					newResponse.headers.append('Env-Mode', 'visitor');
-				}
-				
 				event.waitUntil(this.cache.put(this.cacheKey, newResponse.clone()));
 			}
 			else
 			{
-				if(isHtml)
-				{
-					newResponse.headers.set('Cache-Control', 'no-store');
-					newResponse.headers.append('Env-Mode', 'developer');
-				}
-				
 				event.waitUntil(this.cache.delete(this.cacheKey));
 			}
 			

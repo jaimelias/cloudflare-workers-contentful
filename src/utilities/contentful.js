@@ -346,8 +346,7 @@ const parseKvData = data => {
 export const getAllEntries = async (store) => {
 	
 	const {getState, dispatch} = store;
-	const {event, altLang, headers} = getState().request.data;
-	const ip = headers.get('CF-Connecting-IP') || '';
+	const {event, altLang, headers, ip} = getState().request.data;
 	const isBypassedByIp = (ip && getBypassCacheIps.length > 0) 
 		? (getBypassCacheIps.includes(ip)) 
 		? true 
@@ -357,8 +356,6 @@ export const getAllEntries = async (store) => {
 	const kvCacheKey = `cache/${CONTENTFUL_DOMAIN}`;
 	const kvCache = await CACHE.get(kvCacheKey);
 	let kvData = parseKvData(kvCache);
-	
-	
 	
 	if(kvData && ENVIRONMENT === 'production' && isBypassedByIp === false)
 	{		

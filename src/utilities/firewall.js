@@ -58,6 +58,8 @@ export default class Firewall {
 					return {status: 301, body: batchRedirectUrl};
 				}
 				else {
+					
+					console.log({batchRedirectUrl});
 					console.log('redirect not available in dev mode');
 				}				
 			}
@@ -103,7 +105,7 @@ const getBatchRedirectUrl = ({pathName, batchRedirect, siteUrl}) => {
 		
 		if(find)
 		{
-			output = (isUrl(find[1])) ? encodeURI(find[1]) : new URL(encodeURIComponent(find[1]), siteUrl).href;
+			output = (isUrl(find[1])) ? find[1] : new URL(find[1], siteUrl).href;
 		}
 	}
 	

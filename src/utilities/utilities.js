@@ -33,10 +33,8 @@ export const pageHasForm = ({website, slug, entryType}) => {
 	return false;
 };
 
-export const Favicon = ({website}) => {
-	
-	const {favicon} = website;
-	
+export const Favicon = (favicon) => {
+		
 	const faviconObj = (favicon) ? {
 		type: favicon.type, 
 		href: `/images/${favicon.fileName}`
@@ -285,10 +283,9 @@ export const isNumber = val => /^\d+$/.test(val);
 export const isEmail = val => /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val);
 export const recaptcha = () => true;
 
-	
-export const capitalize = (s) => {
-  if (typeof s !== 'string') return ''
-  return s.charAt(0).toUpperCase() + s.slice(1)
+export const capitalize = str => {
+  if (typeof str !== 'string') return ''
+  return str.charAt(0).toUpperCase() + str.slice(1)
 }	
 	
 export const pathNameToArr = pathName => {
@@ -355,8 +352,7 @@ export const getFallBackLang = obj =>  {
 	return output;
 };
 
-export const validUrlCharacters = (str) => /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g.test(str);
-
+export const validUrlCharacters = str => /^([\w_\-\/#$&()=?¿@,;.:]|%[\w]{2}){0,2000}$/g.test(str);
 
 const getSlug = ({pathNameArr, hasPagination}) => {
 	
@@ -581,7 +577,6 @@ export const formatDateStr = date => {
 };
 
 export const differenceBetweenDates = ({startDate, endDate}) => Math.ceil(Math.abs(startDate - endDate) / (1000 * 60 * 60 * 24));
-
 
 export const isContentTypeInStore = data => {
 	return (typeof data === 'object')
