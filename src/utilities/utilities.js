@@ -279,7 +279,18 @@ export const secureHeaders = {
 	'Referrer-Policy' : 'strict-origin-when-cross-origin',
 };
 
-export const isNumber = val => /^\d+$/.test(val);
+export const isNumber = val => {
+	if(typeof val === 'number')
+	{
+		return true;
+	}
+	else if(typeof val === 'string')
+	{
+		return /^\d+$/.test(val);
+	}
+	
+	return false;
+};
 export const isEmail = val => /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i.test(val);
 export const recaptcha = () => true;
 

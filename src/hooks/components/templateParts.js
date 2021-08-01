@@ -3,7 +3,7 @@ import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
 import {RightSideWidget} from './widgets';
 const {startingAt} = Bookings;
-const {pageIsBlog, pageHasForm} = Utilities;
+const {pageIsBlog, pageHasForm, isNumber, sortByOrderKey} = Utilities;
 
 export const WrapperComponent = ({request, labels, data, thisEntry, width}) => {
 	
@@ -83,26 +83,35 @@ export const getTitle = ({request, thisEntry, data, labels}) => {
 	return title;
 };
 
-export const packageGrid = ({request, data}) => {
+export const packageGrid = ({request, data, max}) => {
 	
 	let output = '';
 	const {homeUrl} = request;
-	const packages = data.packages.entries;
 	const websites = data.websites.entries;
 	const website = websites[0];
+	let packages = data.packages.entries;
 
 	if(Array.isArray(packages))
 	{
 		if(packages.length > 0)
 		{
-			const count = packages.length;
+			
+			packages.sort(sortByOrderKey);
+			
+			const count = (isNumber(max))
+				? (max <= packages.length)
+				? max
+				: packages.length
+				: packages.length;
+				
 			const operator = (count >= 4) ? 4 : (count >= 3) ? 3 : 2;
 			const md = (operator === 4) ? '3' : (operator === 3) ? '4' : '6';
 			const rowStart = '<div class="row g-5">';
 			output = rowStart;
 			
-			packages.forEach((r, i) => {
-				
+			for(let i = 0; i < count; i++)
+			{
+				const r = packages[i];
 				const {slug, imageGallery, priceFrom, title, bookings} = r;
 				let image = '';
 				const url = `${homeUrl}${slug}`;
@@ -145,8 +154,8 @@ export const packageGrid = ({request, data}) => {
 					${rowBreak}
 				`;
 								
-				output += row;
-			});
+				output += row;				
+			}
 			
 			output += '<hr/>'			
 		}

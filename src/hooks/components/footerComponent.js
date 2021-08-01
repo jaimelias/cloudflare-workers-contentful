@@ -117,12 +117,10 @@ export const Footer = website => {
 	
 	return `
 		<div id="footer" class="mt-5" style="background-color: #f8f9fa;">
-			<div class="container-fluid">
-				<div class="container py-5">
-					${RenderFooterMenu}
-					${RenderCopyRight}
-					${RenderChatButton}
-				</div>
+			<div class="container-fluid py-5">
+				${RenderFooterMenu}
+				${RenderCopyRight}
+				${RenderChatButton}
 			</div>
 		</div>
 	`;

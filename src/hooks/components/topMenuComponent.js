@@ -11,7 +11,7 @@ export const TopMenu = ({website, labels, langItems}) => {
 		
 	let output = `
 		<nav class="navbar navbar-expand ${theme.topBarTextColor ? "topBarTextColor" : "navbar-dark"} ${theme.topBarBackgroundColor ? "topBarBackgroundColor" : "bg-secondary"}">
-			<div class="container">
+			<div class="container-fluid">
 					${renderTelephoneNumber}
 					
 					<form class="d-flex">
@@ -67,7 +67,7 @@ export const MainMenu = ({store, langItems}) => {
 		
 	return `
 		<nav class="navbar navbar-expand-lg navbar-${theme.topMenuTone || 'light'} ${theme.topMenuBackgroundColor ? "topMenuBackgroundColor" : "bg-light"}">
-			<div class="container">
+			<div class="container-fluid">
 				<a class="navbar-brand mb-0 h1 text-uppercase" href="${homeUrl}">${RenderLogo}</a>
 				
 				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
