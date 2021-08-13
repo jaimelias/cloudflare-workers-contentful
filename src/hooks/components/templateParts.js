@@ -17,7 +17,7 @@ export const WrapperComponent = ({request, labels, data, thisEntry, width}) => {
 		<h1 class="entry-title display-5 mb-4">${title}</h1>
 			<div class="row g-5">
 				<div class="col-md-8">
-					<div class="entry-content" >
+					<div class="entry-content fs-5">
 						${entryContent}
 					</div>
 				</div>
