@@ -18,7 +18,8 @@ export default class IndexComponent {
 		const {websites} = data;
 		const website = websites.entries[0];
 		const {homepage} = website;
-		const {title, description, imageGallery, longTitle} = homepage;
+		const {title, description, longTitle, canonicalUrl} = homepage || '';
+		const {imageGallery} = homepage || [];
 						
 		render.addHooks({
 			content: JsonLd(store),
@@ -29,6 +30,7 @@ export default class IndexComponent {
 		dispatch({
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
+				canonicalUrl,
 				title,
 				longTitle,
 				description,

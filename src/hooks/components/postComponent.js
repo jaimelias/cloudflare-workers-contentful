@@ -15,7 +15,8 @@ export default class PostComponent {
 		const {dispatch, render, getState} = store;
 		const request = getState().request.data;
 		const {data} = getState().contentful;
-		const {imageGallery, title, description, longTitle} = entry;
+		const {title, description, longTitle, canonicalUrl} = entry || '';
+		const {imageGallery} = entry || [];
 
 		render.addHooks({
 			content: JsonLdComponent({post: entry, store}),
@@ -27,6 +28,7 @@ export default class PostComponent {
 		dispatch({
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
+				canonicalUrl,
 				title,
 				longTitle,
 				description,

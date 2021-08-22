@@ -22,11 +22,13 @@ export default class PageComponent {
 		const {getState, dispatch} = store;
 		const request = getState().request.data;
 		const {data} = getState().contentful;
-		const {description, imageGallery, longTitle} = entry;
+		const {description, longTitle, canonicalUrl} = entry || '';
+		const {imageGallery} = entry || [];
 
 		dispatch({
 			type: ActionTypes.FILTER_TEMPLATE, 
 			payload: {
+				canonicalUrl,
 				title: getTitle({request, thisEntry, data, labels}),
 				longTitle,
 				description,

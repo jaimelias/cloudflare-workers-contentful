@@ -4,7 +4,7 @@ import {renderScripts} from '../utilities/renderScripts';
 import EnqueueHooks from './enqueueHooks';
 import PageHooks from './pageHooks';
 
-const {Favicon, listLangItems} = Utilities;
+const {Favicon, listLangItems, isUrl} = Utilities;
 const {langLabels} = LangConfig;
 
 export const templateHooks = store => {
@@ -25,14 +25,14 @@ export const templateHooks = store => {
 		
 	new PageHooks({store, labels});
 	
-	const {entryType} = getState().template;
+	const template = getState().template;
+	const {entryType, title, longTitle, description, content, status} = template;
+	let {canonicalUrl} = template;
 	
 	const langItems = listLangItems({store, entryType});
 	
 	new EnqueueHooks({store, labels, entryType});
-	
-	const {title, longTitle, description, content, status} = getState().template;
-	
+		
 	const siteTitle = (typeof longTitle === 'string') 
 		? (longTitle.length > title.length) 
 		? longTitle 
@@ -49,12 +49,18 @@ export const templateHooks = store => {
 
 	if(status === 200)
 	{
-		let canonicalUrl = langItems.find(i => i.lang === currentLanguage);
-	
+		if(!isUrl(canonicalUrl))
+		{
+			canonicalUrl = langItems.find(i => i.lang === currentLanguage);
+			
+			if(typeof canonicalUrl === 'object')
+			{
+				canonicalUrl = new URL(canonicalUrl.href, `https://${CONTENTFUL_DOMAIN}`).href;
+			}
+		}
+
 		if(canonicalUrl)
 		{
-			canonicalUrl = new URL(canonicalUrl.href, `https://${CONTENTFUL_DOMAIN}`);
-
 			render.addHooks({
 				content: `<link rel="canonical" href="${canonicalUrl}" >`,
 				order: 10,
