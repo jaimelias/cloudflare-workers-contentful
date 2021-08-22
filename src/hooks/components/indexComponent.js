@@ -64,13 +64,13 @@ const IndexWrapper = ({store, labels}) => {
 	const main = (content) ? (widget) ? `
 		<div class="row">
 			<div class="col-md-8">
-				<div class="entry-content entry-fixed-width">${RenderContent}</div>
+				<div class="entry-content fs-5 entry-fixed-width">${RenderContent}</div>
 			</div>
 			<div class="col-md-4">
 				${widget}
 			</div>
 		</div>	
-	` : `<div class="entry-content entry-full-width">${RenderContent}</div>` : '';
+	` : `<div class="entry-content fs-5 entry-full-width">${RenderContent}</div>` : '';
 	
 	return `
 		<div class="container">

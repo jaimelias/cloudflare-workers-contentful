@@ -29,7 +29,7 @@ export const RequestForm = ({labels, data, request, entryType}) => {
 	const fc = 'class="form-control"';
 	const fs = 'class="form-select"';
 	const attrCol = `class="${classMB} ${classCol}"`;
-	const options = [...Array(12)].map((r, i) => {
+	const options = [...Array(100)].map((r, i) => {
 		const v = i + 1;
 		return `<option value="${v}">${v}</option>`;
 	}).join('');
