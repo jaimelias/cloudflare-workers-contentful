@@ -357,22 +357,13 @@ export const getAllEntries = async (store) => {
 	const kvCache = await CACHE.get(kvCacheKey);
 	let kvData = parseKvData(kvCache);
 	
+	let parseArgs = {altLang, dispatch, isBypassedByIp, kvCacheKey, event};
+	
 	if(kvData && ENVIRONMENT === 'production' && isBypassedByIp === false)
-	{		
-		const data = kvData.map(d => {
-			d.fetcher = 'KV';
-			return d;
-		});
-				
-		const website = data.find(i => i.contentType === 'websites');
+	{
+		const website = kvData.find(i => i.contentType === 'websites');
 		const websiteId = website.items[0].sys.id;
-		
-		return data.map(d => {
-			const contentType = d.contentType;
-			const output = parseData({data: d, altLang, contentType, websiteId});
-			dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
-			return output;			
-		});
+		return mapParseData({...parseArgs, data: kvData, websiteId, fetcher: 'KV'});
 	}
 	else
 	{
@@ -402,32 +393,34 @@ export const getAllEntries = async (store) => {
 			
 			return await Promise.all(entries)
 			.then(data => {
-				
-				data = [website, ...data];
-												
-				return data.map(async (d) => {
-					d = await d;
-					d.fetcher = 'fetch';		
-					const contentType = d.contentType;
-										
-					const output = parseData({data: d, altLang, contentType, websiteId});
-					dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
-
-					if(ENVIRONMENT === 'production' && isBypassedByIp === false)
-					{
-						event.waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
-					}
-					else
-					{
-						event.waitUntil(CACHE.delete(kvCacheKey));
-					}
-					
-					return output;
-				});
+				return mapParseData({...parseArgs, data: [website, ...data], websiteId, fetcher: 'fetch'});
 			})
 			.catch(err => store.render.payload({status: 500, body: err.message}));
 
 		})
 		.catch(err => store.render.payload({status: 500, body: err.message}));		
 	}
+};
+
+const mapParseData = ({data, altLang, websiteId, dispatch, isBypassedByIp, kvCacheKey, fetcher, event})  => {
+	return data.map(async (d) => {
+		d = await d;
+		d.fetcher = fetcher;		
+		const contentType = d.contentType;
+							
+		const output = parseData({data: d, altLang, contentType, websiteId});
+		
+		dispatch({type: ActionTypes.FETCH_CONTENTFUL_SUCCESS, payload: {...output}});
+
+		if(ENVIRONMENT === 'production' && isBypassedByIp === false)
+		{
+			event.waitUntil(CACHE.put(kvCacheKey, JSON.stringify(data), {expirationTtl: 600}));
+		}
+		else
+		{
+			event.waitUntil(CACHE.delete(kvCacheKey));
+		}
+		
+		return output;
+	});					
 };
