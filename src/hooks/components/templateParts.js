@@ -13,8 +13,8 @@ export const WrapperComponent = ({request, labels, data, thisEntry, width}) => {
 	const widget = RightSideWidget({entry, labels});
 	
 	return (width === 'fixed') ? `
-	<div class="container">
-		<h1 class="entry-title display-5 mb-4">${title}</h1>
+		<div class="container">
+			<h1 class="entry-title display-5 mb-4">${title}</h1>
 			<div class="row g-5">
 				<div class="col-md-8">
 					<div class="entry-content fs-5">
@@ -39,16 +39,17 @@ export const EntryContentComponent = ({thisEntry, labels, request, data, width})
 	const isBlog = pageIsBlog({slug, website});
 	const date = (entryType === 'posts') ? Utilities.formatToReadableDate({date: updatedAt, lang: currentLanguage}) : '';
 	const {labelNoPosts} = labels;
-	
+	const hasContent = (typeof content === 'string') ? (content.length > 0) ? true : false : false;
 	entryContent += GalleryComponent({data: imageGallery});
 	entryContent += (date) ? `<div class="mb-4 text-muted fw-light"><small>${date}</small></div>` : '';
-	entryContent += (typeof content === 'string') ? marked(content) : '';
+	entryContent += hasContent ? marked(content) : '';
 
 	if(isBlog)
 	{		
 		if(posts.total > 0)
 		{
-			entryContent += '<hr/>' + BlogIndexComponent({posts, width, pageNumber, homeUrl});
+			entryContent += (hasContent) ? '<hr/>' : '';
+			entryContent += BlogIndexComponent({posts, width, pageNumber, homeUrl});
 		}
 		else
 		{

@@ -3,7 +3,7 @@ const postsPerPage = 10;
 
 export const BlogIndexComponent = ({posts, width, pageNumber, homeUrl}) => {
 	
-	const entries = posts.entries;
+	const {entries} = posts;
 	
 	if(Array.isArray(entries))
 	{
@@ -14,49 +14,73 @@ export const BlogIndexComponent = ({posts, width, pageNumber, homeUrl}) => {
 
 const IndexComponent = ({paginatedEntries, homeUrl, width}) => {
 	
+	let notFeatured = '';
+	let featured = '';
 	let output = '';
-	const {data, total} = paginatedEntries;
+	const {total, data} = paginatedEntries;
 	let args = {homeUrl, total};
-	
-	
+	let last = data.length;
 
 	if(total > 0)
 	{
+		const featuredData = data.filter(p => p.featured);
+		const notFeaturedData = data.filter(p => !p.featured);
+		
 		if(width === 'fixed')
 		{
-			output += data.map(p => stylePost({...args, post: p, showFeatured: true})).join('');
-			output += data.map(p => stylePost({...args, post: p, showFeatured: false})).join('');
+			featured = featuredData
+				.map((p, i) => stylePost({...args, post: p, showFeatured: true, index: i, last: featuredData.length, showImage: true}))
+				.join('');
+			
+			notFeatured = notFeaturedData
+				.map((p, i) => stylePost({...args, post: p, showFeatured: false, index: i, last: notFeaturedData.length, showImage: true}))
+				.join('');
 		}
 		else
-		{
+		{			
 			if(total === 1)
 			{
-				output += data.map(p => stylePost({...args, post: p, showFeatured: true})).join('');
+				featured = featuredData
+					.map((p, i) => stylePost({...args, post: p, showFeatured: true, index: i, last: featuredData.length, showImage: true}))
+					.join('');
 			}
 			else
 			{
-				const featured = data.map(p => stylePost({...args, post: p, showFeatured: true})).join('');
-				const notFeatured = data.map(p => stylePost({...args, post: p, showFeatured: false})).join('');
-				
-				output += `
+				featured = featuredData
+					.map((p, i) => stylePost({...args, post: p, showFeatured: true, index: i, last: featuredData.length, showImage: true}))
+					.join('');
 					
-					<div class="row g-5">
-						<div class="col-md">
-							${featured}
-						</div>
-						<div class="col-md">
-							${notFeatured}
-						</div>
-					</div>
-				`;
+				notFeatured = notFeaturedData
+					.map((p, i) => stylePost({...args, post: p, showFeatured: false, index: i, last: notFeaturedData.length, showImage: false}))
+					.join('');
 			}
+		}
+		
+		if(featured && notFeatured && width === 'full')
+		{
+			output = `
+				
+				<div class="row g-5">
+					<div class="col-md">
+						${featured}
+					</div>
+					<div class="col-md">
+						${notFeatured}
+					</div>
+				</div>
+			`;			
+		}
+		else
+		{
+			output = (featured) ? `${featured} <hr/>` : output;
+			output += (notFeatured) ? notFeatured : output;
 		}
 	}
 	
 	return output;
 };
 
-const stylePost = ({post, homeUrl, showFeatured, total}) => {
+const stylePost = ({post, homeUrl, showFeatured, index, last, showImage}) => {
 	
 	let template = '';
 	const {formatToReadableDate} = Utilities;
@@ -69,9 +93,7 @@ const stylePost = ({post, homeUrl, showFeatured, total}) => {
 	let image = '';
 	const renderDescription = (description) ? `<p>${description}</p>` : '';
 	
-	
-	
-	if(Array.isArray(imageGallery))
+	if(Array.isArray(imageGallery) && showImage)
 	{
 		if(imageGallery.length > 0)
 		{
@@ -84,47 +106,28 @@ const stylePost = ({post, homeUrl, showFeatured, total}) => {
 		if(featured && showFeatured)
 		{
 			const renderContent = (typeof shortContent === 'string') ? marked(shortContent) : '';
-						
-			if(total === 1)
-			{
-				template = `
-					<div class="row g-5">
-						<div class="col-md">
-							<h3><a href="${homeUrl}${slug}">${title}</a></h3>
-							<div class="my-2 text-muted fw-light"><small>${date}</small></div>
-							${renderContent}
-						</div>
-						<div class="col-md">
-							${image}
-						</div>
-					</div>
-					<hr/>
-				`				
-			}
-			else
-			{
-				template = `
-					<h3><a href="${homeUrl}${slug}">${title}</a></h3>
-					${image}
-					<div class="my-2 text-muted fw-light"><small>${date}</small></div>
-					${renderContent}
-					<hr/>
-				`				
-			}
+	
+			template = `
+				<h3><a href="${homeUrl}${slug}">${title}</a></h3>
+				${image}
+				<div class="my-2 text-muted fw-light"><small>${date}</small></div>
+				${renderContent}
+			`;
 		}
 		else
 		{
 			template = `
 				<h3><a href="${homeUrl}${slug}">${title}</a></h3>
+				${image}
 				<div class="mb-2 text-muted fw-light"><small>${date}</small></div>
 				${renderDescription}
-				<hr/>
 			`
-		}		
-	}
-	else
-	{
-		
+		}
+
+		if(template && (index + 1) !== last)
+		{
+			template += '<hr/>';
+		}
 	}
 	
 	return template;
