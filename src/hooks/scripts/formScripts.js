@@ -1,4 +1,4 @@
-export const formScripts = (reCaptchaSiteKey) => ({
+export const formScripts = reCaptchaSiteKey => ({
 	recaptcha: {
 		type: 'js',
 		location: 'footer',

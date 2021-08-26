@@ -118,7 +118,7 @@ export const packageGrid = ({request, data, max}) => {
 				const url = `${homeUrl}${slug}`;
 				const index = (i + 1);
 				const addNewRow = ((index % operator) === 0) ? true : false;
-				const colStart = `<div class="col-md-${md}">`;
+				const colStart = `<div class="col-md-${md} mb-5">`;
 				const rowEnd = `</div></div>`;
 				const rowRestart = `${rowEnd}${rowStart}`;
 				const rowBreak = (count === index) ? rowEnd : (addNewRow) ? rowRestart : '</div>';

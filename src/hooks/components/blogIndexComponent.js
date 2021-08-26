@@ -63,6 +63,7 @@ const IndexComponent = ({paginatedEntries, homeUrl, width}) => {
 				<div class="row g-5">
 					<div class="col-md">
 						${featured}
+						<div class="d-block d-md-none"><hr/></div>
 					</div>
 					<div class="col-md">
 						${notFeatured}
