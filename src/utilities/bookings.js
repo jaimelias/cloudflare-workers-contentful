@@ -99,16 +99,59 @@ const parseBookingArgs = ({bookings, request}) => {
 
 export const startingAt = ({bookings, request}) => {
 	
-	const validateConfig = isValidBookingConfig(bookings);
+	let output = 0;
 	
+	if(typeof bookings === 'undefined')
+	{
+		return output;
+	}
+
+	console.log('bookins.startingAt prop added');
+
+	const validateConfig = isValidBookingConfig(bookings);
+		
 	if(validateConfig.status === 200)
 	{
 		bookings = parseBookingArgs({bookings, request});
-		
-		const prices = parseAllPrices(bookings);
+
+		///needs a select seasons find method here!!!!!!!!!!
+		const prices = parseAllPrices(bookings) || {};
+				
+		if(prices.hasOwnProperty('season_1'))
+		{
+			if(prices.season_1.hasOwnProperty('prices'))
+			{
+				let minRates = [];
+				
+				for(let k in prices.season_1.prices)
+				{
+					const p = prices.season_1.prices[k];
+					
+					if(p.length === 0)
+					{
+						return;
+					}
+					
+					let min = (p.length === 1) ? p[0] : Math.min(...p);
+					
+					if(min > 0)
+					{
+						minRates.push(min);
+					}
+					
+				}
+
+				if(minRates.length > 0)
+				{
+					output = (minRates === 1) ? minRates[0] : Math.min(...minRates);
+				}
+			}
+
+		}
+
 	}
 
-	return validateConfig;
+	return output;
 };
 
 const parseAllPrices = bookings => {
