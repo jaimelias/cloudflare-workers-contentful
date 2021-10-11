@@ -2,7 +2,7 @@ import {GalleryComponent} from './galleryComponent';
 import {BlogIndexComponent} from './blogIndexComponent';
 import {RequestForm} from './formComponent';
 import {RightSideWidget} from './widgets';
-const {startingAt} = Bookings;
+const {getStartingAt} = Bookings;
 const {pageIsBlog, pageHasForm, isNumber, sortByOrderKey} = Utilities;
 
 export const WrapperComponent = ({request, labels, data, thisEntry, width}) => {
@@ -112,8 +112,8 @@ export const packageGrid = ({request, data, max}) => {
 			
 			for(let i = 0; i < count; i++)
 			{
-				const r = packages[i];
-				const {slug, imageGallery, priceFrom, title, bookings} = r;
+				const packagePage = packages[i];
+				const {slug, imageGallery, priceFrom, title, bookings} = packagePage;
 				let image = '';
 				const url = `${homeUrl}${slug}`;
 				const index = (i + 1);
@@ -139,7 +139,7 @@ export const packageGrid = ({request, data, max}) => {
 					}			
 				}
 				
-				startingAt({bookings, request});
+				getStartingAt({packagePage, request});
 				
 				let badge = (priceFrom) ? `<a href="${url}" class="position-absolute top-0 end-0 bg-warning text-dark p-2">${priceFrom}</a>` : '';
 				

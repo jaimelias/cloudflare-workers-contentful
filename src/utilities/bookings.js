@@ -97,58 +97,32 @@ const parseBookingArgs = ({bookings, request}) => {
 	: {status, statusText};
 };
 
-export const startingAt = ({bookings, request}) => {
+export const getStartingAt = ({packagePage, request}) => {
 	
 	let output = 0;
+	let {bookings, slug} = packagePage;
 	
 	if(typeof bookings === 'undefined')
 	{
 		return output;
 	}
 
-	console.log('bookins.startingAt prop added');
+	const {startingAt} = bookings || 0;
+
+	/*
+		startingAt = 'Per Person' || 'Full Price' || 'Duration' || 'Do Not Show'
+	*/
 
 	const validateConfig = isValidBookingConfig(bookings);
-		
+	
 	if(validateConfig.status === 200)
 	{
 		bookings = parseBookingArgs({bookings, request});
 
 		///needs a select seasons find method here!!!!!!!!!!
 		const prices = parseAllPrices(bookings) || {};
-				
-		if(prices.hasOwnProperty('season_1'))
-		{
-			if(prices.season_1.hasOwnProperty('prices'))
-			{
-				let minRates = [];
-				
-				for(let k in prices.season_1.prices)
-				{
-					const p = prices.season_1.prices[k];
-					
-					if(p.length === 0)
-					{
-						return;
-					}
-					
-					let min = (p.length === 1) ? p[0] : Math.min(...p);
-					
-					if(min > 0)
-					{
-						minRates.push(min);
-					}
-					
-				}
-
-				if(minRates.length > 0)
-				{
-					output = (minRates === 1) ? minRates[0] : Math.min(...minRates);
-				}
-			}
-
-		}
-
+		
+		console.log(prices);
 	}
 
 	return output;
@@ -165,20 +139,54 @@ const parseAllPrices = bookings => {
 	for(let s in seasons)
 	{
 		const {fixedPrices, variablePrices, dates} = seasons[s];
-		output[s] = {dates, prices: {}};
+		output[s] = {
+			dates,
+			fixedPrices: {},
+			variablePrices: {},
+			subtotal: {}
+		};
 		
 		if(Array.isArray(fixedPrices))
 		{
 			fixedPrices.forEach((price, i) => {
 				
+				const paxNum = i + 1;
+				
 				for(let p in price)
 				{
-					if(typeof output[s].prices[p] === 'undefined')
+					const pricePerPerson = isNumber(price[p]) ? price[p] : 0;
+					const fullPrice = pricePerPerson * paxNum;
+					
+					if(typeof output[s].fixedPrices[p] === 'undefined')
 					{
-						output[s].prices[p] = [...Array(fixedPrices.length)].map(r => 0);
+						output[s].fixedPrices[p] = {
+							pricesPerPerson: [],
+							fullPrices: [],
+							minPricePerPerson: pricePerPerson,
+							minFullPrice: fullPrice,
+							maxPricePerPerson: pricePerPerson,
+							maxFullPrice: fullPrice	
+						};
 					}
 					
-					output[s].prices[p][i] = isNumber(price[p]) ? price[p] : 0;
+					const {
+						minPricePerPerson, 
+						minFullPrice, 
+						maxPricePerPerson, 
+						maxFullPrice,
+						pricesPerPerson,
+						fullPrices
+					} = output[s].fixedPrices[p];
+					
+					output[s].fixedPrices[p] = {
+						...output[s].fixedPrices[p],
+						pricesPerPerson: [...pricesPerPerson, pricePerPerson],
+						fullPrices: [...fullPrices, fullPrice],
+						minPricePerPerson: Math.min(minPricePerPerson, pricePerPerson),
+						minFullPrice: Math.min(minFullPrice, fullPrice),
+						maxPricePerPerson: Math.max(maxPricePerPerson, pricePerPerson),
+						maxFullPrice: Math.max(maxFullPrice, fullPrice)
+					}
 				}
 			});			
 		}
@@ -187,24 +195,48 @@ const parseAllPrices = bookings => {
 		{
 			variablePrices.forEach((price, i) => {
 				
+				const paxNum = i + 1;
+				
 				for(let p in price)
 				{
-					if(isNumber(price[p]))
+					const pricePerPerson = isNumber(price[p]) ? price[p] * duration : 0;
+					const fullPrice = pricePerPerson * paxNum;
+					
+					if(typeof output[s].variablePrices[p] === 'undefined')
 					{
-						
-						if(typeof output[s].prices[p] === 'undefined')
-						{
-							output[s].prices[p] = [...Array(variablePrices.length)].map(r => 0);
-						}
-						
-						output[s].prices[p][i] += price[p] * duration;
+						output[s].variablePrices[p] = {
+							pricesPerPerson: [],
+							fullPrices: [],
+							minPricePerPerson: pricePerPerson,
+							minFullPrice: fullPrice,
+							maxPricePerPerson: pricePerPerson,
+							maxFullPrice: fullPrice								
+						};
+					}
+					
+					const {
+						minPricePerPerson, 
+						minFullPrice, 
+						maxPricePerPerson, 
+						maxFullPrice,
+						pricesPerPerson,
+						fullPrices
+					} = output[s].variablePrices[p];
+					
+					output[s].variablePrices[p] = {
+						...output[s].variablePrices[p],
+						pricesPerPerson: [...pricesPerPerson, pricePerPerson],
+						fullPrices: [...fullPrices, fullPrice],
+						minPricePerPerson: Math.min(minPricePerPerson, pricePerPerson),
+						minFullPrice: Math.min(minFullPrice, fullPrice),
+						maxPricePerPerson: Math.max(maxPricePerPerson, pricePerPerson),
+						maxFullPrice: Math.max(maxFullPrice, fullPrice)
 					}
 				}
 			});
 		}
-		
 	}
-
+	
 	return output;
 };
 
