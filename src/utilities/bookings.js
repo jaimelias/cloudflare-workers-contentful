@@ -1,4 +1,4 @@
-const {isNumber, isValidDateStr, formatDateStr, differenceBetweenDates} = Utilities;
+const {isNumber, isValidDateStr, formatDateStr, differenceBetweenDates, capitalize} = Utilities;
 const variableDurationUnits = ['days', 'nights'];
 
 const parseBookingArgs = ({bookings, request}) => {
@@ -79,7 +79,7 @@ const parseBookingArgs = ({bookings, request}) => {
 		{	
 			duration = differenceBetweenDates({startDate, endDate}) + 1;
 			occupancyDuration = (variablePricesLast) ? duration : duration - 1;
-			console.log({startDate, endDate, duration, occupancyDuration});
+			//console.log({startDate, endDate, duration, occupancyDuration});
 		}
 		
 		//startDate = formatDateStr(startDate);
@@ -128,6 +128,66 @@ export const getStartingAt = ({packagePage, request}) => {
 	return output;
 };
 
+
+const sumPriceObjects = arr => {
+	
+	let output = {};
+	
+	arr.forEach(priceObj => {
+		
+		for(let k in priceObj)
+		{			
+			if(typeof output[k] === 'undefined')
+			{
+				output[k] = {};
+				
+				for(let t in priceObj[k])
+				{
+					const prices = priceObj[k][t];
+
+					if(Array.isArray(prices))
+					{
+						output[k][t] = [...Array(prices.length)].map(r => 0);
+					}
+				}
+			}
+			
+			for(let t in priceObj[k])
+			{
+				const prices = priceObj[k][t];
+				
+				if(Array.isArray(prices))
+				{
+					const capitalizeT = capitalize(t);
+					
+					prices.forEach((v, i) => {
+
+						if(isNumber(v))
+						{
+							v = v + output[k][t][i];
+							
+							if(i === 0)
+							{
+								output[k][`min${capitalizeT}`] = v;
+								output[k][`max${capitalizeT}`] = v;
+							}							
+							
+							output[k][`min${capitalizeT}`] = Math.min(output[k][`min${capitalizeT}`], v);
+							output[k][`max${capitalizeT}`] = Math.max(output[k][`max${capitalizeT}`], v);
+								
+							output[k][t][i] = v;
+						}
+					});					
+				}
+			}
+		}
+		
+	});
+	
+	return output;
+};
+
+
 const parseAllPrices = bookings => {
 	
 	//This function sums fixed + (variable * duration) of each price type of each season
@@ -162,18 +222,18 @@ const parseAllPrices = bookings => {
 						output[s].fixedPrices[p] = {
 							pricesPerPerson: [],
 							fullPrices: [],
-							minPricePerPerson: pricePerPerson,
-							minFullPrice: fullPrice,
-							maxPricePerPerson: pricePerPerson,
-							maxFullPrice: fullPrice	
+							minPricesPerPerson: pricePerPerson,
+							minFullPrices: fullPrice,
+							maxPricesPerPerson: pricePerPerson,
+							maxFullPrices: fullPrice	
 						};
 					}
 					
 					const {
-						minPricePerPerson, 
-						minFullPrice, 
-						maxPricePerPerson, 
-						maxFullPrice,
+						minPricesPerPerson, 
+						minFullPrices, 
+						maxPricesPerPerson, 
+						maxFullPrices,
 						pricesPerPerson,
 						fullPrices
 					} = output[s].fixedPrices[p];
@@ -182,10 +242,10 @@ const parseAllPrices = bookings => {
 						...output[s].fixedPrices[p],
 						pricesPerPerson: [...pricesPerPerson, pricePerPerson],
 						fullPrices: [...fullPrices, fullPrice],
-						minPricePerPerson: Math.min(minPricePerPerson, pricePerPerson),
-						minFullPrice: Math.min(minFullPrice, fullPrice),
-						maxPricePerPerson: Math.max(maxPricePerPerson, pricePerPerson),
-						maxFullPrice: Math.max(maxFullPrice, fullPrice)
+						minPricesPerPerson: Math.min(minPricesPerPerson, pricePerPerson),
+						minFullPrices: Math.min(minFullPrices, fullPrice),
+						maxPricesPerPerson: Math.max(maxPricesPerPerson, pricePerPerson),
+						maxFullPrices: Math.max(maxFullPrices, fullPrice)
 					}
 				}
 			});			
@@ -207,18 +267,18 @@ const parseAllPrices = bookings => {
 						output[s].variablePrices[p] = {
 							pricesPerPerson: [],
 							fullPrices: [],
-							minPricePerPerson: pricePerPerson,
-							minFullPrice: fullPrice,
-							maxPricePerPerson: pricePerPerson,
-							maxFullPrice: fullPrice								
+							minPricesPerPerson: pricePerPerson,
+							minFullPrices: fullPrice,
+							maxPricesPerPerson: pricePerPerson,
+							maxFullPrices: fullPrice								
 						};
 					}
 					
 					const {
-						minPricePerPerson, 
-						minFullPrice, 
-						maxPricePerPerson, 
-						maxFullPrice,
+						minPricesPerPerson, 
+						minFullPrices, 
+						maxPricesPerPerson, 
+						maxFullPrices,
 						pricesPerPerson,
 						fullPrices
 					} = output[s].variablePrices[p];
@@ -227,14 +287,16 @@ const parseAllPrices = bookings => {
 						...output[s].variablePrices[p],
 						pricesPerPerson: [...pricesPerPerson, pricePerPerson],
 						fullPrices: [...fullPrices, fullPrice],
-						minPricePerPerson: Math.min(minPricePerPerson, pricePerPerson),
-						minFullPrice: Math.min(minFullPrice, fullPrice),
-						maxPricePerPerson: Math.max(maxPricePerPerson, pricePerPerson),
-						maxFullPrice: Math.max(maxFullPrice, fullPrice)
+						minPricesPerPerson: Math.min(minPricesPerPerson, pricePerPerson),
+						minFullPrices: Math.min(minFullPrices, fullPrice),
+						maxPricesPerPerson: Math.max(maxPricesPerPerson, pricePerPerson),
+						maxFullPrices: Math.max(maxFullPrices, fullPrice)
 					}
 				}
 			});
 		}
+
+		output[s].subtotal = sumPriceObjects([output[s].variablePrices, output[s].fixedPrices]);
 	}
 	
 	return output;
