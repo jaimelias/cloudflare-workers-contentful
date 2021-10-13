@@ -391,7 +391,8 @@ export const getAllEntries = async (store) => {
 				 defaultLanguage
 			}));
 			
-			return await Promise.all(entries)
+			//Promise.all promise is resolved in index.js
+			return Promise.all(entries)
 			.then(data => {
 				return mapParseData({...parseArgs, data: [website, ...data], websiteId, fetcher: 'fetch'});
 			})
@@ -403,8 +404,8 @@ export const getAllEntries = async (store) => {
 };
 
 const mapParseData = ({data, altLang, websiteId, dispatch, isBypassedByIp, kvCacheKey, fetcher, event})  => {
-	return data.map(async (d) => {
-		d = await d;
+	return data.map(d => {
+		//d = await d;
 		d.fetcher = fetcher;		
 		const contentType = d.contentType;
 							

@@ -117,6 +117,8 @@ export const getStartingAt = ({packagePage, request}) => {
 	
 	if(validateConfig.status === 200)
 	{
+		
+		return;
 		bookings = parseBookingArgs({bookings, request});
 
 		///needs a select seasons find method here!!!!!!!!!!
