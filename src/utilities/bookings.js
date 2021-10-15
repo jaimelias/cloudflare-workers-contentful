@@ -1,4 +1,4 @@
-const {isNumber, isValidDateStr, formatDateStr, differenceBetweenDates, capitalize} = Utilities;
+const {isNumber, isValidDateStr, formatDateStr, differenceBetweenDates, capitalize, getDatesRange} = Utilities;
 const variableDurationUnits = ['days', 'nights'];
 
 const parseBookingArgs = ({bookings, request}) => {
@@ -10,17 +10,21 @@ const parseBookingArgs = ({bookings, request}) => {
 	let status = 200;
 	let startDate = new Date();
 	let endDate = new Date();
-	let occupancyDuration = duration;
-	startDate.setHours(0);
-	endDate.setHours(0);
+	
+	//startDate.setHours(0);
+	//endDate.setHours(0);
 
 	const isVariableDurationUnit = (variablePricesEnabled)
 		? variableDurationUnits.includes(durationUnit)
 		: false;
+		
+	let occupancyDuration = (isVariableDurationUnit) 
+		? (variablePricesLast) 
+		? duration : duration - 1 
+		: 1;
 	
 	if(isVariableDurationUnit)
 	{
-		occupancyDuration = (variablePricesLast) ? duration : duration - 1;
 		endDate.setDate(endDate.getDate() + occupancyDuration);
 		
 		if(method === 'GET')
@@ -92,8 +96,10 @@ const parseBookingArgs = ({bookings, request}) => {
 		statusText: 'invalid duration param';
 	}
 	
+	const datesRange = (occupancyDuration > 1) ? getDatesRange({startDate, endDate}) : [startDate];
+	
 	return (status === 200) 
-	? {...bookings, startDate, endDate, isVariableDurationUnit, duration, status, requestHasDateParams}
+	? {...bookings, startDate, endDate, datesRange, isVariableDurationUnit, duration, status, requestHasDateParams}
 	: {status, statusText};
 };
 
@@ -117,191 +123,58 @@ export const getStartingAt = ({packagePage, request}) => {
 	
 	if(validateConfig.status === 200)
 	{
-		
-		return;
-		bookings = parseBookingArgs({bookings, request});
-
-		///needs a select seasons find method here!!!!!!!!!!
-		const prices = parseAllPrices(bookings) || {};
-		
+		bookings = parseBookingArgs({bookings, request});		
+		const prices = getPricesByDates(bookings);
 		console.log(prices);
 	}
 
 	return output;
 };
 
-
-const sumPriceObjects = arr => {
+const getPricesByDates = bookings => {
+	const {seasons, datesRange} = bookings;
 	
-	let output = {};
-	
-	arr.forEach(priceObj => {
-		
-		for(let k in priceObj)
-		{			
-			if(typeof output[k] === 'undefined')
-			{
-				output[k] = {};
-				
-				for(let t in priceObj[k])
-				{
-					const prices = priceObj[k][t];
-
-					if(Array.isArray(prices))
-					{
-						output[k][t] = [...Array(prices.length)].map(r => 0);
-					}
-				}
-			}
-			
-			for(let t in priceObj[k])
-			{
-				const prices = priceObj[k][t];
-				
-				if(Array.isArray(prices))
-				{
-					const capitalizeT = capitalize(t);
-					
-					prices.forEach((v, i) => {
-
-						if(isNumber(v))
-						{
-							v = v + output[k][t][i];
-							
-							if(i === 0)
-							{
-								output[k][`min${capitalizeT}`] = v;
-								output[k][`max${capitalizeT}`] = v;
-							}							
-							
-							output[k][`min${capitalizeT}`] = Math.min(output[k][`min${capitalizeT}`], v);
-							output[k][`max${capitalizeT}`] = Math.max(output[k][`max${capitalizeT}`], v);
-								
-							output[k][t][i] = v;
-						}
-					});					
-				}
-			}
-		}
-		
-	});
-	
-	return output;
-};
-
-
-const parseAllPrices = bookings => {
-	
-	//This function sums fixed + (variable * duration) of each price type of each season
-	
-	const {seasons, duration, variablePricesEnabled} = bookings;
-	
-	let output = {};
-	
-	for(let s in seasons)
+	if(!seasons.hasOwnProperty('season_1'))
 	{
-		const {fixedPrices, variablePrices, dates} = seasons[s];
-		output[s] = {
-			dates,
-			fixedPrices: {},
-			variablePrices: {},
-			subtotal: {}
-		};
+		return;
+	}
+	
+	return datesRange.map((thisDate, dateIndex) => {
 		
-		if(Array.isArray(fixedPrices))
+		let seasonName = 'season_1';
+		let obj = {date: thisDate};
+		
+		for(let s in seasons)
 		{
-			fixedPrices.forEach((price, i) => {
+			const {dates} = seasons[s] || [];
+			
+			dates.forEach(d => {
+				let {to, from} = d || '';
 				
-				const paxNum = i + 1;
+				to = (to) ? new Date(to) : '';
+				from = (from) ? new Date(from) : '';
 				
-				for(let p in price)
+				if(to && from)
 				{
-					const pricePerPerson = isNumber(price[p]) ? price[p] : 0;
-					const fullPrice = pricePerPerson * paxNum;
-					
-					if(typeof output[s].fixedPrices[p] === 'undefined')
+					if(thisDate >= from && thisDate <= to)
 					{
-						output[s].fixedPrices[p] = {
-							pricesPerPerson: [],
-							fullPrices: [],
-							minPricesPerPerson: pricePerPerson,
-							minFullPrices: fullPrice,
-							maxPricesPerPerson: pricePerPerson,
-							maxFullPrices: fullPrice	
-						};
-					}
-					
-					const {
-						minPricesPerPerson, 
-						minFullPrices, 
-						maxPricesPerPerson, 
-						maxFullPrices,
-						pricesPerPerson,
-						fullPrices
-					} = output[s].fixedPrices[p];
-					
-					output[s].fixedPrices[p] = {
-						...output[s].fixedPrices[p],
-						pricesPerPerson: [...pricesPerPerson, pricePerPerson],
-						fullPrices: [...fullPrices, fullPrice],
-						minPricesPerPerson: Math.min(minPricesPerPerson, pricePerPerson),
-						minFullPrices: Math.min(minFullPrices, fullPrice),
-						maxPricesPerPerson: Math.max(maxPricesPerPerson, pricePerPerson),
-						maxFullPrices: Math.max(maxFullPrices, fullPrice)
-					}
-				}
-			});			
-		}
-
-		if(Array.isArray(variablePrices) && variablePricesEnabled)
-		{
-			variablePrices.forEach((price, i) => {
-				
-				const paxNum = i + 1;
-				
-				for(let p in price)
-				{
-					const pricePerPerson = isNumber(price[p]) ? price[p] * duration : 0;
-					const fullPrice = pricePerPerson * paxNum;
-					
-					if(typeof output[s].variablePrices[p] === 'undefined')
-					{
-						output[s].variablePrices[p] = {
-							pricesPerPerson: [],
-							fullPrices: [],
-							minPricesPerPerson: pricePerPerson,
-							minFullPrices: fullPrice,
-							maxPricesPerPerson: pricePerPerson,
-							maxFullPrices: fullPrice								
-						};
-					}
-					
-					const {
-						minPricesPerPerson, 
-						minFullPrices, 
-						maxPricesPerPerson, 
-						maxFullPrices,
-						pricesPerPerson,
-						fullPrices
-					} = output[s].variablePrices[p];
-					
-					output[s].variablePrices[p] = {
-						...output[s].variablePrices[p],
-						pricesPerPerson: [...pricesPerPerson, pricePerPerson],
-						fullPrices: [...fullPrices, fullPrice],
-						minPricesPerPerson: Math.min(minPricesPerPerson, pricePerPerson),
-						minFullPrices: Math.min(minFullPrices, fullPrice),
-						maxPricesPerPerson: Math.max(maxPricesPerPerson, pricePerPerson),
-						maxFullPrices: Math.max(maxFullPrices, fullPrice)
+						seasonName = s;
 					}
 				}
 			});
 		}
+		
+		const {fixedPrices, variablePrices} = seasons[seasonName];
+		
+		if(dateIndex === 0)
+		{
+			obj.fixedPrices = fixedPrices;
+		}
+		
+		obj = {...obj, variablePrices, seasonName};
 
-		output[s].subtotal = sumPriceObjects([output[s].variablePrices, output[s].fixedPrices]);
-	}
-	
-	return output;
+		return obj;
+	});
 };
 
 const isValidBookingConfig = bookings => {
