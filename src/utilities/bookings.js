@@ -124,25 +124,50 @@ export const getStartingAt = ({packagePage, request}) => {
 	if(validateConfig.status === 200)
 	{
 		bookings = parseBookingArgs({bookings, request});		
-		const prices = getPricesByDates(bookings);
-		console.log(prices);
+		const pricesByDates = getPricesByDates(bookings);
+		const subtotals = sumPricesByDates(pricesByDates);
+		console.log(subtotals);
 	}
 
 	return output;
 };
 
+const sumPricesByDates = arr => {
+
+	let subtotal = {};
+	
+	
+	arr.forEach((prices, i) => {
+		for(let p in prices)
+		{
+			if(p === 'fixedPrices' || p === 'variablePrices')
+			{
+				//console.log(prices[p]);
+				
+				if(!subtotal.hasOwnProperty(p))
+				{
+					
+				}
+			}
+		}
+	});
+	
+	return arr;
+};
+
 const getPricesByDates = bookings => {
-	const {seasons, datesRange} = bookings;
+		
+	const {seasons, datesRange, maxParticipantsPerBooking} = bookings;
 	
 	if(!seasons.hasOwnProperty('season_1'))
 	{
 		return;
 	}
 	
-	return datesRange.map((thisDate, dateIndex) => {
+	return datesRange.map((date, i) => {
 		
 		let seasonName = 'season_1';
-		let obj = {date: thisDate};
+		let obj = {date: date};
 		
 		for(let s in seasons)
 		{
@@ -156,7 +181,7 @@ const getPricesByDates = bookings => {
 				
 				if(to && from)
 				{
-					if(thisDate >= from && thisDate <= to)
+					if(date >= from && date <= to)
 					{
 						seasonName = s;
 					}
@@ -164,16 +189,24 @@ const getPricesByDates = bookings => {
 			});
 		}
 		
-		const {fixedPrices, variablePrices} = seasons[seasonName];
+		let {fixedPrices, variablePrices} = seasons[seasonName];
 		
-		if(dateIndex === 0)
+		fixedPrices = (fixedPrices.length > maxParticipantsPerBooking) 
+			? fixedPrices.splice(0, maxParticipantsPerBooking) : fixedPrices;
+			
+		variablePrices = (variablePrices.length > maxParticipantsPerBooking) 
+			? variablePrices.splice(0, maxParticipantsPerBooking) : variablePrices;
+		
+		if(i === 0)
 		{
-			obj.fixedPrices = fixedPrices;
+			obj.fixedPrices = fixedPrices || [];
 		}
 		
-		obj = {...obj, variablePrices, seasonName};
-
-		return obj;
+		return {
+			...obj, 
+			variablePrices: variablePrices || [],
+			seasonName
+		};
 	});
 };
 
