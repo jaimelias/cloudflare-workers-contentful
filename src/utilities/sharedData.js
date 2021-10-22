@@ -21,7 +21,7 @@ export const formFields = {
 	pax1: {
 		validator: 'isNumber',
 		min: 1,
-		max: 12
+		max: 100
 	},
 	email: {
 		required: true,

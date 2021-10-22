@@ -105,8 +105,10 @@ const parseBookingArgs = ({bookings, request}) => {
 
 export const getStartingAt = ({packagePage, request}) => {
 	
+	
+	return;
 	let output = 0;
-	let {bookings, slug} = packagePage;
+	let {bookings, slug, maxParticipantsPerBooking} = packagePage;
 	
 	if(typeof bookings === 'undefined')
 	{
@@ -125,24 +127,24 @@ export const getStartingAt = ({packagePage, request}) => {
 	{
 		bookings = parseBookingArgs({bookings, request});		
 		const pricesByDates = getPricesByDates(bookings);
-		const subtotals = sumPricesByDates(pricesByDates);
+		const subtotals = sumPricesByDates({pricesByDates, maxParticipantsPerBooking});
 		console.log(subtotals);
 	}
 
 	return output;
 };
 
-const sumPricesByDates = arr => {
+const sumPricesByDates = ({pricesByDates, maxParticipantsPerBooking}) => {
 
 	let subtotal = {};
 	
 	
-	arr.forEach((prices, i) => {
+	pricesByDates.forEach((prices, i) => {
 		for(let p in prices)
 		{
 			if(p === 'fixedPrices' || p === 'variablePrices')
 			{
-				//console.log(prices[p]);
+				console.log(prices[p]);
 				
 				if(!subtotal.hasOwnProperty(p))
 				{
@@ -152,7 +154,7 @@ const sumPricesByDates = arr => {
 		}
 	});
 	
-	return arr;
+	return pricesByDates;
 };
 
 const getPricesByDates = bookings => {
