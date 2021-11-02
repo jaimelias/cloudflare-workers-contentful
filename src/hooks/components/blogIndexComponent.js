@@ -73,8 +73,8 @@ const IndexComponent = ({paginatedEntries, homeUrl, width}) => {
 		}
 		else
 		{
-			output = (featured) ? `${featured} <hr/>` : output;
-			output += (notFeatured) ? notFeatured : output;
+			output = (featured) ? `${featured} <hr/>` : '';
+			output += (notFeatured) ? notFeatured : '';
 		}
 	}
 	
