@@ -17,7 +17,6 @@ export const TopMenu = ({website, labels, langItems}) => {
 					<form class="d-flex">
 						${topMenuDropdown}
 					</form>
-				</div>
 			</div>
 		</nav>
 	`;

@@ -1,7 +1,6 @@
 import {GalleryComponent} from './galleryComponent';
 import {RightSideWidget} from './widgets';
 import {BlogIndexComponent} from './blogIndexComponent';
-import {packageGrid} from './templateParts';
 const { getFallBackLang } = Utilities;
 
 export default class IndexComponent {
@@ -54,7 +53,6 @@ const IndexWrapper = ({store, labels}) => {
 	const {title, description, content, imageGallery} = homepage || '';
 	const RenderGallery = GalleryComponent({data: imageGallery});
 	const RenderDescription = (description) ? `<p class="lead">${description}</p>` : '';
-	const RenderGrid =  packageGrid({request, data});
 	const RenderContent = (content) ? marked(content) : '';
 	const RenderBlog = BlogIndexComponent({posts, width: 'full', pageNumber, homeUrl});
 	
@@ -85,7 +83,6 @@ const IndexWrapper = ({store, labels}) => {
 			</div>
 			<hr/>
 			${main}
-			${RenderGrid}
 			${RenderBlog}
 		</div>	
 	`;

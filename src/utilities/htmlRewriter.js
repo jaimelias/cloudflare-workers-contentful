@@ -1,11 +1,27 @@
-export const htmlRewriter = store => new HTMLRewriter()
-.on('a', new aRewriterClass(store))
-.on('.entry-content img', new imageRewriterClass())
-.on('.entry-content table', new tableRewriterClass())
-.on('.entry-content table > tbody > tr > td > a', new tableLinkToButtonClass())
-.on('.entry-content iframe', new iframeRewriterClass());
+import {packageGrid} from '../hooks/components/templateParts';
 
-class imageRewriterClass
+export const htmlRewriter = store => new HTMLRewriter()
+.on('Packages', new PackageGridRewriter(store))
+.on('a', new aRewriterClass(store))
+.on('.entry-content img', new ImageRewriter())
+.on('.entry-content table', new TableRewriter())
+.on('.entry-content table > tbody > tr > td > a', new TableButtonRewriter())
+.on('.entry-content iframe', new IframeRewriter());
+
+class PackageGridRewriter {
+	constructor(store){
+		this.store = store;
+	}
+	element(element){
+
+		const request = this.store.getState().request.data;
+		const {data} = this.store.getState().contentful;
+		const grid = packageGrid({request, data});
+		element.replace(grid, {html: true});
+	}
+}
+
+class ImageRewriter
 {
   element(element)
   {
@@ -42,14 +58,14 @@ class imageRewriterClass
   }
 };
 
-class iframeRewriterClass {
+class IframeRewriter {
 	element(element){
 		element.before(`<div class="ratio ratio-16x9 mb-4">`, { html: true });
 		element.after('</div>', { html: true });
 	};	
 }
 
-class tableRewriterClass {
+class TableRewriter {
 	element(element){
 		
 		element.setAttribute('class', 'table table-bordered table-striped');
@@ -58,7 +74,7 @@ class tableRewriterClass {
 	};
 };
 
-class tableLinkToButtonClass {
+class TableButtonRewriter {
 	element(element){
 		element.setAttribute('class', 'btn btn-success text-light');
 		element.setAttribute('role', 'button');

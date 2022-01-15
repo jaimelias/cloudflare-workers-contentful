@@ -156,11 +156,9 @@ export const packageGrid = ({request, data, max}) => {
 				`;
 								
 				output += row;				
-			}
-			
-			output += '<hr/>'			
+			}			
 		}
 	}
 	
-	return output;
+	return (output) ? `<div class="package-grid fs-6">${output}</div>` : 'No Packages Found';
 }

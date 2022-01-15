@@ -6,7 +6,7 @@ export const bootstrapScripts = theme => {
 		bootstrapScriptsCss: {
 				type: 'css',
 				concat: true,
-				file: 'bootstrap.5.1.0.min.css',
+				file: 'bootstrap.5.1.3.min.css',
 				order: 100,
 				inline: [{
 					location: 'after',
@@ -19,7 +19,7 @@ export const bootstrapScripts = theme => {
 				async: true,
 				defer: true,
 				concat: true,
-				file: 'bootstrap.5.1.0.bundle.min.js',
+				file: 'bootstrap.5.1.3.bundle.min.js',
 				order: 10
 			}
 		};
